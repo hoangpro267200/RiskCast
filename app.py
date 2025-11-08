@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-
+import numpy as np
+import io
 st.set_page_config(page_title="RISKCAST Demo", layout="wide")
 
 st.title("🚢 RISKCAST — Demo Web App")
@@ -29,10 +30,7 @@ if uploaded_file:
     st.subheader("🏢 Dữ liệu công ty (TOPSIS)")
     st.dataframe(df_company, use_container_width=True)
 
-    # Button xử lý thuật toán
-   import numpy as np
-import io
-
+    
 # ---------- PLACE THIS INSIDE YOUR STREAMLIT APP WHERE df_weights, df_company EXIST ----------
 if st.button("🚀 Run FAHP + TOPSIS"):
     with st.spinner("Chạy FAHP → TOPSIS... Vui lòng chờ chút"):
