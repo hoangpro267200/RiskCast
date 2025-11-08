@@ -16,13 +16,12 @@ if uploaded_file:
 
     st.subheader("🔧 Normalize dữ liệu (Min-Max)")
 
-    # Normalize từng cột (trừ cột đầu nếu là tên công ty)
     df_norm = df.copy()
     for col in df.columns[1:]:
         df_norm[col] = (df[col] - df[col].min()) / (df[col].max() - df[col].min())
 
     st.dataframe(df_norm, use_container_width=True)
 
-    st.success("✅ Normalize thành công! Tiếp theo sẽ là Fuzzy AHP.")
+    st.success("✅ Normalize thành công! Tiếp theo sẽ là Fuzzy AHP + TOPSIS.")
 else:
     st.info("⬆️ Hãy upload file Excel để bắt đầu xử lý.")
