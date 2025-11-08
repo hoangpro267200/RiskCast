@@ -1,8 +1,8 @@
 streamlit
 pandas
 numpy
-openpyxl
-matplotlib
 plotly
-thefuzz[speedup]
-python-Levenshtein
+openpyxl
+fpdf2
+
+
