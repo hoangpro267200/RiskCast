@@ -1,294 +1,193 @@
-# app.py
+# app.py — RISKCAST v2.5
 import io
-import math
-import traceback
-
-import streamlit as st
-import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+import pandas as pd
+import streamlit as st
+import plotly.express as px
+from fpdf import FPDF
 
-# ---------------------------
-# Page + Theme (gradient-ish via CSS)
-# ---------------------------
-st.set_page_config(page_title="RISKCAST Demo", layout="wide")
-# minimal gradient background and card style
-st.markdown(
-    """
-    <style>
-    .stApp {
-        background: linear-gradient(135deg, #0f172a 0%, #001f3f 40%, #002b5c 100%);
-        color: #e6f0ff;
-    }
-    .block-container {
-        padding-top: 2rem;
-        padding-left: 2rem;
-        padding-right: 2rem;
-        padding-bottom: 2rem;
-    }
-    .stButton>button {
-        background-image: linear-gradient(90deg,#00c6ff,#7b2ff7);
-        color: white;
-        border: none;
-        padding: 8px 18px;
-    }
-    .stDownloadButton>button {
-        background-image: linear-gradient(90deg,#7b2ff7,#00c6ff);
-        color: white;
-        border: none;
-        padding: 8px 18px;
-    }
-    .dataframe th {
-        background: rgba(255,255,255,0.06) !important;
-        color: #e6f0ff;
-    }
-    .css-1d391kg { /* streamlit header hack */
-        color: #e6f0ff;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+# -----------------------
+# Page config + CSS
+# -----------------------
+st.set_page_config(page_title="RISKCAST v2.5", layout="wide", page_icon="🛡")
 
-st.title("🚀 DEMO RISKCAST")
-st.markdown("**Chào Hoàng — Hệ thống FAHP (approx) + TOPSIS để hỗ trợ quyết định mua bảo hiểm vận tải.**")
-st.write("Giao diện: *Gradient Blue / Neo Cyber*  •  Kết quả: *Bảng xếp hạng + biểu đồ*")
+st.markdown("""
+<style>
+    .stApp { background: linear-gradient(180deg,#021023 0%, #082c4a 70%); color: #e6f0ff; }
+    .block-container { padding: 1.2rem 2rem; }
+    h1 { color: #7bd3ff; text-align: center; font-weight: 800; }
+    .stButton>button { background: linear-gradient(90deg,#00c6ff,#7b2ff7); color: white;
+                       font-weight:bold; border-radius: 12px; padding: 0.7rem; }
+    .result-box { background: #1a2a44; padding: 1.2rem; border-radius: 12px;
+                  border-left: 5px solid #00d4ff; margin: 1rem 0; }
+</style>
+""", unsafe_allow_html=True)
 
-# ---------------------------
-# Upload area
-# ---------------------------
-st.info("📁 Upload file Excel (.xlsx) chứa 2 sheet: 1) Ma trận trọng số (FAHP/pairwise) hoặc [criterion, weight]. 2) Dữ liệu công ty (hàng = công ty, cột = tiêu chí numeric).")
-uploaded_file = st.file_uploader("📂 Upload file Excel (.xlsx)", type=["xlsx"])
+st.title("🛡 RISKCAST v2.5 — HỆ THỐNG ĐỀ XUẤT BẢO HIỂM THÔNG MINH")
+st.caption("Nhập lô hàng → Phân tích rủi ro → Xếp hạng công ty bảo hiểm → Xuất PDF/Excel")
 
-if not uploaded_file:
-    st.stop()
 
-# read sheets
-try:
-    xls = pd.ExcelFile(uploaded_file)
-    sheet_names = xls.sheet_names
-except Exception as e:
-    st.error(f"Lỗi khi đọc file Excel: {e}")
-    st.stop()
+# -----------------------
+# Sidebar Input
+# -----------------------
+with st.sidebar:
+    st.header("📦 Thông tin lô hàng")
+    cargo_value = st.number_input("Giá trị (USD)", value=31000, step=1000)
+    good_type = st.selectbox("Loại hàng", ["Đông lạnh", "Hàng khô", "Điện tử", "Hàng nguy hiểm", "Khác"])
+    route = st.selectbox("Tuyến", ["VN - Singapore", "VN - US", "VN - EU", "VN - China", "Domestic"])
+    method = st.selectbox("Phương thức", ["Sea", "Air", "Truck"])
+    month = st.selectbox("Tháng", list(range(1, 13)), index=10)
+    priority = st.selectbox("Ưu tiên", ["An toàn tối đa", "Cân bằng", "Tối ưu chi phí"])
 
-st.success(f"File có {len(sheet_names)} sheet: {', '.join(sheet_names)}")
-# choose sheets
-weight_sheet = st.selectbox("📌 Chọn sheet chứa trọng số (FAHP)", sheet_names, index=0)
-company_sheet = st.selectbox("📌 Chọn sheet chứa dữ liệu công ty (TOPSIS)", sheet_names, index=min(1, len(sheet_names)-1))
 
-# read selected
-try:
-    df_weights = pd.read_excel(uploaded_file, sheet_name=weight_sheet)
-    df_company = pd.read_excel(uploaded_file, sheet_name=company_sheet)
-except Exception as e:
-    st.error(f"Lỗi khi đọc các sheet: {e}")
-    st.stop()
+# -----------------------
+# Criteria & Weights
+# -----------------------
+criteria = ["C1: Tỷ lệ phí", "C2: Thời gian xử lý", "C3: Tỷ lệ tổn thất", "C4: Hỗ trợ ICC", "C5: Chăm sóc KH"]
 
-st.subheader("🧾 Trọng số (sheet chọn)")
-st.dataframe(df_weights, use_container_width=True)
-st.subheader("🏢 Dữ liệu công ty (sheet chọn)")
-st.dataframe(df_company, use_container_width=True)
+cost_flags = {
+    "C1: Tỷ lệ phí": "cost",
+    "C2: Thời gian xử lý": "benefit",
+    "C3: Tỷ lệ tổn thất": "benefit",
+    "C4: Hỗ trợ ICC": "benefit",
+    "C5: Chăm sóc KH": "benefit"
+}
 
-# ---------------------------
-# Helper: compute weights from df_weights (FAHP approx)
-# Accepts:
-# - pairwise numeric matrix (square)
-# - table [criterion, weight] in two columns
-# Return: pandas Series indexed by criteria names
-# ---------------------------
-def compute_weights_from_df(df_w):
-    """
-    Returns pandas Series of normalized weights (sum 1).
-    If df_w is square numeric -> geometric mean (approx AHP)
-    Else if df_w has two columns -> take second column as weights.
-    """
-    # drop fully-nan rows/cols
-    df = df_w.copy()
-    # If two columns and non-square: treat as [criterion, weight]
-    if df.shape[1] == 2 and not (df.shape[0] == df.shape[1]):
-        col0 = df.columns[0]
-        col1 = df.columns[1]
-        crit = df[col0].astype(str).str.strip().tolist()
-        w = pd.to_numeric(df[col1], errors='coerce').fillna(0).astype(float)
-        if w.sum() == 0:
-            raise ValueError("Trọng số nhập vào (sheet) đều là 0 hoặc không hợp lệ.")
-        w = w / w.sum()
-        return pd.Series(w.values, index=crit)
-    # If square numeric matrix
-    vals = df.select_dtypes(include=[np.number])
-    if df.shape[0] == df.shape[1] and vals.shape[0] == df.shape[0]:
-        A = vals.values.astype(float)
-        # avoid zeros and negatives in pairwise? allow >0
-        if np.any(A <= 0):
-            # If matrix includes zeros or negatives, we fallback to reading column weights if possible
-            # Try to use a 'weight' column if exists
-            for c in df.columns:
-                if 'weight' in str(c).lower():
-                    alt = pd.to_numeric(df[c], errors='coerce').fillna(0).astype(float)
-                    if alt.sum() > 0:
-                        return pd.Series(alt/alt.sum(), index=df.index.astype(str))
-            raise ValueError("Ma trận pairwise chứa giá trị <= 0; ma trận FAHP cần dương.")
-        # geometric mean method
-        geo = np.prod(A, axis=1) ** (1.0 / A.shape[0])
-        w = geo / geo.sum()
-        # try to preserve index names
-        idx = df.index.astype(str) if hasattr(df, "index") else [f"C{i}" for i in range(len(w))]
-        return pd.Series(w, index=idx)
-    # else: try if there's a named 'weight' column
-    for c in df.columns:
-        if 'weight' in str(c).lower():
-            alt = pd.to_numeric(df[c], errors='coerce').fillna(0).astype(float)
-            if alt.sum() > 0:
-                return pd.Series(alt/alt.sum(), index=df.index.astype(str))
-    raise ValueError("Không hiểu định dạng sheet trọng số. Hãy dùng ma trận vuông pairwise numeric hoặc table [criterion, weight].")
+st.subheader("⚖ Điều chỉnh trọng số tiêu chí")
+cols = st.columns(5)
+weights = [cols[i].slider(criteria[i], 0.0, 1.0, 0.2, 0.01) for i in range(5)]
+w = np.array(weights)
 
-# ---------------------------
-# TOPSIS implementation
-# ---------------------------
-def topsis(df_data, weights, benefit_cols=None, cost_cols=None):
-    """
-    df_data: pandas DataFrame; rows = alternatives (companies), columns = criteria numeric
-    weights: pandas Series indexed by criteria; will be aligned by name
-    benefit_cols / cost_cols: optional lists of columns. If none provided, assume all benefit.
-    Returns: DataFrame with score and rank
-    """
-    # Align columns
-    data = df_data.copy()
-    # ensure numeric columns only (use selected columns from weights intersection)
-    common = [c for c in data.columns if c in weights.index]
-    if len(common) == 0:
-        # fallback: if weights are unnamed, assume order
-        common = list(data.select_dtypes(include=[np.number]).columns)
-        weights = pd.Series(weights.values[:len(common)], index=common)
-    else:
-        weights = weights.loc[common]
-    # prepare matrix
-    M = data[common].apply(pd.to_numeric, errors='coerce').fillna(0).values.astype(float)
-    # 1) Normalization (vector normalization)
-    denom = np.sqrt((M ** 2).sum(axis=0))
-    denom[denom == 0] = 1
+# Boost theo ưu tiên
+if priority == "An toàn tối đa":
+    w[1] *= 1.4; w[4] *= 1.3
+elif priority == "Tối ưu chi phí":
+    w[0] *= 1.5
+
+w = w / w.sum()
+weights_series = pd.Series(w, index=criteria)
+
+
+# -----------------------
+# Data mẫu của 5 công ty bảo hiểm
+# -----------------------
+sample = {
+    "Company": ["PVI", "BaoViet", "Aon", "Chubb", "InternationalIns"],
+    "C1: Tỷ lệ phí": [0.22, 0.24, 0.20, 0.28, 0.26],
+    "C2: Thời gian xử lý": [7, 5, 4, 6, 8],
+    "C3: Tỷ lệ tổn thất": [0.08, 0.10, 0.06, 0.12, 0.09],
+    "C4: Hỗ trợ ICC": [8, 9, 7, 9, 6],
+    "C5: Chăm sóc KH": [7, 8, 6, 9, 5],
+}
+df = pd.DataFrame(sample).set_index("Company")
+
+# Điều chỉnh theo thông tin lô hàng
+df_adj = df.copy()
+if cargo_value > 50000:
+    df_adj["C1: Tỷ lệ phí"] *= 1.2
+if route in ["VN - US", "VN - EU"]:
+    df_adj["C2: Thời gian xử lý"] *= 1.3
+if good_type in ["Hàng nguy hiểm", "Điện tử"]:
+    df_adj["C3: Tỷ lệ tổn thất"] *= 1.5
+
+
+# -----------------------
+# TOPSIS FUNCTION
+# -----------------------
+def topsis(df_data, weights, cost_flags):
+    M = df_data[list(weights.index)].astype(float).values
+    denom = np.sqrt((M ** 2).sum(axis=0)); denom[denom == 0] = 1
     R = M / denom
-    # 2) Weighting
-    W = weights.values.astype(float)
-    if np.isclose(W.sum(), 0):
-        raise ValueError("Tổng trọng số bằng 0.")
-    W = W / W.sum()
-    V = R * W
-    # identify benefit/cost
-    if benefit_cols is None and cost_cols is None:
-        # assume all benefit
-        benefit_mask = np.array([True] * V.shape[1])
-    else:
-        benefit_mask = np.array([col in (benefit_cols or []) or (col not in (cost_cols or [])) for col in common])
-    # 3) ideal best/worst
-    ideal_best = np.max(V, axis=0)  # for benefit
-    ideal_worst = np.min(V, axis=0)
-    # if any cost criterion given, invert for those positions
-    if cost_cols:
-        for i, col in enumerate(common):
-            if col in cost_cols:
-                ideal_best[i] = np.min(V[:, i])
-                ideal_worst[i] = np.max(V[:, i])
-    # 4) distances
-    d_plus = np.sqrt(((V - ideal_best) ** 2).sum(axis=1))
-    d_minus = np.sqrt(((V - ideal_worst) ** 2).sum(axis=1))
-    # 5) score
+    V = R * weights.values
+    is_cost = np.array([cost_flags[c] == "cost" for c in weights.index])
+    ideal_best = np.where(is_cost, np.min(V, 0), np.max(V, 0))
+    ideal_worst = np.where(is_cost, np.max(V, 0), np.min(V, 0))
+    d_plus = np.sqrt(((V - ideal_best) ** 2).sum(1))
+    d_minus = np.sqrt(((V - ideal_worst) ** 2).sum(1))
     score = d_minus / (d_plus + d_minus + 1e-12)
-    # results
-    res_df = pd.DataFrame(index=data.index.astype(str) if data.index is not None else range(len(score)))
-    res_df['score'] = score
-    res_df['distance+'] = d_plus
-    res_df['distance-'] = d_minus
-    res_df = res_df.sort_values('score', ascending=False)
-    res_df['rank'] = range(1, len(res_df) + 1)
-    # attach used criteria values
-    for i, col in enumerate(common):
-        res_df[col] = data[col].values
-    return res_df.reset_index().rename(columns={'index': 'company'})
 
-# ---------------------------
-# Run block
-# ---------------------------
-st.markdown("---")
-st.markdown("### ⚙️ Chạy phân tích")
+    res = pd.DataFrame({
+        'rank': range(1, len(df_data) + 1),
+        'company': df_data.index,
+        'score': score
+    }).sort_values('score', ascending=False).reset_index(drop=True)
 
-# Provide optional selection: which criteria are cost (lower better) vs benefit (higher better)
-all_numeric_cols = df_company.select_dtypes(include=[np.number]).columns.tolist()
-st.info("Nếu có tiêu chí *cost* (như chi phí, thời gian), chọn chúng để TOPSIS coi là *cost* (nhỏ tốt). Các tiêu chí còn lại được xem là *benefit* (lớn tốt).")
-cost_cols = st.multiselect("Chọn cột cost (cost = nhỏ tốt)", all_numeric_cols, default=[])
-
-# Run button
-if st.button("Phân tích rủi ro ngay"):
-    with st.spinner("Đang chạy FAHP → TOPSIS..."):
-        try:
-            # compute weights
-            w_series = compute_weights_from_df(df_weights)
-            st.success("✅ Trọng số đã tính xong.")
-            # try to align with company columns; if names differ, show both and ask mapping
-            numeric_cols = df_company.select_dtypes(include=[np.number]).columns.tolist()
-            # if criteria names in weights not matching numeric cols, try fuzzy mapping by exact lower-case match
-            if not set(w_series.index).issubset(set(numeric_cols)):
-                # attempt a simple mapping: lowercase match
-                map_matches = {}
-                for crit in w_series.index:
-                    lc = crit.strip().lower()
-                    found = [c for c in numeric_cols if c.strip().lower() == lc]
-                    if found:
-                        map_matches[crit] = found[0]
-                if map_matches and len(map_matches) > 0:
-                    # remap
-                    st.info("🔁 Một số tiêu chí đã tự động ghép tên tương ứng.")
-                    new_idx = []
-                    for crit in w_series.index:
-                        if crit in map_matches:
-                            new_idx.append(map_matches[crit])
-                        else:
-                            # if not found, skip
-                            st.warning(f"Không tìm thấy cột tương ứng cho tiêu chí: {crit}. Tiêu chí này sẽ bị bỏ.")
-                    # keep only those found
-                    valid_pairs = [(map_matches[k], v) for k, v in w_series.items() if k in map_matches]
-                    if len(valid_pairs) == 0:
-                        raise ValueError("Không tìm thấy cột numeric tương ứng với trọng số. Hãy đặt tên tiêu chí trùng nhau hoặc chỉnh file.")
-                    names, vals = zip(*valid_pairs)
-                    w_series = pd.Series(list(vals), index=list(names))
-                else:
-                    # Ask user to map manually (simple UI)
-                    st.error("Tên tiêu chí trong sheet trọng số không khớp với tên cột numeric trong dữ liệu công ty.")
-                    st.info("Hãy đảm bảo tên tiêu chí trùng nhau hoặc đặt file theo format [criterion, weight].")
-                    st.stop()
-            # Now run TOPSIS
-            result = topsis(df_company, w_series, benefit_cols=None, cost_cols=cost_cols)
-            st.success("✅ TOPSIS hoàn tất.")
-            # Display ranking table
-            st.subheader("🏆 Bảng xếp hạng (TOPSIS score)")
-            st.dataframe(result[['company', 'score', 'rank'] + [c for c in result.columns if c not in ['company','score','rank','distance+','distance-']]], use_container_width=True)
-            # Chart: bar of scores (top N)
-            st.subheader("📊 Biểu đồ điểm TOPSIS")
-            fig, ax = plt.subplots(figsize=(10, 4))
-            # plot top 10
-            topn = result.head(10).sort_values('score', ascending=True)
-            ax.barh(topn['company'], topn['score'])
-            ax.set_xlabel("TOPSIS Score")
-            ax.set_title("Top 10 companies by TOPSIS score")
-            ax.grid(axis='x', linestyle='--', alpha=0.3)
-            st.pyplot(fig, clear_figure=True)
-            # Show best option
-            best = result.iloc[0]
-            st.markdown(f"### 🥇 **Lựa chọn tốt nhất:** **{best['company']}** — Score = **{best['score']:.4f}**")
-            # Download results as Excel
-            towrite = io.BytesIO()
-            with pd.ExcelWriter(towrite, engine="openpyxl") as writer:
-                result.to_excel(writer, sheet_name="ranking", index=False)
-                df_company.to_excel(writer, sheet_name="company_raw", index=False)
-                w_series.rename("weight").to_frame().to_excel(writer, sheet_name="weights", index=True)
-            towrite.seek(0)
-            st.download_button(label="⬇️ Xuất báo cáo", data=towrite, file_name="riskcast_topsis_result.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-        except Exception as e:
-            st.error(f"Có lỗi khi chạy thuật toán: {e}")
-            st.text(traceback.format_exc())
+    return res
 
 
-    
+# -----------------------
+# RUN ANALYSIS
+# -----------------------
+if st.button("🚀 PHÂN TÍCH NGAY", use_container_width=True):
+    with st.spinner("Đang tính toán bằng TOPSIS..."):
 
+        result = topsis(df_adj, weights_series, cost_flags)
 
+        result["ICC"] = result["score"].apply(lambda x: "ICC A" if x >= 0.75 else "ICC B" if x >= 0.5 else "ICC C")
+        result["Risk"] = result["score"].apply(lambda x: "THẤP" if x >= 0.75 else "TRUNG BÌNH" if x >= 0.5 else "CAO")
 
+        st.success("✅ HOÀN TẤT PHÂN TÍCH!")
+
+        st.dataframe(result.set_index("rank"), use_container_width=True)
+
+        fig = px.bar(
+            result.sort_values("score"),
+            x="score", y="company", color="score",
+            color_continuous_scale="Blues", title="Xếp hạng công ty bảo hiểm"
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+        best = result.iloc[0]
+        st.markdown(f"""### 🏆 ĐỀ XUẤT:
+        ✅ Công ty tối ưu: **{best['company']}**  
+        ✅ Loại bảo hiểm: **{best['ICC']}**  
+        ✅ Mức rủi ro: **{best['Risk']}**
+        """)
+
+        # -----------------------
+        # EXPORT EXCEL
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine="openpyxl") as writer:
+            result.to_excel(writer, sheet_name="Result", index=False)
+            df_adj.to_excel(writer, sheet_name="Adjusted_Data")
+        output.seek(0)
+
+        st.download_button("📥 Xuất Excel", data=output,
+                           file_name="riskcast_result.xlsx")
+
+        # -----------------------
+        # EXPORT PDF
+        class PDF(FPDF):
+            def header(self):
+                self.set_font("Arial", "B", 14)
+                self.cell(0, 10, "BÁO CÁO ĐỀ XUẤT BẢO HIỂM - RISKCAST v2.5",
+                          ln=True, align="C")
+
+        pdf = PDF()
+        pdf.add_page()
+        pdf.set_font("Arial", "", 11)
+        pdf.cell(0, 8, f"Giá trị hàng: {cargo_value:,} USD | Tuyến: {route}", ln=True)
+        pdf.cell(0, 8, f"Phương thức: {method} | Ưu tiên: {priority}", ln=True)
+        pdf.ln(6)
+
+        pdf.set_font("Arial", "B", 10)
+        pdf.cell(20, 7, "Rank", 1)
+        pdf.cell(50, 7, "Company", 1)
+        pdf.cell(30, 7, "Score", 1)
+        pdf.cell(30, 7, "ICC", 1)
+        pdf.cell(30, 7, "Risk", 1)
+        pdf.ln()
+
+        pdf.set_font("Arial", "", 9)
+        for _, r in result.iterrows():
+            pdf.cell(20, 7, str(int(r["rank"])), 1)
+            pdf.cell(50, 7, r["company"], 1)
+            pdf.cell(30, 7, f"{r['score']:.4f}", 1)
+            pdf.cell(30, 7, r["ICC"], 1)
+            pdf.cell(30, 7, r["Risk"], 1)
+            pdf.ln()
+
+        pdf_bytes = pdf.output(dest="S").encode("latin-1")
+        st.download_button("📄 Xuất PDF", data=pdf_bytes,
+                           file_name="riskcast_report.pdf",
+                           mime="application/pdf")
