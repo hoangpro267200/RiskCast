@@ -1,27 +1,26 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 
-st.set_page_config(page_title="🚢 RISKCAST", layout="wide")
+st.set_page_config(page_title="RISKCAST Demo", layout="wide")
 
-st.title("🚢 DEMO RISKCAST")
-st.write("Chào Hoàng, hệ thống đang sẵn sàng xử lý dữ liệu!")
+st.title("🚢 RISKCAST — Demo Web App")
+st.write("Chào Hoàng, hệ thống đã sẵn sàng xử lý dữ liệu bảo hiểm!")
 
-uploaded_file = st.file_uploader("📂 Upload file Excel (xlsx)", type=["xlsx"])
+# STEP 1 — Upload file
+uploaded_file = st.file_uploader("📂 Upload file Excel (.xlsx)", type=["xlsx"])
 
 if uploaded_file:
-    df = pd.read_excel(uploaded_file)
-    st.subheader("📊 Dữ liệu gốc")
-    st.dataframe(df, use_container_width=True)
+    xls = pd.ExcelFile(uploaded_file)
+    sheet_names = xls.sheet_names
 
-    st.subheader("🔧 Normalize dữ liệu (Min-Max)")
+    st.success("✅ File đã upload thành công!")
+    st.write(f"File này có **{len(sheet_names)} sheet**: {', '.join(sheet_names)}")
 
-    df_norm = df.copy()
-    for col in df.columns[1:]:
-        df_norm[col] = (df[col] - df[col].min()) / (df[col].max() - df[col].min())
+    # Hiển thị từng sheet
+    for sheet in sheet_names:
+        df = pd.read_excel(uploaded_file, sheet_name=sheet)
+        st.subheader(f"📄 Sheet: {sheet}")
+        st.dataframe(df, use_container_width=True)
 
-    st.dataframe(df_norm, use_container_width=True)
-
-    st.success("✅ Normalize thành công! Tiếp theo sẽ là Fuzzy AHP + TOPSIS.")
 else:
-    st.info("⬆️ Hãy upload file Excel để bắt đầu xử lý.")
+    st.info("⬆️ Hãy upload file Excel để hệ thống xử lý.")
