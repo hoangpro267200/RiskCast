@@ -14,13 +14,25 @@ if uploaded_file:
     sheet_names = xls.sheet_names
 
     st.success("✅ File đã upload thành công!")
-    st.write(f"File này có **{len(sheet_names)} sheet**: {', '.join(sheet_names)}")
 
-    # Hiển thị từng sheet
-    for sheet in sheet_names:
-        df = pd.read_excel(uploaded_file, sheet_name=sheet)
-        st.subheader(f"📄 Sheet: {sheet}")
-        st.dataframe(df, use_container_width=True)
+    # Chọn sheet trọng số & sheet công ty
+    weight_sheet = st.selectbox("📌 Chọn sheet chứa trọng số (Fuzzy AHP)", sheet_names)
+    company_sheet = st.selectbox("🏢 Chọn sheet chứa dữ liệu công ty (TOPSIS)", sheet_names)
 
+    # Hiển thị 2 sheet đã chọn
+    df_weights = pd.read_excel(uploaded_file, sheet_name=weight_sheet)
+    df_company = pd.read_excel(uploaded_file, sheet_name=company_sheet)
+
+    st.subheader("📊 Trọng số (FAHP)")
+    st.dataframe(df_weights, use_container_width=True)
+
+    st.subheader("🏢 Dữ liệu công ty (TOPSIS)")
+    st.dataframe(df_company, use_container_width=True)
+
+    # Button xử lý thuật toán
+    if st.button("🚀 Run FAHP + TOPSIS"):
+        st.success("✅ Thuật toán đang chạy... chuẩn bị dữ liệu đầu vào!")
+        # (chỗ này tí nữa mình sẽ thêm thuật toán FAHP + TOPSIS)
 else:
     st.info("⬆️ Hãy upload file Excel để hệ thống xử lý.")
+
