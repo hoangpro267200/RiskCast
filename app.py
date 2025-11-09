@@ -85,7 +85,7 @@ if use_fuzzy:
     mid = weights_series.copy()
     high = np.minimum(weights_series * (1 + fuzziness / 100.0), 0.9999)
     defuzz = (low + mid + high) / 3
-    weights_series = defuzz / defuzz.sum()\    
+    weights_series = defuzz / defuzz.sum()   
 
 # -----------------------
 # Dữ liệu mẫu + company-specific sensitivity
