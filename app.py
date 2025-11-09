@@ -1,6 +1,5 @@
-# app.py — RISKCAST v4.6 — Green ESG Pro (Optimized & Modern)
+# app.py — RISKCAST v4.6.1 — Green ESG Pro (Fixed & Optimized)
 import io
-import math
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -24,11 +23,10 @@ except Exception:
     PIL_AVAILABLE = False
 
 # ---------------- Page Config + Modern Green ESG CSS ----------------
-st.set_page_config(page_title="RISKCAST v4.6 — ESG Pro", layout="wide", page_icon="🌿")
+st.set_page_config(page_title="RISKCAST v4.6.1 — ESG Pro", layout="wide", page_icon="Green Leaf")
 
 st.markdown("""
 <style>
-    /* Main App */
     .stApp {
         background: linear-gradient(180deg, #0a2e0a 0%, #041a04 100%);
         color: #e8f5e9;
@@ -36,8 +34,6 @@ st.markdown("""
     }
     .big-title { font-size: 2.8rem; font-weight: 800; color: #a8e6cf; text-align: center; margin-bottom: 0.5rem; }
     .subtitle { color: #81c784; text-align: center; font-weight: 500; margin-bottom: 1.5rem; }
-
-    /* Cards */
     .card {
         background: rgba(20, 60, 20, 0.6);
         backdrop-filter: blur(10px);
@@ -56,12 +52,6 @@ st.markdown("""
         font-weight: 600;
         box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
-
-    /* Metrics */
-    .stMetric { background: rgba(255,255,255,0.05); padding: 0.5rem; border-radius: 10px; }
-    .stMetric > div { color: #a5d6a7 !important; }
-
-    /* Buttons */
     .stButton > button {
         background: linear-gradient(135deg, #2e7d32, #1b5e20);
         color: white;
@@ -76,26 +66,17 @@ st.markdown("""
         transform: translateY(-2px);
         box-shadow: 0 6px 16px rgba(0,0,0,0.3);
     }
-
-    /* Sidebar */
-    .css-1d391kg { background: rgba(10, 40, 10, 0.9); border-right: 1px solid #2e7d32; }
-    .sidebar .sidebar-content { padding: 1.5rem; }
-
-    /* Progress */
-    .stProgress > div > div { background: linear-gradient(90deg, #00e676, #66bb6a); }
-
-    /* Footer */
     .footer { text-align: center; color: #81c784; font-size: 0.8rem; margin-top: 3rem; opacity: 0.8; }
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------- Title ----------------
-st.markdown('<h1 class="big-title">🌿 RISKCAST v4.6 — ESG Pro</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="big-title">RISKCAST v4.6.1 — ESG Pro</h1>', unsafe_allow_html=True)
 st.markdown('<p class="subtitle">Fuzzy AHP • TOPSIS • Monte Carlo • ARIMA • VaR/CVaR • ESG Focus</p>', unsafe_allow_html=True)
 
 # ---------------- Sidebar ----------------
 with st.sidebar:
-    st.header("📦 Thông tin lô hàng")
+    st.header("Thông tin lô hàng")
     cargo_value = st.number_input("Giá trị lô hàng (USD)", min_value=1000, value=39000, step=1000, format="%d")
     good_type = st.selectbox("Loại hàng", ["Điện tử", "Đông lạnh", "Hàng khô", "Hàng nguy hiểm", "Khác"])
     route = st.selectbox("Tuyến", ["VN - EU", "VN - US", "VN - Singapore", "VN - China", "Domestic"])
@@ -104,14 +85,14 @@ with st.sidebar:
     priority = st.selectbox("Ưu tiên", ["An toàn tối đa", "Cân bằng", "Tối ưu chi phí"])
 
     st.markdown("---")
-    st.header("🧠 Mô hình")
+    st.header("Mô hình")
     use_fuzzy = st.checkbox("Bật Fuzzy AHP (TFN)", True)
     use_arima = st.checkbox("Dùng ARIMA dự báo", True)
     use_var = st.checkbox("Tính VaR & CVaR", True)
     use_mc = st.checkbox("Monte Carlo cho C6", True)
     mc_runs = st.slider("Số vòng Monte Carlo", 500, 5000, 2000, step=500)
 
-# ---------------- Helper Functions (Optimized) ----------------
+# ---------------- Helper Functions ----------------
 @st.cache_data(show_spinner=False)
 def load_sample_data():
     months = list(range(1,13))
@@ -161,7 +142,7 @@ def safe_plotly_to_png(fig, width=800, height=500):
     except:
         return None
 
-# ---------------- Criteria & Weights UI ----------------
+# ---------------- Criteria & Weights ----------------
 criteria = ["C1: Tỷ lệ phí", "C2: Thời gian xử lý", "C3: Tỷ lệ tổn thất",
             "C4: Hỗ trợ ICC", "C5: Chăm sóc KH", "C6: Rủi ro khí hậu"]
 
@@ -171,15 +152,15 @@ if "locked" not in st.session_state:
     st.session_state.locked = [False] * 6
 
 st.markdown("<div class='card'>", unsafe_allow_html=True)
-st.subheader("⚖️ Phân bổ trọng số (Lock & Auto-balance)")
+st.subheader("Phân bổ trọng số (Lock & Auto-balance)")
 
 cols = st.columns(6)
 new_w = st.session_state.weights.copy()
 
 for i, c in enumerate(criteria):
     with cols[i]:
-        st.markdown(f"**{c.split(':')[1]}**")
-        st.checkbox("🔒", key=f"lock_{i}", value=st.session_state.locked[i])
+        st.markdown(f"**{c.split(':')[1].strip()}**")
+        st.checkbox("Lock", key=f"lock_{i}", value=st.session_state.locked[i])
         val = st.number_input("w", min_value=0.0, max_value=1.0, value=float(new_w[i]), step=0.01, key=f"w_{i}", label_visibility="collapsed")
         new_w[i] = val
 
@@ -188,7 +169,7 @@ for i in range(6):
 
 col1, col2 = st.columns([1, 4])
 with col1:
-    if st.button("🔄 Reset", use_container_width=True):
+    if st.button("Reset", use_container_width=True):
         st.session_state.weights = np.array([0.20, 0.15, 0.20, 0.20, 0.10, 0.15])
         st.session_state.locked = [False] * 6
         st.success("Đã reset!")
@@ -218,7 +199,7 @@ base_climate = float(historical.loc[historical['month']==month, route].iloc[0])
 
 # ---------------- Monte Carlo C6 ----------------
 df_adj = df.copy().astype(float)
-mc_mean = np.array([base_climate * sensitivity.get(c, 1.0) for c in df.index])
+mc_mean = np.array([base_climate * sensitivity.get(c, 1.0) for c in df.index], dtype=float)
 
 if use_mc:
     rng = np.random.default_rng(2025)
@@ -240,7 +221,7 @@ if cargo_value > 50000:
 
 # ---------------- TOPSIS ----------------
 def topsis(matrix, weights, cost_benefit):
-    M = matrix.values
+    M = matrix.values.astype(float)
     norm = np.sqrt((M**2).sum(axis=0))
     norm[norm == 0] = 1
     R = M / norm
@@ -278,7 +259,7 @@ def forecast_route_cached(_historical, route_key, months_ahead=3):
     return series.tolist(), fc
 
 # ---------------- RUN ANALYSIS ----------------
-if st.button("🚀 PHÂN TÍCH & GỢI Ý", use_container_width=True, type="primary"):
+if st.button("PHÂN TÍCH & GỢI Ý", use_container_width=True, type="primary"):
     progress = st.progress(0)
     status = st.empty()
 
@@ -310,17 +291,25 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý", use_container_width=True, type="prim
     results["rank"] = results.index + 1
     results["recommend_icc"] = results["score"].apply(lambda x: "ICC A" if x >= 0.75 else ("ICC B" if x >= 0.5 else "ICC C"))
 
-    # Confidence
-    cv_c6 = np.where(mc_mean == 0, 0, mc_std / mc_mean)
-    conf_c6 = 1 / (1 + cv_c6)
-    conf_c6 = 0.3 + 0.7 * (conf_c6 - conf_c6.min()) / (conf_c6.ptp() + 1e-9) if conf_c6.ptp() > 0 else np.full_like(conf_c6, 0.65)
+    # === CONFIDENCE - ĐÃ SỬA LỖI .ptp() ===
+    cv_c6 = np.where(mc_mean == 0, 0.0, mc_std / mc_mean)
+    conf_c6 = 1.0 / (1.0 + cv_c6)
+    conf_c6 = np.array(conf_c6, dtype=float)
+    if conf_c6.ptp() > 0:
+        conf_c6_scaled = 0.3 + 0.7 * (conf_c6 - conf_c6.min()) / (conf_c6.ptp() + 1e-9)
+    else:
+        conf_c6_scaled = np.full_like(conf_c6, 0.65)
 
-    crit_cv = df_adj.std(axis=1) / (df_adj.mean(axis=1) + 1e-9)
-    conf_crit = 1 / (1 + crit_cv)
-    conf_crit = 0.3 + 0.7 * (conf_crit - conf_crit.min()) / (conf_crit.ptp() + 1e-9) if conf_crit.ptp() > 0 else np.full_like(conf_crit, 0.65)
+    crit_cv = df_adj.std(axis=1).values / (df_adj.mean(axis=1).values + 1e-9)
+    conf_crit = 1.0 / (1.0 + crit_cv)
+    conf_crit = np.array(conf_crit, dtype=float)
+    if conf_crit.ptp() > 0:
+        conf_crit_scaled = 0.3 + 0.7 * (conf_crit - conf_crit.min()) / (conf_crit.ptp() + 1e-9)
+    else:
+        conf_crit_scaled = np.full_like(conf_crit, 0.65)
 
-    conf_final = np.sqrt(conf_c6 * conf_crit)
-    order_map = {c: conf_final[i] for i, c in enumerate(df_adj.index)}
+    conf_final = np.sqrt(conf_c6_scaled * conf_crit_scaled)
+    order_map = {comp: conf_final[i] for i, comp in enumerate(df_adj.index)}
     results["confidence"] = results["company"].map(order_map).round(3)
 
     # VaR
@@ -348,7 +337,7 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý", use_container_width=True, type="prim
     col1, col2 = st.columns([2, 1])
     with col1:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.subheader("🏆 Xếp hạng TOPSIS")
+        st.subheader("Xếp hạng TOPSIS")
         st.dataframe(results[["rank","company","score","confidence","recommend_icc"]].set_index("rank").style.format({"score": "{:.3f}", "confidence": "{:.2f}"}), use_container_width=True)
         st.markdown(f"""
         <div class='result-box'>
@@ -362,7 +351,7 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý", use_container_width=True, type="prim
 
     with col2:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.subheader("📊 Tổng quan")
+        st.subheader("Tổng quan")
         st.metric("VaR 95%", f"${var95:,.0f}" if var95 else "N/A")
         st.metric("CVaR 95%", f"${cvar95:,.0f}" if cvar95 else "N/A")
         st.markdown("</div>", unsafe_allow_html=True)
@@ -379,18 +368,18 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý", use_container_width=True, type="prim
             df_adj.to_excel(writer, sheet_name="Data")
             pd.DataFrame({"Criteria": criteria, "Weight": weights}).to_excel(writer, sheet_name="Weights", index=False)
         excel_buffer.seek(0)
-        st.download_button("📊 Xuất Excel", excel_buffer, "riskcast_v4.6.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        st.download_button("Xuất Excel", excel_buffer, "riskcast_v4.6.1.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
     with col2:
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", "B", 16)
-        pdf.cell(0, 10, "RISKCAST v4.6 - ESG Report", ln=1, align='C')
+        pdf.cell(0, 10, "RISKCAST v4.6.1 - ESG Report", ln=1, align='C')
         pdf.ln(10)
         pdf.set_font("Arial", size=12)
         pdf.multi_cell(0, 8, f"Recommended: {results.iloc[0]['company']} | Score: {results.iloc[0]['score']:.3f} | VaR: ${var95:,.0f}" if var95 else "")
         pdf_bytes = pdf.output(dest="S").encode("latin-1")
-        st.download_button("📄 Xuất PDF", pdf_bytes, "riskcast_report.pdf", "application/pdf")
+        st.download_button("Xuất PDF", pdf_bytes, "riskcast_report.pdf", "application/pdf")
 
     progress.empty()
     status.empty()
@@ -399,6 +388,6 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý", use_container_width=True, type="prim
 st.markdown("""
 <div class='footer'>
     <hr style='border: 1px solid #2e7d32; margin: 2rem 0;'>
-    <strong>RISKCAST v4.6 — Green ESG Pro</strong> • Author: Bùi Xuân Hoàng • Deploy: Streamlit Cloud / Render
+    <strong>RISKCAST v4.6.1 — Green ESG Pro</strong> • Fixed .ptp() error • Author: Bùi Xuân Hoàng
 </div>
 """, unsafe_allow_html=True)
