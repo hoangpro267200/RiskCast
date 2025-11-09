@@ -213,8 +213,10 @@ if st.button("PHÂN TÍCH NGAY", use_container_width=True):
         # form 1: also use coefficient of variation across criteria for final confidence
         crit_cv = df_adj[list(weights_series.index)].std(axis=1) / (df_adj[list(weights_series.index)].mean(axis=1) + 1e-9)
         crit_conf = 1 / (1 + crit_cv)
-        crit_conf = 0.3 + 0.7 * (crit_conf - crit_conf.min()) / (crit_conf.ptp() + 1e-9)
-
+       import numpy as np
+# normalize confidence [0.3 ; 1.0] to reduce overconfidence bias
+confidence = np.array(confidence, dtype=float)
+confidence = 0.3 + 0.7 * (confidence - confidence.min()) / ((confidence.max() - confidence.min()) + 1e-9)
         # final confidence = geometric mean of climate confidence and crit_conf
         final_conf = np.sqrt(confidence * crit_conf)
 
