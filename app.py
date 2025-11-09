@@ -1,6 +1,7 @@
-# app.py — RISKCAST v4.7 (fixed ptp & robust)
+# app.py — RISKCAST v4.7 (fixed ptp & robust) — patched by Kai
 import io
 import math
+import uuid
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -16,6 +17,14 @@ try:
     ARIMA_AVAILABLE = True
 except Exception:
     ARIMA_AVAILABLE = False
+
+# Optional image libs
+HAS_PIL = False
+try:
+    from PIL import Image
+    HAS_PIL = True
+except Exception:
+    HAS_PIL = False
 
 st.set_page_config(page_title="RISKCAST v4.7 — Green ESG", layout="wide", page_icon="🛡️")
 st.markdown("""
@@ -78,10 +87,27 @@ def auto_balance(weights, locked_flags):
 def defuzzify_centroid(low, mid, high):
     return (low + mid + high) / 3.0
 
-def safe_plotly_to_png(fig):
+def try_plotly_to_png(fig):
+    """
+    Try multiple ways to export a plotly figure to bytes (png).
+    Returns bytes or None.
+    """
+    # Primary: fig.to_image (requires kaleido)
     try:
-        img_bytes = fig.to_image(format="png")
-        return img_bytes
+        return fig.to_image(format="png")
+    except Exception:
+        pass
+    # Secondary: use write_image if available
+    try:
+        import tempfile, os
+        tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+        path = tmp.name
+        fig.write_image(path)
+        tmp.close()
+        with open(path, "rb") as f:
+            data = f.read()
+        os.remove(path)
+        return data
     except Exception:
         return None
 
@@ -150,17 +176,35 @@ route_key = route
 base_climate = float(historical.loc[historical['month']==month, route_key].iloc[0]) if month in historical['month'].values else 0.40
 
 df_adj = df.copy().astype(float)
-mc_mean = np.array([base_climate * sensitivity.get(c,1.0) for c in df_adj.index], dtype=float)
-mc_std = np.zeros(len(df_adj), dtype=float)
+
+# Vectorized Monte Carlo for C6 (faster)
+@st.cache_data
+def monte_carlo_climate(base_climate, sensitivity_map, mc_runs, rng_seed=2025):
+    rng = np.random.default_rng(rng_seed)
+    names = list(sensitivity_map.keys())
+    n = len(names)
+    means = np.zeros(n, dtype=float)
+    stds = np.zeros(n, dtype=float)
+    # compute mu per company
+    mu = np.array([base_climate * sensitivity_map.get(name,1.0) for name in names], dtype=float)
+    sigma = np.maximum(0.03, mu * 0.12)
+    # draw (mc_runs x n) all at once
+    sims = rng.normal(loc=mu, scale=sigma, size=(int(mc_runs), n))
+    sims = np.clip(sims, 0.0, 1.0)
+    means = sims.mean(axis=0)
+    stds = sims.std(axis=0)
+    return names, means, stds
+
 if use_mc:
-    rng = np.random.default_rng(2025)
-    for i in range(len(df_adj)):
-        mu = mc_mean[i]
-        sigma = max(0.03, mu*0.12)
-        sims = rng.normal(loc=mu, scale=sigma, size=int(mc_runs))
-        sims = np.clip(sims, 0.0, 1.0)
-        mc_mean[i] = sims.mean()
-        mc_std[i] = sims.std()
+    names_mc, mc_mean, mc_std = monte_carlo_climate(base_climate, sensitivity, mc_runs)
+    # make sure order matches df_adj.index
+    order = [names_mc.index(nm) for nm in df_adj.index]
+    mc_mean = mc_mean[order]
+    mc_std = mc_std[order]
+else:
+    mc_mean = np.zeros(len(df_adj), dtype=float)
+    mc_std = np.zeros(len(df_adj), dtype=float)
+
 df_adj["C6: Rủi ro khí hậu"] = mc_mean
 
 if cargo_value > 50000:
@@ -184,10 +228,13 @@ def topsis(df_input, weight_series, cost_flags):
 cost_flags = {c: "cost" if c in ["C1: Tỷ lệ phí", "C6: Rủi ro khí hậu"] else "benefit" for c in criteria}
 
 def compute_var_cvar(loss_rates, cargo_value, alpha=0.95):
+    eps = 1e-9
     losses = np.array(loss_rates, dtype=float) * float(cargo_value)
+    if losses.size == 0:
+        return None, None
     var = np.percentile(losses, alpha*100)
-    tail = losses[losses >= var]
-    cvar = tail.mean() if len(tail)>0 else var
+    tail = losses[losses >= var - eps]
+    cvar = float(tail.mean()) if len(tail)>0 else float(var)
     return float(var), float(cvar)
 
 def forecast_route(route_key, months_ahead=3):
@@ -200,8 +247,8 @@ def forecast_route(route_key, months_ahead=3):
         except Exception:
             pass
     last = np.array(series)
-    avg = np.mean(last[-6:])
-    trend = (last[-1] - last[-6]) / 6.0
+    avg = np.mean(last[-6:]) if len(last)>=6 else np.mean(last)
+    trend = (last[-1] - last[-6]) / 6.0 if len(last)>=6 else 0.0
     fc = np.array([max(0, last[-1] + (i+1)*trend) for i in range(months_ahead)])
     return last, fc
 
@@ -210,9 +257,9 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý"):
         weights = weights_series.copy()
         if use_fuzzy:
             f = float(st.sidebar.slider("Bất định TFN (%)", 0, 50, 15))
-            low = np.maximum(weights*(1 - f/100.0), 1e-6)
+            low = np.maximum(weights*(1 - f/100.0), 1e-9)
             high = np.minimum(weights*(1 + f/100.0), 0.9999)
-            defuz = defuzzify_centroid(low, weights, high)
+            defuz = defuzzify_centroid(low, weights.values, high)
             weights = pd.Series(defuz/defuz.sum(), index=weights.index)
 
         scores = topsis(df_adj, weights, cost_flags)
@@ -226,15 +273,15 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý"):
         results["recommend_icc"] = results["score"].apply(lambda x: "ICC A" if x>=0.75 else ("ICC B" if x>=0.5 else "ICC C"))
 
         # Confidence calc (robust)
-        cv_c6 = np.where(results["C6_mean"].values==0, 0.0, results["C6_std"].values / (results["C6_mean"].values + 1e-9))
+        eps = 1e-9
+        cv_c6 = np.where(results["C6_mean"].values==0, 0.0, results["C6_std"].values / (results["C6_mean"].values + eps))
         conf_c6 = 1.0 / (1.0 + cv_c6)
-        # use numpy.ptp for safety
         if np.ptp(conf_c6) > 0:
             conf_c6_scaled = 0.3 + 0.7*(conf_c6 - conf_c6.min()) / (np.ptp(conf_c6) + 1e-12)
         else:
             conf_c6_scaled = np.full_like(conf_c6, 0.65)
 
-        crit_cv = df_adj.std(axis=1).values / (df_adj.mean(axis=1).values + 1e-9)
+        crit_cv = df_adj.std(axis=1).values / (df_adj.mean(axis=1).values + eps)
         conf_crit = 1.0 / (1.0 + crit_cv)
         if np.ptp(conf_crit) > 0:
             conf_crit_scaled = 0.3 + 0.7*(conf_crit - conf_crit.min()) / (np.ptp(conf_crit) + 1e-12)
@@ -242,7 +289,7 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý"):
             conf_crit_scaled = np.full_like(conf_crit, 0.65)
 
         conf_final = np.sqrt(conf_c6_scaled * conf_crit_scaled)
-        order_map = {comp: conf_final[i] for i, comp in enumerate(df_adj.index)}
+        order_map = {comp: float(conf_final[i]) for i, comp in enumerate(df_adj.index)}
         results["confidence"] = results["company"].map(order_map).round(3)
 
         var95, cvar95 = (None, None)
@@ -277,20 +324,22 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý"):
         st.plotly_chart(fig_topsis, use_container_width=True)
         st.plotly_chart(fig_forecast, use_container_width=True)
 
-        # Export Excel
+        # Export Excel (improved weights sheet)
         excel_out = io.BytesIO()
         with pd.ExcelWriter(excel_out, engine="openpyxl") as writer:
             results.to_excel(writer, sheet_name="Result", index=False)
             df_adj.to_excel(writer, sheet_name="Adjusted_Data")
-            pd.DataFrame(weights).to_excel(writer, "Weights", index=True)
+            pd.DataFrame({"weight": weights.values}, index=weights.index).to_excel(writer, sheet_name="Weights")
         excel_out.seek(0)
         st.download_button("⬇️ Xuất Excel (Kết quả)", excel_out, file_name="riskcast_result.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
-        # Export PDF (3 pages)
+        # Export PDF (3 pages) — safer image handling
         pdf = FPDF(unit="mm", format="A4")
         pdf.set_auto_page_break(auto=True, margin=12)
+        # don't attempt to add font with empty fname
         try:
-            pdf.add_font("DejaVu", "", fname="", uni=True)
+            # If you have a .ttf in repo, give path here; else fallback to core font
+            pdf.add_font("DejaVu", "", fname="DejaVuSans.ttf", uni=True)
             pdf.set_font("DejaVu", size=12)
         except Exception:
             pdf.set_font("Arial", size=12)
@@ -304,28 +353,42 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý"):
         pdf.cell(0, 6, f"Cargo value: ${cargo_value:,}    Priority: {priority}", ln=1)
         pdf.ln(4)
         pdf.set_font_size(11)
-        pdf.multi_cell(0, 6, f"Recommended insurer: {results.iloc[0]['company']} ({results.iloc[0]['recommend_icc']})\nTOPSIS Score: {results.iloc[0]['score']:.4f}\nConfidence: {results.iloc[0]['confidence']:.2f}\nVaR95: ${var95:,.0f} | CVaR95: ${cvar95:,.0f}" if var95 is not None else "", align="L")
+        summary_text = f"Recommended insurer: {results.iloc[0]['company']} ({results.iloc[0]['recommend_icc']})\nTOPSIS Score: {results.iloc[0]['score']:.4f}\nConfidence: {results.iloc[0]['confidence']:.2f}"
+        if var95 is not None:
+            summary_text += f"\nVaR95: ${var95:,.0f} | CVaR95: ${cvar95:,.0f}"
+        pdf.multi_cell(0, 6, summary_text, align="L")
         pdf.ln(6)
         pdf.set_font_size(10)
-        pdf.cell(40,6,"Rank",1); pdf.cell(50,6,"Company",1); pdf.cell(40,6,"Score",1); pdf.cell(35,6,"Confidence",1); pdf.ln()
+        # table header
+        pdf.cell(20,6,"Rank",1); pdf.cell(60,6,"Company",1); pdf.cell(40,6,"Score",1); pdf.cell(35,6,"Confidence",1); pdf.ln()
         for idx, row in results.head(5).iterrows():
-            pdf.cell(40,6,str(int(row["rank"])),1); pdf.cell(50,6,str(row["company"])[:20],1)
+            pdf.cell(20,6,str(int(row["rank"])),1); pdf.cell(60,6,str(row["company"])[:30],1)
             pdf.cell(40,6,f"{row['score']:.4f}",1); pdf.cell(35,6,f"{row['confidence']:.2f}",1); pdf.ln()
 
+        # Page 2: TOPSIS chart
         pdf.add_page()
         pdf.set_font_size(14)
         pdf.cell(0,8,"TOPSIS Scores", ln=1)
-        img_bytes = safe_plotly_to_png(fig_topsis)
-        if img_bytes:
+        img_bytes = try_plotly_to_png(fig_topsis)
+        if img_bytes and HAS_PIL:
             try:
-                from PIL import Image
                 im = Image.open(io.BytesIO(img_bytes))
-                tmp = "tmp_topsis.png"
+                tmp = f"tmp_{uuid.uuid4().hex}_topsis.png"
                 im.save(tmp)
                 pdf.image(tmp, x=15, w=180)
             except Exception:
                 pdf.set_font_size(10)
-                pdf.cell(0,6,"(Không thể xuất biểu đồ TOPSIS — missing PIL/kaleido)", ln=1)
+                pdf.cell(0,6,"(Không thể xuất biểu đồ TOPSIS — PIL export failed)", ln=1)
+        elif img_bytes:
+            # try direct write if PIL not available
+            try:
+                tmp = f"tmp_{uuid.uuid4().hex}_topsis.png"
+                with open(tmp, "wb") as f:
+                    f.write(img_bytes)
+                pdf.image(tmp, x=15, w=180)
+            except Exception:
+                pdf.set_font_size(10)
+                pdf.cell(0,6,"(Không thể xuất biểu đồ TOPSIS — image save failed)", ln=1)
         else:
             pdf.set_font_size(10)
             pdf.cell(0,6,"(Biểu đồ TOPSIS không thể xuất sang ảnh)", ln=1)
@@ -333,20 +396,29 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý"):
             for idx,row in results.iterrows():
                 pdf.cell(0,5,f"{int(row['rank'])}. {row['company']} — Score: {row['score']:.4f} — Conf: {row['confidence']:.2f}", ln=1)
 
+        # Page 3: Forecast
         pdf.add_page()
         pdf.set_font_size(14)
         pdf.cell(0,8,"Forecast (ARIMA or fallback) & VaR", ln=1)
-        img_bytes2 = safe_plotly_to_png(fig_forecast)
-        if img_bytes2:
+        img_bytes2 = try_plotly_to_png(fig_forecast)
+        if img_bytes2 and HAS_PIL:
             try:
-                from PIL import Image
                 im2 = Image.open(io.BytesIO(img_bytes2))
-                tmp2 = "tmp_forecast.png"
+                tmp2 = f"tmp_{uuid.uuid4().hex}_forecast.png"
                 im2.save(tmp2)
                 pdf.image(tmp2, x=10, w=190)
             except Exception:
                 pdf.set_font_size(10)
-                pdf.cell(0,6,"(Không thể xuất biểu đồ Forecast — missing PIL/kaleido)", ln=1)
+                pdf.cell(0,6,"(Không thể xuất biểu đồ Forecast — PIL failed)", ln=1)
+        elif img_bytes2:
+            try:
+                tmp2 = f"tmp_{uuid.uuid4().hex}_forecast.png"
+                with open(tmp2, "wb") as f:
+                    f.write(img_bytes2)
+                pdf.image(tmp2, x=10, w=190)
+            except Exception:
+                pdf.set_font_size(10)
+                pdf.cell(0,6,"(Không thể xuất biểu đồ Forecast — image save failed)", ln=1)
         else:
             pdf.set_font_size(10)
             pdf.cell(0,6,"(Biểu đồ Forecast không thể xuất)", ln=1)
@@ -362,4 +434,4 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý"):
             pdf_bytes = pdf.output(dest="S").encode("utf-8", errors="ignore")
         st.download_button("⬇️ Xuất PDF báo cáo (3 trang)", data=pdf_bytes, file_name="RISKCAST_report.pdf", mime="application/pdf")
 
-st.markdown("<br><div class='muted small'>RISKCAST v4.7 — Green ESG theme. Author: Bùi Xuân Hoàng.</div>", unsafe_allow_html=True) 
+st.markdown("<br><div class='muted small'>RISKCAST v4.7 — Green ESG theme. Author: Bùi Xuân Hoàng.</div>", unsafe_allow_html=True)
