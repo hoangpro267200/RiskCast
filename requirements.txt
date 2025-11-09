@@ -2,7 +2,10 @@ streamlit
 pandas
 numpy
 plotly
-openpyxl
 fpdf2
+requests
+openpyxl
+statsmodels
+scipy
 
 
