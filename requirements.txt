@@ -6,3 +6,4 @@ fpdf
 openpyxl
 statsmodels
 Pillow
+kaleido
