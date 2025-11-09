@@ -1,9 +1,14 @@
-streamlit
-numpy
-pandas
-plotly
-fpdf
-openpyxl
-statsmodels
-pillow
-kaleido
+# Core
+streamlit>=1.28.0
+pandas>=1.5.0
+numpy>=1.21.0
+plotly>=5.15.0
+
+# Export & Visualization - BẮT BUỘC CHO CI/CD
+kaleido==0.2.1          # BẮT BUỘC để xuất PNG từ Plotly trên server
+openpyxl>=3.0.10
+fpdf2>=2.7.0
+
+# Optional
+Pillow>=9.0.0
+statsmodels>=0.13.0
