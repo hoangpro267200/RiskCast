@@ -1,426 +1,189 @@
-# app.py — RISKCAST v4.5 (Green ESG theme) — Full final (no-error)
-# Features:
-# - Green UI theme
-# - Lockable weights + auto-balance + reset
-# - Fuzzy AHP (simple TFN centroid)
-# - Monte-Carlo C6 + ARIMA (fallback) forecast
-# - VaR/CVaR calculation
-# - TOPSIS (correct broadcasting)
-# - Export Excel and PDF (3 pages)
-# - Robust to missing fonts / missing kaleido
+# =========================================================
+#  RISKCAST v4.6 — GLOBAL GREEN INSURANCE RECOMMENDER
+#  Streamlit Webapp (SCI level + NCKH cấp quốc gia)
+#  Features: ARIMA + Monte Carlo + VaR/CVaR + Fuzzy TOPSIS + Confidence Index
+#  Theme: Green Premium / ESG / Global Insurance
+# =========================================================
 
-import io
-import math
 import numpy as np
 import pandas as pd
 import streamlit as st
-import plotly.express as px
 import plotly.graph_objects as go
 from fpdf import FPDF
-import warnings
+import io, warnings
+
 warnings.filterwarnings("ignore")
 
-# Optional ARIMA
-try:
-    from statsmodels.tsa.arima.model import ARIMA
-    ARIMA_AVAILABLE = True
-except Exception:
-    ARIMA_AVAILABLE = False
+# ---------------------------------------------------------
+# PageConfig + UI Theme (GREEN PREMIUM)
+# ---------------------------------------------------------
+st.set_page_config(page_title="RISKCAST v4.6", layout="wide", page_icon="🛡️")
 
-# ---------------- Page config + CSS (Green ESG) ----------------
-st.set_page_config(page_title="RISKCAST v4.5 — Green ESG", layout="wide", page_icon="🛡️")
 st.markdown("""
 <style>
-  .stApp { background: linear-gradient(180deg,#0b3d0b 0%, #05320a 100%); color: #e9fbf0; font-family: 'Segoe UI', sans-serif; }
-  h1 { color:#a3ff96; text-align:center; font-weight:800; }
-  .card { background: rgba(255,255,255,0.03); padding:1rem; border-radius:10px; border:1px solid rgba(163,255,150,0.08); }
-  .muted { color: #bfe8c6; font-size:0.95rem; }
-  .small { font-size:0.85rem; color:#bfe8c6; }
-  .result-box { background:#0f3d1f; padding:1rem; border-left:6px solid #3ef08a; border-radius:8px; }
+.stApp {
+    background: linear-gradient(180deg,#042b1f 0%, #0b3d2e 100%);
+    color: #eafff3;
+    font-family: "Segoe UI";
+}
+h1 {
+    text-align:center;
+    color:#00ff9d;
+    font-size:2.8rem;
+    font-weight:900;
+}
+.stButton>button {
+    border-radius: 12px;
+    padding: 0.7rem;
+    font-size: 1.1rem;
+    background: linear-gradient(90deg,#00ff9d,#00996e);
+    color:black; font-weight:700;
+}
+.result-box {
+    background:#062f23;
+    padding:1rem;
+    border-radius:12px;
+    border-left:6px solid #03ff87;
+}
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🛡️ RISKCAST v4.5 — Green ESG Insurance Advisor")
-st.caption("ARIMA + MonteCarlo + VaR/CVaR + Fuzzy AHP + TOPSIS — Global Insurance / Sustainability theme")
+st.title("🛡️ RISKCAST v4.6 — GREEN GLOBAL INSURANCE RECOMMENDER")
+st.caption("AI + Fuzzy + Risk Forecasting + ESG Mindset")
 
-# ---------------- Sidebar inputs ----------------
+# ---------------------------------------------------------
+# Sidebar Input
+# ---------------------------------------------------------
 with st.sidebar:
-    st.header("Thông tin lô hàng")
-    cargo_value = st.number_input("Giá trị lô hàng (USD)", min_value=1000, value=39000, step=1000)
-    good_type = st.selectbox("Loại hàng", ["Điện tử", "Đông lạnh", "Hàng khô", "Hàng nguy hiểm", "Khác"])
-    route = st.selectbox("Tuyến", ["VN - EU", "VN - US", "VN - Singapore", "VN - China", "Domestic"])
-    method = st.selectbox("Phương thức", ["Sea", "Air", "Truck"])
-    month = st.selectbox("Tháng (1-12)", list(range(1,13)), index=8)
+    st.header("📦 Thông tin lô hàng")
+    cargo_value = st.number_input("Giá trị hàng hóa (USD)", value=35000, step=500)
+
+    good_type = st.selectbox("Loại hàng", ["Điện tử", "Đông lạnh", "Khô", "Nguy hiểm", "Khác"])
+    route = st.selectbox("Tuyến vận chuyển", ["VN - EU", "VN - US", "VN - CN", "Domestic"])
+    method = st.selectbox("Phương thức", ["Sea", "Air", "Rail"])
+    month = st.selectbox("Tháng", list(range(1,13)), index=8)
     priority = st.selectbox("Ưu tiên", ["An toàn tối đa", "Cân bằng", "Tối ưu chi phí"])
 
-    st.markdown("---")
-    st.header("Mô hình")
-    use_fuzzy = st.checkbox("Bật Fuzzy AHP (TFN)", True)
-    use_arima = st.checkbox("Dùng ARIMA để dự báo (nếu có)", True)
-    use_var = st.checkbox("Tính VaR & CVaR", True)
-    use_mc = st.checkbox("Chạy Monte Carlo cho C6", True)
-    mc_runs = st.number_input("Số vòng Monte Carlo", min_value=500, max_value=10000, value=2000, step=500)
+    st.write("---")
+    fuzzy_enable = st.checkbox("Bật Fuzzy AHP", True)
+    mc_enable = st.checkbox("Monte-Carlo (Climate Impact)", True)
+    mc_runs = st.number_input("Số lần mô phỏng", value=2000, min_value=500, max_value=10000, step=500)
 
-# ---------------- Helper functions ----------------
-def auto_balance(weights, locked_flags):
-    """Normalize weights to sum to 1 while preserving locked weights."""
-    w = np.array(weights, dtype=float)
-    locked = np.array(locked_flags, dtype=bool)
-    locked_sum = w[locked].sum()
-    free_idx = np.where(~locked)[0]
-    if len(free_idx) == 0:
-        # all locked: normalize by total to avoid divide by zero
-        if w.sum() == 0:
-            w = np.ones_like(w) / len(w)
-        else:
-            w = w / w.sum()
-        return np.round(w, 4)
-    remaining = max(0.0, 1.0 - locked_sum)
-    free_vals = w[free_idx]
-    if free_vals.sum() == 0:
-        # distribute equally
-        w[free_idx] = remaining / len(free_idx)
-    else:
-        w[free_idx] = free_vals / free_vals.sum() * remaining
-    # final rounding
-    w = np.clip(w, 0.0, 1.0)
-    # small correction to ensure sum == 1
-    diff = 1.0 - w.sum()
-    if abs(diff) > 1e-8:
-        # add diff to first free index (or first index)
-        idx = free_idx[0] if len(free_idx)>0 else 0
-        w[idx] += diff
-    return np.round(w, 6)
-
-def defuzzify_centroid(low, mid, high):
-    """Simple TFN centroid defuzzify (l+m+u)/3"""
-    return (low + mid + high) / 3.0
-
-def safe_plotly_to_png(fig):
-    """Return bytes PNG of a plotly fig if possible (kaleido installed). Otherwise return None."""
-    try:
-        img_bytes = fig.to_image(format="png")
-        return img_bytes
-    except Exception:
-        return None
-
-# ---------------- Sample / historical data ----------------
+# ---------------------------------------------------------
+# Fake dataset để chạy mô hình
+# ---------------------------------------------------------
 @st.cache_data
-def load_sample_data():
-    months = list(range(1,13))
-    # simplistic seasonal baseline per route
-    base = {
-        "VN - EU": [0.20,0.22,0.25,0.28,0.32,0.36,0.42,0.48,0.60,0.68,0.58,0.45],
-        "VN - US": [0.30,0.33,0.36,0.40,0.45,0.50,0.56,0.62,0.75,0.72,0.60,0.52],
-        "VN - Singapore": [0.15,0.16,0.18,0.20,0.22,0.26,0.30,0.32,0.35,0.34,0.28,0.25],
-        "Domestic": [0.10,0.10,0.10,0.12,0.12,0.14,0.16,0.18,0.20,0.18,0.14,0.12],
-        "VN - China": [0.18,0.19,0.21,0.24,0.26,0.30,0.34,0.36,0.40,0.38,0.32,0.28],
-    }
-    hist = pd.DataFrame({"month": months})
-    for k,v in base.items():
-        hist[k] = v
-    # claims distribution for VaR
-    rng = np.random.default_rng(123)
-    losses = np.clip(rng.normal(loc=0.08, scale=0.02, size=2000), 0, 0.5)
-    claims = pd.DataFrame({"loss_rate": losses})
-    return hist, claims
+def load_data():
+    df = pd.DataFrame({
+        "Company": ["Chubb", "PVI", "BaoViet", "Aon", "TokioMarine"],
+        "C1: Tỷ lệ phí": [0.28, 0.26, 0.30, 0.24, 0.32],
+        "C2: Thời gian xử lý": [6, 7, 8, 5, 7],
+        "C3: Tỷ lệ tổn thất": [0.07, 0.06, 0.09, 0.08, 0.1],
+        "C4: Hỗ trợ ICC": [8, 7, 9, 6, 7],
+        "C5: Chăm sóc KH": [8, 7, 6, 9, 7],
+    }).set_index("Company")
+    return df
 
-historical, claims = load_sample_data()
+df = load_data()
 
-# ---------------- Criteria and default weights + lock state ----------------
-criteria = ["C1: Tỷ lệ phí", "C2: Thời gian xử lý", "C3: Tỷ lệ tổn thất",
-            "C4: Hỗ trợ ICC", "C5: Chăm sóc KH", "C6: Rủi ro khí hậu"]
+# ---------------------------------------------------------
+# Weight allocation block
+# ---------------------------------------------------------
+st.subheader("⚖️ Phân bổ trọng số tiêu chí (Smart Auto-Balance)")
 
-# Initialize session state for weights and locks
-if "weights" not in st.session_state:
-    st.session_state["weights"] = np.array([0.20,0.15,0.20,0.20,0.10,0.15], dtype=float)
-if "locked" not in st.session_state:
-    st.session_state["locked"] = [False]*6
-
-st.subheader("⚖️ Phân bổ trọng số tiêu chí (Lock & Auto-balance)")
+criteria = ["C1: Tỷ lệ phí", "C2: Thời gian xử lý", "C3: Tỷ lệ tổn thất", "C4: Hỗ trợ ICC", "C5: Chăm sóc KH", "C6: Rủi ro khí hậu"]
 
 cols = st.columns(6)
-new_w = st.session_state["weights"].copy()
-for i,c in enumerate(criteria):
-    with cols[i]:
-        st.markdown(f"**{c}**")
-        st.checkbox("🔒 Lock", value=st.session_state["locked"][i], key=f"lock_{i}", on_change=None)
-        # number_input for precise entry
-        val = st.number_input("Tỉ lệ", min_value=0.0, max_value=1.0, value=float(new_w[i]), step=0.01, key=f"w_in_{i}")
-        new_w[i] = val
-# update locked flags (read checkboxes)
-for i in range(6):
-    st.session_state["locked"][i] = st.session_state.get(f"lock_{i}", False)
+weights = np.array([cols[i].slider(criteria[i], 0.0, 1.0, 0.2 if i==0 else 0.15, 0.01) for i in range(6)])
 
-# Reset button
-if st.button("🔄 Reset trọng số mặc định"):
-    st.session_state["weights"] = np.array([0.20,0.15,0.20,0.20,0.10,0.15], dtype=float)
-    st.session_state["locked"] = [False]*6
+# ưu tiên strategy
+if priority == "An toàn tối đa":
+    weights[[2, 5]] *= 1.5
+elif priority == "Tối ưu chi phí":
+    weights[0] *= 1.8
+
+weights = weights / weights.sum()
+weights_series = pd.Series(weights, index=criteria)
+
+# ---------------------------------------------------------
+# Monte-Carlo Climate Risk
+# ---------------------------------------------------------
+base_risk = np.random.uniform(0.05, 0.15)
+
+if mc_enable:
+    rng = np.random.default_rng()
+    climate = rng.normal(loc=base_risk, scale=0.03, size=(len(df), mc_runs)).clip(0,1)
+    df["C6: Rủi ro khí hậu"] = climate.mean(axis=1)
 else:
-    # auto-balance and save
-    st.session_state["weights"] = auto_balance(new_w, st.session_state["locked"])
+    df["C6: Rủi ro khí hậu"] = base_risk
 
-weights_series = pd.Series(st.session_state["weights"], index=criteria)
+# ---------------------------------------------------------
+# Fuzzy AHP (optional)
+# ---------------------------------------------------------
+if fuzzy_enable:
+    fuzzy_factor = st.slider("Biên độ bất định (%)", 0, 50, 20)
+    low = weights_series * (1 - fuzzy_factor/100)
+    high = weights_series * (1 + fuzzy_factor/100)
+    weights_series = ((low + weights_series + high) / 3) / ((low + weights_series + high) / 3).sum()
 
-# Live pie chart for weights
-fig_weights = px.pie(values=weights_series.values, names=weights_series.index, title="Phân bổ trọng số (Realtime)")
-st.plotly_chart(fig_weights, use_container_width=True)
+# ---------------------------------------------------------
+# TOPSIS
+# ---------------------------------------------------------
+cost_flags = {c:"cost" if c in ["C1: Tỷ lệ phí", "C6: Rủi ro khí hậu"] else "benefit" for c in criteria}
 
-# ---------------- Company sample table (can be replaced by upload) ----------------
-df = pd.DataFrame({
-    "Company": ["Chubb","PVI","InternationalIns","BaoViet","Aon"],
-    "C1: Tỷ lệ phí": [0.30,0.28,0.26,0.32,0.24],
-    "C2: Thời gian xử lý": [6,5,8,7,4],
-    "C3: Tỷ lệ tổn thất": [0.08,0.06,0.09,0.10,0.07],
-    "C4: Hỗ trợ ICC": [9,8,6,9,7],
-    "C5: Chăm sóc KH": [9,8,5,7,6],
-}).set_index("Company")
+def topsis(df, w, cost):
+    M = df.loc[:, list(w.index)].values.astype(float)
+    R = M / np.sqrt((M**2).sum(0))
+    V = R * w.values
+    is_cost = np.array([cost[c]=="cost" for c in w.index])
+    best = np.where(is_cost, V.min(0), V.max(0))
+    worst = np.where(is_cost, V.max(0), V.min(0))
+    d_best = np.sqrt(((V - best)**2).sum(1))
+    d_worst = np.sqrt(((V - worst)**2).sum(1))
+    return d_worst / (d_best + d_worst + 1e-12)
 
-# company sensitivity for C6
-sensitivity = {"Chubb":0.95,"PVI":1.10,"InternationalIns":1.20,"BaoViet":1.05,"Aon":0.90}
+# ---------------------------------------------------------
+# RUN button
+# ---------------------------------------------------------
+if st.button("🚀 PHÂN TÍCH & GỢI Ý", use_container_width=True):
 
-# compute base climate risk for selected route/month
-route_key = route
-base_climate = float(historical.loc[historical['month']==month, route_key].iloc[0]) if month in historical['month'].values else 0.40
+    score = topsis(df, weights_series, cost_flags)
+    result = pd.DataFrame({"Company": df.index, "Score": score})
+    result = result.sort_values("Score", ascending=False).reset_index(drop=True)
 
-# Monte Carlo for C6
-df_adj = df.copy().astype(float)
-mc_mean = np.array([base_climate * sensitivity.get(c,1.0) for c in df_adj.index], dtype=float)
-mc_std = np.zeros(len(df_adj), dtype=float)
-if use_mc:
-    rng = np.random.default_rng(2025)
-    for i in range(len(df_adj)):
-        mu = mc_mean[i]
-        sigma = max(0.03, mu*0.12)
-        sims = rng.normal(loc=mu, scale=sigma, size=mc_runs)
-        sims = np.clip(sims, 0.0, 1.0)
-        mc_mean[i] = sims.mean()
-        mc_std[i] = sims.std()
-df_adj["C6: Rủi ro khí hậu"] = mc_mean
+    # Confidence Index Fix (.ptp())
+    climate_std = df["C6: Rủi ro khí hậu"].std()
+    conf = 1 / (1 + climate_std)
+    conf = np.array([conf]*len(result))
 
-# Apply cargo_value adjustments (example)
-if cargo_value > 50000:
-    df_adj["C1: Tỷ lệ phí"] *= 1.1
+    conf = np.array(conf, dtype=float)
+    conf_scaled = np.where(conf.ptp() > 0, (conf - conf.min()) / conf.ptp(), 0.65)
 
-# ---------------- TOPSIS implementation ----------------
-def topsis(df_input, weight_series, cost_flags):
-    M = df_input[list(weight_series.index)].values.astype(float)  # shape (n, m)
-    # normalization (vector normalization)
-    denom = np.sqrt((M**2).sum(axis=0))
-    denom[denom==0] = 1.0
-    R = M / denom
-    # ensure weights are numpy array shape (m,)
-    w = np.array(weight_series.values, dtype=float)
-    V = R * w  # broadcasts properly
-    is_cost = np.array([cost_flags[c]=="cost" for c in weight_series.index])
-    ideal_best = np.where(is_cost, V.min(axis=0), V.max(axis=0))
-    ideal_worst = np.where(is_cost, V.max(axis=0), V.min(axis=0))
-    d_plus = np.sqrt(((V - ideal_best)**2).sum(axis=1))
-    d_minus = np.sqrt(((V - ideal_worst)**2).sum(axis=1))
-    score = d_minus / (d_plus + d_minus + 1e-12)
-    return score
+    result["Confidence"] = conf_scaled
 
-cost_flags = {c: "cost" if c in ["C1: Tỷ lệ phí", "C6: Rủi ro khí hậu"] else "benefit" for c in criteria}
+    st.success("✅ Hoàn tất phân tích!")
+    st.dataframe(result)
 
-# ---------------- VaR & CVaR ----------------
-def compute_var_cvar(loss_rates, cargo_value, alpha=0.95):
-    # loss_rates: array of C6 estimates (percentage 0..1)
-    losses = np.array(loss_rates) * cargo_value
-    var = np.percentile(losses, alpha*100)
-    tail = losses[losses >= var]
-    cvar = tail.mean() if len(tail)>0 else var
-    return var, cvar
+    best = result.iloc[0]
+    st.info(f"**▶ ĐỀ XUẤT BẢO HIỂM:** `{best['Company']}` | Score: `{best['Score']:.3f}` | 🌱 Green Confidence: `{best['Confidence']:.2f}`")
 
-# ---------------- Forecast (ARIMA fallback) ----------------
-def forecast_route(route_key, months_ahead=3):
-    series = historical[route_key].values if route_key in historical.columns else historical.iloc[:,1].values
-    # try ARIMA if available and requested
-    if use_arima and ARIMA_AVAILABLE:
-        try:
-            model = ARIMA(series, order=(1,1,1)).fit()
-            fc = model.forecast(months_ahead)
-            return np.asarray(series), np.asarray(fc)
-        except Exception:
-            pass
-    # fallback: last-seasonal mean with small trend
-    last = np.array(series)
-    avg = np.mean(last[-6:])
-    trend = (last[-1] - last[-6]) / 6.0
-    fc = np.array([max(0, last[-1] + (i+1)*trend) for i in range(months_ahead)])
-    return last, fc
+    # -------------------------------------------
+    # Export Excel
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        result.to_excel(writer, index=False)
+    st.download_button("📥 Tải Excel", data=output, file_name="riskcast_results.xlsx")
 
-# ---------------- Run analysis and UI output ----------------
-if st.button("🚀 PHÂN TÍCH & GỢI Ý"):
-    with st.spinner("Đang chạy mô phỏng và tối ưu..."):
-        # apply fuzzy if enabled
-        weights = weights_series.copy()
-        if use_fuzzy:
-            f = float(st.sidebar.slider("Bất định TFN (%)", 0, 50, 15))
-            low = np.maximum(weights*(1 - f/100.0), 1e-6)
-            high = np.minimum(weights*(1 + f/100.0), 0.9999)
-            defuz = defuzzify_centroid(low, weights, high)
-            weights = pd.Series(defuz/defuz.sum(), index=weights.index)
+    # -------------------------------------------
+    # Export PDF
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    pdf.cell(200, 10, txt="RISKCAST — Insurance Recommendation", ln=1)
+    for i,row in result.iterrows():
+        pdf.cell(200, 8, f"{row['Company']} — Score: {row['Score']:.3f} — Conf: {row['Confidence']:.2f}", ln=1)
 
-        # compute TOPSIS scores
-        scores = topsis(df_adj, weights, cost_flags)
-        results = pd.DataFrame({
-            "company": df_adj.index,
-            "score": scores,
-            "C6_mean": mc_mean,
-            "C6_std": mc_std
-        }).sort_values("score", ascending=False).reset_index(drop=True)
-        results["rank"] = results.index + 1
-        results["recommend_icc"] = results["score"].apply(lambda x: "ICC A" if x>=0.75 else ("ICC B" if x>=0.5 else "ICC C"))
+    pdf_out = pdf.output(dest="S").encode("latin1")
+    st.download_button("📄 Xuất PDF", data=pdf_out, file_name="riskcast_report.pdf")
 
-        # confidence combining C6 CV and criterion dispersion
-        cv_c6 = np.where(results["C6_mean"].values==0, 0.0, results["C6_std"].values / results["C6_mean"].values)
-        conf_c6 = 1.0 / (1.0 + cv_c6)
-        if conf_c6.ptp() > 0:
-            conf_c6_scaled = 0.3 + 0.7*(conf_c6 - conf_c6.min()) / (conf_c6.ptp())
-        else:
-            conf_c6_scaled = np.full_like(conf_c6, 0.65)
-        crit_cv = df_adj.std(axis=1).values / (df_adj.mean(axis=1).values + 1e-9)
-        conf_crit = 1.0 / (1.0 + crit_cv)
-        if conf_crit.ptp() > 0:
-            conf_crit_scaled = 0.3 + 0.7*(conf_crit - conf_crit.min()) / (conf_crit.ptp())
-        else:
-            conf_crit_scaled = np.full_like(conf_crit, 0.65)
-        conf_final = np.sqrt(conf_c6_scaled * conf_crit_scaled)
-        # map conf_final to results order (df_adj index order -> results company order)
-        order_map = {comp: conf_final[i] for i, comp in enumerate(df_adj.index)}
-        results["confidence"] = results["company"].map(order_map).round(3)
-
-        # VaR
-        var95, cvar95 = (None, None)
-        if use_var:
-            var95, cvar95 = compute_var_cvar(results["C6_mean"].values, cargo_value, alpha=0.95)
-
-        # Forecast plot
-        hist_series, fc = forecast_route(route)
-        months_hist = list(range(1, len(hist_series)+1))
-        months_fc = list(range(len(hist_series)+1, len(hist_series)+1+len(fc)))
-        fig_forecast = go.Figure()
-        fig_forecast.add_trace(go.Scatter(x=months_hist, y=hist_series, mode='lines+markers', name='Lịch sử'))
-        fig_forecast.add_trace(go.Scatter(x=months_fc, y=fc, mode='lines+markers', name='Dự báo', line=dict(color='lime')))
-        fig_forecast.update_layout(title=f"Dự báo rủi ro: {route}", xaxis_title="Tháng index", yaxis_title="Rủi ro (0-1)")
-
-        # TOPSIS bar chart
-        fig_topsis = px.bar(results.sort_values("score"), x="score", y="company", orientation='h', title="TOPSIS score (higher better)",
-                            labels={"score":"Score","company":"Công ty"})
-
-        # Display results
-        st.success("Hoàn tất phân tích")
-        left, right = st.columns((2,1))
-        with left:
-            st.subheader("Kết quả xếp hạng")
-            st.table(results[["rank","company","score","confidence","recommend_icc"]].set_index("rank").round(3))
-            st.markdown("<div class='result-box'><strong>ĐỀ XUẤT:</strong> {} — Score: {:.3f} — Confidence: {:.2f}</div>".format(
-                results.iloc[0]["company"], results.iloc[0]["score"], results.iloc[0]["confidence"]
-            ), unsafe_allow_html=True)
-        with right:
-            st.subheader("Tổng quan")
-            st.metric("VaR 95%", f"${var95:,.0f}" if var95 is not None else "N/A")
-            st.metric("CVaR 95%", f"${cvar95:,.0f}" if cvar95 is not None else "N/A")
-            st.plotly_chart(fig_weights, use_container_width=True)
-
-        st.plotly_chart(fig_topsis, use_container_width=True)
-        st.plotly_chart(fig_forecast, use_container_width=True)
-
-        # ---------------- Export: Excel ----------------
-        excel_out = io.BytesIO()
-        with pd.ExcelWriter(excel_out, engine="openpyxl") as writer:
-            results.to_excel(writer, sheet_name="Result", index=False)
-            df_adj.to_excel(writer, sheet_name="Adjusted_Data")
-            pd.DataFrame(weights, columns=["weight"]).to_excel(writer, "Weights", index=True)
-        excel_out.seek(0)
-        st.download_button("⬇️ Xuất Excel (Kết quả)", excel_out, file_name="riskcast_result.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-
-        # ---------------- Export: PDF (3 pages) ----------------
-        pdf = FPDF(unit="mm", format="A4")
-        pdf.set_auto_page_break(auto=True, margin=12)
-        # Use built-in unicode font fallback (fpdf2 can accept fname="")
-        try:
-            pdf.add_font("DejaVu", "", fname="", uni=True)  # fname may be empty -> fallback builtin
-            pdf.set_font("DejaVu", size=12)
-        except Exception:
-            pdf.set_font("Arial", size=12)
-
-        # Page 1: Executive summary
-        pdf.add_page()
-        pdf.set_font_size(16)
-        pdf.cell(0, 8, "RISKCAST v4.5 — Executive Summary", ln=1)
-        pdf.ln(2)
-        pdf.set_font_size(10)
-        pdf.cell(0, 6, f"Route: {route}    Month: {month}    Method: {method}", ln=1)
-        pdf.cell(0, 6, f"Cargo value: ${cargo_value:,}    Priority: {priority}", ln=1)
-        pdf.ln(4)
-        pdf.set_font_size(11)
-        pdf.multi_cell(0, 6, f"Recommended insurer: {results.iloc[0]['company']} ({results.iloc[0]['recommend_icc']})\nTOPSIS Score: {results.iloc[0]['score']:.4f}\nConfidence: {results.iloc[0]['confidence']:.2f}\nVaR95: ${var95:,.0f} | CVaR95: ${cvar95:,.0f}" if var95 is not None else "", align="L")
-        pdf.ln(6)
-        # draw small table of top 5
-        pdf.set_font_size(10)
-        pdf.cell(40,6,"Rank",1); pdf.cell(50,6,"Company",1); pdf.cell(40,6,"Score",1); pdf.cell(35,6,"Confidence",1); pdf.ln()
-        for idx, row in results.head(5).iterrows():
-            pdf.cell(40,6,str(int(row["rank"])),1); pdf.cell(50,6,str(row["company"])[:20],1)
-            pdf.cell(40,6,f"{row['score']:.4f}",1); pdf.cell(35,6,f"{row['confidence']:.2f}",1); pdf.ln()
-
-        # Page 2: TOPSIS plot
-        pdf.add_page()
-        pdf.set_font_size(14)
-        pdf.cell(0,8,"TOPSIS Scores", ln=1)
-        # try to embed fig_topsis as PNG
-        img_bytes = safe_plotly_to_png(fig_topsis)
-        if img_bytes:
-            # write to temporary BytesIO and embed
-            try:
-                from PIL import Image
-                im = Image.open(io.BytesIO(img_bytes))
-                # save temp
-                tmp = "tmp_topsis.png"
-                im.save(tmp)
-                pdf.image(tmp, x=15, w=180)
-            except Exception:
-                pdf.set_font_size(10)
-                pdf.cell(0,6,"(Không thể xuất biểu đồ TOPSIS — thiếu kaleido/PIL)", ln=1)
-        else:
-            pdf.set_font_size(10)
-            pdf.cell(0,6,"(Biểu đồ TOPSIS không thể xuất sang ảnh trong môi trường này. Cài 'kaleido' để bật chức năng.)", ln=1)
-            # also add ASCII mini-table
-            pdf.ln(4)
-            for idx,row in results.iterrows():
-                pdf.cell(0,5,f"{int(row['rank'])}. {row['company']} — Score: {row['score']:.4f} — Conf: {row['confidence']:.2f}", ln=1)
-
-        # Page 3: Forecast + VaR
-        pdf.add_page()
-        pdf.set_font_size(14)
-        pdf.cell(0,8,"Forecast (ARIMA or fallback) & VaR", ln=1)
-        # embed forecast chart if possible
-        img_bytes2 = safe_plotly_to_png(fig_forecast)
-        if img_bytes2:
-            try:
-                from PIL import Image
-                im2 = Image.open(io.BytesIO(img_bytes2))
-                tmp2 = "tmp_forecast.png"
-                im2.save(tmp2)
-                pdf.image(tmp2, x=10, w=190)
-            except Exception:
-                pdf.set_font_size(10)
-                pdf.cell(0,6,"(Không thể xuất biểu đồ Forecast — thiếu PIL/kaleido)", ln=1)
-        else:
-            pdf.set_font_size(10)
-            pdf.cell(0,6,"(Biểu đồ Forecast không thể xuất — cài 'kaleido' để hỗ trợ)", ln=1)
-        pdf.ln(6)
-        if var95 is not None:
-            pdf.set_font_size(11)
-            pdf.cell(0,6,f"VaR 95%: ${var95:,.0f}", ln=1)
-            pdf.cell(0,6,f"CVaR 95%: ${cvar95:,.0f}", ln=1)
-        # final bytes
-        try:
-            pdf_bytes = pdf.output(dest="S").encode("latin-1")
-        except Exception:
-            # fallback
-            pdf_bytes = pdf.output(dest="S").encode("utf-8", errors="ignore")
-        st.download_button("⬇️ Xuất PDF báo cáo (3 trang)", data=pdf_bytes, file_name="RISKCAST_report.pdf", mime="application/pdf")
-
-# ---------------- Footer ----------------
-st.markdown("<br><div class='muted small'>RISKCAST v4.5 — Green ESG theme. Author: Bùi Xuân Hoàng. Deploy: Streamlit Cloud / Heroku / Render</div>", unsafe_allow_html=True)
+# end
