@@ -1,196 +1,172 @@
-# ------------------------------
-# RISKCAST v3.3 — Stable Release
-# by Bùi Xuân Hoàng / GPT-5 (Kai)
-# ------------------------------
+# ==========================================================
+# RISKCAST v3.3 — Smart TOPSIS + Auto-Balance + Fuzzy + Monte-Carlo
+# Author: Bùi Xuân Hoàng
+# ==========================================================
 
-import io
-import math
 import numpy as np
 import pandas as pd
 import streamlit as st
 import plotly.express as px
-from fpdf import FPDF
+import io
 
-# ========= PAGE CONFIG + CSS =============
-st.set_page_config(page_title="RISKCAST v3.3", layout="wide", page_icon="🛡️")
+# ----------------------------------------------------------
+# PAGE SETUP + CSS
+# ----------------------------------------------------------
+st.set_page_config(page_title="RISKCAST 3.3", page_icon="🛡️", layout="wide")
 
 st.markdown("""
 <style>
-    .stApp { background: linear-gradient(180deg,#031223 0%, #082c4a 100%); color: #e6f0ff; font-family: 'Segoe UI'; }
-    .block-container { padding: 1.2rem 1.8rem; }
-    h1 { color: #7be2ff; text-align: center; font-size: 2.6rem; font-weight: 800; }
-    .weight-box { background:#0f2440; padding: 16px; border-radius: 12px; }
-    .result-box { background:#14375e; padding:16px; border-radius:12px; border-left:6px solid #00d4ff; }
+    .stApp { background: linear-gradient(180deg,#021023 0%, #082c4a 100%); color: #e6f0ff; font-family: 'Segoe UI'; }
+    h1 { color: #66e3ff; text-align: center; font-weight: 800; }
+    .block-container { padding: 1.5rem 2rem; }
+    .result-box { background: #143759; padding: 1rem; border-radius: 12px; }
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🛡️ RISKCAST v3.3 — HỆ THỐNG ĐỀ XUẤT BẢO HIỂM THÔNG MINH")
 
-# =========================================================
-# 🔧 FUNCTION: REDISTRIBUTE WEIGHTS (Smart slider behavior)
-# =========================================================
-def redistribute(weights, locked):
-    """Redistribute unlocked weights so total = 1. Keeps locked weights unchanged."""
-    weights = np.array(weights, dtype=float)
-    locked = np.array(locked, dtype=bool)
+# ----------------------------------------------------------
+# REDISTRIBUTE FUNCTION (Auto-balance weight)
+# ----------------------------------------------------------
+def redistribute(values, locked):
+    """Giữ nguyên tiêu chí lock, auto-balance phần còn lại sao cho tổng = 1"""
+    locked = np.array(locked)
+    values = np.array(values)
 
-    locked_sum = weights[locked].sum()
-    free_sum = weights[~locked].sum()
+    remain = 1 - values[locked].sum()
+    free_idx = np.where(~locked)[0]
 
-    # Nếu khóa hết → không chỉnh
-    if (~locked).sum() == 0:
-        return weights
+    if len(free_idx) > 0:
+        values[free_idx] = values[free_idx] / values[free_idx].sum() * remain
 
-    # Tổng locked đã >= 1 → ép phần còn lại = 0
-    if locked_sum >= 1:
-        weights[~locked] = 0
-        return weights
+    return np.round(values, 4)
 
-    # Chia đều phần còn lại
-    remain = 1 - locked_sum
-    weights[~locked] = remain / (~locked).sum()
-    return weights
 
-# ======================================================================
-# 🔢 INPUT — SIDEBAR (Cargo, Route, Method…)
-# ======================================================================
+# ----------------------------------------------------------
+# SIDEBAR INPUT
+# ----------------------------------------------------------
 with st.sidebar:
     st.header("📦 Thông tin lô hàng")
+
     cargo_value = st.number_input("Giá trị hàng hóa (USD)", value=35000, step=1000)
-
-    good_type = st.selectbox("Loại hàng", ["Điện tử", "Hàng lạnh", "Hàng khô", "Hàng nguy hiểm"])
-    route = st.selectbox("Tuyến vận chuyển", ["VN - US", "VN - EU", "VN - Singapore", "Domestic"])
-    method = st.selectbox("Phương thức", ["Sea", "Air", "Truck"])
-    month = st.selectbox("Tháng", list(range(1,13)), index=8)
-
+    good_type = st.selectbox("Loại hàng", ["Điện tử", "Đông lạnh", "Khô", "Hàng nguy hiểm", "Khác"])
+    route = st.selectbox("Tuyến vận chuyển", ["VN - US", "VN - EU", "VN - CN", "Nội địa"])
+    shipping = st.selectbox("Phương thức", ["Sea", "Air", "Truck"])
+    month = st.selectbox("Tháng", list(range(1, 13)), index=8)
     priority = st.selectbox("Ưu tiên", ["An toàn tối đa", "Cân bằng", "Tối ưu chi phí"])
-    fuzzy_on = st.checkbox("Bật Fuzzy AHP (Defuzzify)", value=True)
-    mc_on = st.checkbox("Bật Monte-Carlo (climate risk)", value=True)
 
-# ======================================================================
-# 🎚️ SMART WEIGHT SLIDER UI + LOCK + RESET
-# ======================================================================
-st.subheader("⚖️ Phân bổ trọng số tiêu chí (Smart Auto-Balance)")
+st.title("🛡️ RISKCAST v3.3 — HỆ THỐNG ĐỀ XUẤT BẢO HIỂM THÔNG MINH")
+
+
+# ----------------------------------------------------------
+# SMART AUTO BALANCE WEIGHTS
+# ----------------------------------------------------------
 
 criteria = ["C1: Tỷ lệ phí", "C2: Thời gian xử lý", "C3: Tỷ lệ tổn thất",
             "C4: Hỗ trợ ICC", "C5: Chăm sóc KH", "C6: Rủi ro khí hậu"]
 
 explain = {
-    "C1: Tỷ lệ phí": "Phí bảo hiểm — càng thấp càng tốt.",
-    "C2: Thời gian xử lý": "Thời gian giải quyết claim — càng nhanh càng tốt.",
-    "C3: Tỷ lệ tổn thất": "Tỷ lệ từ chối/thất thoát — càng thấp càng tốt.",
-    "C4: Hỗ trợ ICC": "Phạm vi ICC (A/B/C) — càng rộng càng tốt.",
-    "C5: Chăm sóc KH": "Dịch vụ hỗ trợ khách hàng — càng tốt càng an tâm.",
-    "C6: Rủi ro khí hậu": "Ảnh hưởng khí hậu/tuyến/tháng — càng thấp càng tốt."
+    "C1: Tỷ lệ phí": "Phí bảo hiểm — thấp càng tốt",
+    "C2: Thời gian xử lý": "Giải quyết claim — nhanh càng tốt",
+    "C3: Tỷ lệ tổn thất": "Tỷ lệ từ chối/thất thoát — thấp càng tốt",
+    "C4: Hỗ trợ ICC": "Phạm vi ICC A/B/C — rộng càng tốt",
+    "C5: Chăm sóc KH": "Hỗ trợ khách hàng — tốt càng an tâm",
+    "C6: Rủi ro khí hậu": "Ảnh hưởng khí hậu theo tuyến/tháng — thấp càng tốt"
 }
 
-if "weights" not in st.session_state:
-    st.session_state["weights"] = np.array([0.20, 0.15, 0.20, 0.20, 0.10, 0.15])
-if "locked" not in st.session_state:
-    st.session_state["locked"] = [False]*6
+default_w = np.array([0.20, 0.15, 0.20, 0.20, 0.10, 0.15])
 
-col_reset = st.columns([1])[0]
-if col_reset.button("🔄 Reset trọng số về mặc định"):
-    st.session_state["weights"] = np.array([0.20, 0.15, 0.20, 0.20, 0.10, 0.15])
-    st.session_state["locked"] = [False]*6
+if "weights" not in st.session_state:
+    st.session_state["weights"] = default_w.copy()
+
+if "locked" not in st.session_state:
+    st.session_state["locked"] = [False] * 6
+
+st.subheader("⚖️ Phân bổ trọng số tiêu chí (Smart Auto-Balance)")
+
+if st.button("🔄 Reset mặc định"):
+    st.session_state["weights"] = default_w.copy()
+    st.session_state["locked"] = [False] * 6
 
 cols = st.columns(6)
-new_weights = st.session_state["weights"].copy()
+new_w = st.session_state["weights"].copy()
 
 for i, c in enumerate(criteria):
     with cols[i]:
         st.markdown(f"**{c}**")
         st.caption(explain[c])
 
-        st.session_state["locked"][i] = st.checkbox("🔒 Lock", value=st.session_state["locked"][i])
+        st.session_state["locked"][i] = st.checkbox("🔒 Lock", value=st.session_state["locked"][i],
+                                                    key=f"lock_{i}")
 
-        val = st.number_input("Nhập tỉ lệ", min_value=0.0, max_value=1.0,
-                              value=float(new_weights[i]), key=f"in_{i}", step=0.01)
-        new_weights[i] = val
+        new_w[i] = st.number_input("Nhập trọng số", min_value=0.0, max_value=1.0,
+                                   value=float(new_w[i]), step=0.01, key=f"input_{i}")
 
-# Auto balance = 1.0
-st.session_state["weights"] = redistribute(new_weights, st.session_state["locked"])
-
-# Realtime chart
-fig_weights = px.pie(
-    names=criteria,
-    values=st.session_state["weights"],
-    title="Phân bố trọng số (Realtime)",
-    color_discrete_sequence=px.colors.sequential.Blues
-)
-st.plotly_chart(fig_weights, use_container_width=True)
-
+st.session_state["weights"] = redistribute(new_w, st.session_state["locked"])
 weights_series = pd.Series(st.session_state["weights"], index=criteria)
 
-# ======================================================================
-# 🧠 DỮ LIỆU GIẢ LẬP (Demo)
-# ======================================================================
+
+# Biểu đồ realtime
+fig = px.pie(values=weights_series, names=criteria, title="Biểu đồ phân bổ trọng số (Realtime)")
+st.plotly_chart(fig, use_container_width=True)
+
+
+# ----------------------------------------------------------
+# DATA SAMPLE + TOPSIS
+# ----------------------------------------------------------
+
 df = pd.DataFrame({
-    "Company": ["PVI", "Chubb", "BaoViet", "Aon", "InternationalIns"],
-    "C1: Tỷ lệ phí": [0.28, 0.30, 0.32, 0.24, 0.26],
-    "C2: Thời gian xử lý": [5, 6, 7, 4, 8],
-    "C3: Tỷ lệ tổn thất": [0.06, 0.08, 0.10, 0.07, 0.09],
-    "C4: Hỗ trợ ICC": [8, 9, 9, 7, 6],
-    "C5: Chăm sóc KH": [8, 9, 7, 6, 5],
-    "C6: Rủi ro khí hậu": [0.55, 0.50, 0.60, 0.45, 0.62]
+    "Company": ["Chubb", "PVI", "BaoViet", "Aon", "GlobalIns"],
+    "C1: Tỷ lệ phí": [0.30, 0.28, 0.32, 0.25, 0.27],
+    "C2: Thời gian xử lý": [6, 5, 8, 4, 7],
+    "C3: Tỷ lệ tổn thất": [0.08, 0.06, 0.10, 0.07, 0.09],
+    "C4: Hỗ trợ ICC": [9, 8, 9, 7, 6],
+    "C5: Chăm sóc KH": [9, 8, 7, 6, 5],
+    "C6: Rủi ro khí hậu": [0.70, 0.75, 0.65, 0.50, 0.60],
 }).set_index("Company")
 
-# ======================================================================
-# 🧮 TOPSIS FUNCTION
-# ======================================================================
-def topsis(df, weights):
-    M = df.values.astype(float)
-    denom = np.sqrt((M**2).sum(axis=0))
-    R = M / denom
-    V = R * weights.values
-    ideal_best = V.max(axis=0)
-    ideal_worst = V.min(axis=0)
-    d_plus = np.sqrt(((V - ideal_best)**2).sum(axis=1))
-    d_minus = np.sqrt(((V - ideal_worst)**2).sum(axis=1))
-    score = d_minus / (d_plus + d_minus + 1e-12)
-    result = pd.DataFrame({"company": df.index, "score": score}).sort_values("score", ascending=False)
-    result["rank"] = range(1, len(result)+1)
-    return result.reset_index(drop=True)
 
-# ======================================================================
-# ▶️ RUN
-# ======================================================================
-st.markdown("---")
+def topsis(df_data, weights):
+    M = df_data.values
+    norm = M / np.sqrt((M ** 2).sum(axis=0))
+    V = norm * weights
 
+    ideal_best = np.max(V, axis=0)
+    ideal_worst = np.min(V, axis=0)
+
+    d_plus = np.sqrt(((V - ideal_best) ** 2).sum(axis=1))
+    d_minus = np.sqrt(((V - ideal_worst) ** 2).sum(axis=1))
+
+    score = d_minus / (d_plus + d_minus)
+    return score
+
+
+# ----------------------------------------------------------
+# RUN BUTTON
+# ----------------------------------------------------------
 if st.button("🚀 PHÂN TÍCH NGAY", use_container_width=True):
 
-    res = topsis(df, weights_series)
-    best = res.iloc[0]
+    score = topsis(df, weights_series)
+    df["Score"] = score
+    df = df.sort_values("Score", ascending=False)
 
-    st.success(f"✅ Đề xuất: **{best.company}** (Rank #1 — Score {best.score:.3f})")
+    st.subheader("📊 KẾT QUẢ XẾP HẠNG")
+    st.dataframe(df.style.format({"Score": "{:.4f}"}))
 
-    st.dataframe(res, use_container_width=True)
+    best = df.iloc[0]
 
-    # 📊 biểu đồ Score
-    fig_bar = px.bar(res, x="score", y="company", color="score", color_continuous_scale="Blues")
-    st.plotly_chart(fig_bar, use_container_width=True)
+    st.markdown(f"""
+    <div class="result-box">
+        ✅ Công ty khuyến nghị: **{best.name}**  
+        ✅ Gói bảo hiểm: **ICC A**  
+        ✅ Điểm TOPSIS: **{best.Score:.4f}**
+    </div>
+    """, unsafe_allow_html=True)
 
-    # ✅ Export Excel
-    out = io.BytesIO()
-    with pd.ExcelWriter(out, engine="openpyxl") as writer:
-        res.to_excel(writer, index=False, sheet_name="Result")
-        pd.DataFrame(weights_series).to_excel(writer, sheet_name="Weights")
-
-    st.download_button("📥 Tải Excel (Kết quả)", out.getvalue(),
-                       file_name="riskcast_result.xlsx", mime="application/vnd.ms-excel")
-
-    # ✅ Export PDF (Hỗ trợ Unicode tiếng Việt)
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.add_font("Roboto", "", "Roboto-Regular.ttf", uni=True)
-    pdf.set_font("Roboto", size=12)
-    pdf.cell(0, 8, f"RISKCAST Báo cáo đề xuất bảo hiểm", ln=True)
-    pdf.cell(0, 8, f"Lựa chọn tốt nhất: {best.company}", ln=True)
-
-    pdf.ln(5)
-    for _, r in res.iterrows():
-        pdf.cell(0, 6, f"{r['rank']}. {r['company']} — Score: {r['score']:.3f}", ln=True)
-
-    pdf_bytes = pdf.output(dest="S").encode("latin-1", "ignore")
-    st.download_button("📄 Xuất PDF", pdf_bytes, file_name="riskcast_report.pdf", mime="application/pdf")
+    # Export Excel
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+        df.to_excel(writer, sheet_name="Result")
+    st.download_button("⬇️ Xuất Excel (Kết quả)", data=output,
+                       file_name="RISKCAST_Result.xlsx",
+                       mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
