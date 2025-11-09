@@ -3,6 +3,5 @@ pandas
 numpy
 plotly
 fpdf2
-statsmodels
-scipy
 openpyxl
+
