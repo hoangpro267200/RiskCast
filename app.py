@@ -192,12 +192,4 @@ with pd.ExcelWriter(output, engine='openpyxl') as writer:
 st.download_button("Xuất Excel", data=output, file_name="riskcast.xlsx")
 
 st.markdown("<div class='footer'>RISKCAST v4.0 – Không lỗi, Full Science</div>", unsafe_allow_html=True)
-@
-streamlit
-pandas
-numpy
-plotly
-fpdf2
-statsmodels
-scipy
-openpyxl
+
