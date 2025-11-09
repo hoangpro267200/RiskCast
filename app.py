@@ -362,4 +362,4 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý"):
             pdf_bytes = pdf.output(dest="S").encode("utf-8", errors="ignore")
         st.download_button("⬇️ Xuất PDF báo cáo (3 trang)", data=pdf_bytes, file_name="RISKCAST_report.pdf", mime="application/pdf")
 
-st.markdown("<br><div class='muted small'>RISKCAST v4.7 — Green ESG theme. Author: Bùi Xuân Hoàng.</div>", unsafe_allow_html=True)
+st.markdown("<br><div class='muted small'>RISKCAST v4.7 — Green ESG theme. Author: Bùi Xuân Hoàng.</div>", unsafe_allow_html=True) 
