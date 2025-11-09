@@ -2,9 +2,6 @@ streamlit
 pandas
 numpy
 plotly
-kaleido  # optional but recommended for saving plotly images
-openpyxl
-xlsxwriter
 fpdf2
-Pillow  # optional, for image operations
-statsmodels  # optional for ARIMA
+openpyxl
+statsmodels
