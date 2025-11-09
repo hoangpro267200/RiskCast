@@ -2,9 +2,9 @@ streamlit
 pandas
 numpy
 plotly
-kaleido
-openpyxl
-xlsxwriter
 fpdf2
-Pillow
 statsmodels
+scipy
+openpyxl
+
+
