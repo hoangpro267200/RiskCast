@@ -5,5 +5,5 @@ plotly
 fpdf
 openpyxl
 statsmodels
-Pillow
+pillow
 kaleido
