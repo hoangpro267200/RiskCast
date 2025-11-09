@@ -272,27 +272,38 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý"):
         results["rank"] = results.index + 1
         results["recommend_icc"] = results["score"].apply(lambda x: "ICC A" if x>=0.75 else ("ICC B" if x>=0.5 else "ICC C"))
 
-        # Confidence calc (robust)
+               # Confidence calc (robust) — FIXED + SAFE
         eps = 1e-9
-        cv_c6 = np.where(results["C6_mean"].values==0, 0.0, results["C6_std"].values / (results["C6_mean"].values + eps))
+        cv_c6 = np.where(results["C6_mean"].values == 0, 0.0,
+                         results["C6_std"].values / (results["C6_mean"].values + eps))
         conf_c6 = 1.0 / (1.0 + cv_c6)
+
+        # ensure numpy array and handle scalar edge-case
+        conf_c6 = np.asarray(conf_c6)
+        if conf_c6.ndim == 0:
+            conf_c6 = np.full(len(results), float(conf_c6))
+
         if np.ptp(conf_c6) > 0:
-            conf_c6_scaled = 0.3 + 0.7*(conf_c6 - conf_c6.min()) / (np.ptp(conf_c6) + 1e-12)
+            conf_c6_scaled = 0.3 + 0.7 * (conf_c6 - conf_c6.min()) / (np.ptp(conf_c6) + 1e-12)
         else:
-            conf_c6_scaled = np.full_like(conf_c6, 0.65)
+            conf_c6_scaled = np.full_like(conf_c6, 0.65, dtype=float)
 
         crit_cv = df_adj.std(axis=1).values / (df_adj.mean(axis=1).values + eps)
         conf_crit = 1.0 / (1.0 + crit_cv)
+
+        # ensure numpy array and handle scalar edge-case for conf_crit too
+        conf_crit = np.asarray(conf_crit)
+        if conf_crit.ndim == 0:
+            conf_crit = np.full(len(results), float(conf_crit))
+
         if np.ptp(conf_crit) > 0:
-            conf_crit_scaled = 0.3 + 0.7*(conf_crit - conf_crit.min()) / (np.ptp(conf_crit) + 1e-12)
+            conf_crit_scaled = 0.3 + 0.7 * (conf_crit - conf_crit.min()) / (np.ptp(conf_crit) + 1e-12)
         else:
-            conf_crit_scaled = np.full_like(conf_crit, 0.65)
+            conf_crit_scaled = np.full_like(conf_crit, 0.65, dtype=float)
 
         conf_final = np.sqrt(conf_c6_scaled * conf_crit_scaled)
         order_map = {comp: float(conf_final[i]) for i, comp in enumerate(df_adj.index)}
         results["confidence"] = results["company"].map(order_map).round(3)
-
-        var95, cvar95 = (None, None)
         if use_var:
             var95, cvar95 = compute_var_cvar(results["C6_mean"].values, cargo_value, alpha=0.95)
 
