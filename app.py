@@ -601,115 +601,74 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý", key="run_analysis_v9"):
             key="dl_excel_v9"
         )
 
-        # ---------------- Export PDF - FIXED ----------------
-        class PDF(FPDF):
-            def header(self):
-                self.set_font('Arial', 'B', 16)
-                self.cell(0, 10, 'RISKCAST v4.9 - Executive Summary', 0, 1, 'C')
-                self.ln(5)
-            
-            def footer(self):
-                self.set_y(-15)
-                self.set_font('Arial', 'I', 8)
-                self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'C')
-
+        # ---------------- Export PDF - FIXED & SIMPLIFIED ----------------
         try:
-            pdf = PDF()
+            pdf = FPDF()
             pdf.set_auto_page_break(auto=True, margin=15)
             pdf.add_page()
             
-            # Title and basic info
+            # Title
             pdf.set_font("Arial", "B", 16)
-            pdf.cell(0, 10, "RISKCAST v4.9 — Executive Summary", 0, 1, "C")
-            pdf.ln(5)
+            pdf.cell(0, 10, "RISKCAST v4.9 - Executive Summary", 0, 1, "C")
+            pdf.ln(10)
             
-            pdf.set_font("Arial", "", 10)
-            pdf.cell(0, 6, f"Route: {route} | Month: {month} | Method: {method}", 0, 1)
-            pdf.cell(0, 6, f"Cargo value: ${cargo_value:,} | Priority: {priority}", 0, 1)
-            pdf.ln(5)
+            # Basic info
+            pdf.set_font("Arial", "", 12)
+            pdf.cell(0, 8, f"Route: {route}", 0, 1)
+            pdf.cell(0, 8, f"Month: {month} | Method: {method}", 0, 1)
+            pdf.cell(0, 8, f"Cargo value: ${cargo_value:,}", 0, 1)
+            pdf.cell(0, 8, f"Priority: {priority}", 0, 1)
+            pdf.ln(10)
             
-            # Summary
-            pdf.set_font("Arial", "B", 12)
-            pdf.cell(0, 8, "Recommendation Summary:", 0, 1)
-            pdf.set_font("Arial", "", 10)
-            summary_text = (
-                f"Recommended insurer: {results.iloc[0]['company']} ({results.iloc[0]['recommend_icc']})\n"
-                f"TOPSIS Score: {results.iloc[0]['score']:.4f}\n"
-                f"Confidence: {results.iloc[0]['confidence']:.2f}"
-            )
-            if var95 is not None:
-                summary_text += f"\nVaR95: ${var95:,.0f} | CVaR95: ${cvar95:,.0f}"
-            pdf.multi_cell(0, 6, summary_text)
-            pdf.ln(5)
+            # Recommendation
+            pdf.set_font("Arial", "B", 14)
+            pdf.cell(0, 10, "TOP RECOMMENDATION:", 0, 1)
+            pdf.set_font("Arial", "", 12)
+            top_rec = f"{results.iloc[0]['company']} (Score: {results.iloc[0]['score']:.3f}, Confidence: {results.iloc[0]['confidence']:.2f})"
+            pdf.cell(0, 8, top_rec, 0, 1)
+            pdf.ln(10)
             
             # Results table
-            pdf.set_font("Arial", "B", 11)
-            pdf.cell(20, 8, "Rank", 1)
-            pdf.cell(60, 8, "Company", 1)
-            pdf.cell(30, 8, "Score", 1)
-            pdf.cell(30, 8, "Confidence", 1)
-            pdf.cell(40, 8, "ICC Level", 1)
+            pdf.set_font("Arial", "B", 12)
+            pdf.cell(0, 10, "Ranking Results:", 0, 1)
+            
+            pdf.set_font("Arial", "B", 10)
+            pdf.cell(15, 8, "Rank", 1)
+            pdf.cell(50, 8, "Company", 1)
+            pdf.cell(25, 8, "Score", 1)
+            pdf.cell(25, 8, "Confidence", 1)
+            pdf.cell(30, 8, "ICC Level", 1)
             pdf.ln()
             
             pdf.set_font("Arial", "", 10)
-            for idx, row in results.head().iterrows():
-                pdf.cell(20, 8, str(int(row["rank"])), 1)
-                pdf.cell(60, 8, str(row["company"])[:25], 1)
-                pdf.cell(30, 8, f"{row['score']:.4f}", 1)
-                pdf.cell(30, 8, f"{row['confidence']:.2f}", 1)
-                pdf.cell(40, 8, str(row["recommend_icc"]), 1)
+            for idx, row in results.iterrows():
+                pdf.cell(15, 8, str(int(row["rank"])), 1)
+                pdf.cell(50, 8, str(row["company"])[:20], 1)
+                pdf.cell(25, 8, f"{row['score']:.3f}", 1)
+                pdf.cell(25, 8, f"{row['confidence']:.2f}", 1)
+                pdf.cell(30, 8, str(row["recommend_icc"]), 1)
                 pdf.ln()
             
-                  # ---------------- Export PDF - ĐÃ SỬA HOÀN CHỈNH ----------------
-        pdf = FPDF(unit="mm", format="A4")
-        pdf.set_auto_page_break(auto=True, margin=15)
-        try:
-            pdf.add_font("DejaVu", "", "DejaVuSans.ttf", uni=True)
-            pdf.set_font("DejaVu", size=12)
-        except:
-            pdf.set_font("Arial", size=12)
+            # Risk metrics
+            if var95 and cvar95:
+                pdf.ln(10)
+                pdf.set_font("Arial", "B", 12)
+                pdf.cell(0, 10, "Risk Metrics:", 0, 1)
+                pdf.set_font("Arial", "", 10)
+                pdf.cell(0, 8, f"VaR 95%: ${var95:,.0f}", 0, 1)
+                pdf.cell(0, 8, f"CVaR 95%: ${cvar95:,.0f}", 0, 1)
+            
+            pdf_output = pdf.output(dest='S').encode('latin1')
+            
+            st.download_button(
+                "📄 Xuất PDF báo cáo",
+                data=pdf_output,
+                file_name="RISKCAST_Report.pdf",
+                mime="application/pdf",
+                key="dl_pdf_v9"
+            )
+            
+        except Exception as e:
+            st.error(f"Lỗi tạo PDF: {e}")
 
-        pdf.add_page()
-        pdf.set_font_size(18)
-        pdf.cell(0, 10, "RISKCAST v4.9 — Executive Summary", ln=1, align='C')
-        pdf.ln(5)
-
-        pdf.set_font_size(11)
-        pdf.cell(0, 6, f"Route: {route} | Month: {month} | Value: ${cargo_value:,}", ln=1)
-        pdf.cell(0, 6, f"Recommended: {results.iloc[0]['company']} ({results.iloc[0]['recommend_icc']})", ln=1)
-        pdf.ln(5)
-
-        # Bảng kết quả
-        pdf.set_font_size(10)
-        pdf.cell(20, 6, "Rank", 1); pdf.cell(50, 6, "Company", 1)
-        pdf.cell(35, 6, "Score", 1); pdf.cell(35, 6, "Conf.", 1); pdf.cell(30, 6, "ICC", 1); pdf.ln()
-        for _, row in results.head(5).iterrows():
-            pdf.cell(20, 6, str(int(row["rank"])), 1)
-            pdf.cell(50, 6, row["company"][:15], 1)
-            pdf.cell(35, 6, f"{row['score']:.3f}", 1)
-            pdf.cell(35, 6, f"{row['confidence']:.2f}", 1)
-            pdf.cell(30, 6, row["recommend_icc"], 1); pdf.ln()
-
-        # Thêm biểu đồ
-        for fig, title in [(fig_topsis, "TOPSIS Scores"), (fig_fc, "Climate Risk Forecast")]:
-            pdf.add_page()
-            pdf.set_font_size(14)
-            pdf.cell(0, 8, title, ln=1, align='C')
-            img_data = fig_to_png_bytes(fig, width=1600, height=700, scale=3)
-            if img_data:
-                try:
-                    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
-                    tmp.write(img_data); tmp.close()
-                    pdf.image(tmp.name, x=10, w=190)
-                    os.unlink(tmp.name)
-                except Exception as e:
-                    pdf.cell(0, 10, f"(Không thể chèn biểu đồ: {e})", ln=1)
-
-        pdf_bytes = pdf.output(dest="S")
-        st.download_button(
-            "Xuất PDF Báo Cáo (3 trang)",
-            pdf_bytes,
-            "RISKCAST_v4.9_Report.pdf",
-            "application/pdf",
-            key="dl_pdf_v9"
-        )
+# ================= Footer =================
