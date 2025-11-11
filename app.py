@@ -41,58 +41,82 @@ except Exception:
 # ---------------- page config + css --------------
 st.markdown("""
 <style>
-    /* Nền toàn app */
+
+    /* ====== GLOBAL ====== */
     .stApp {
-        background: #E8F5E9;              /* Xanh lá nhạt ESG */
-        color: #0A1A19;                   /* Text xanh đen */
+        background: linear-gradient(135deg, #d9e9ff 0%, #f4fbff 100%) !important;
         font-family: 'Segoe UI', sans-serif;
+        color: #003060;
     }
 
-    h1 {
-        color: #1B5E20;                   /* Xanh lá đậm */
-        text-align: center;
-        font-weight: 800;
-        padding-top: 12px;
+    /* ====== SIDEBAR ====== */
+    section[data-testid="stSidebar"] {
+        background: #ffffff !important;
+        border-right: 2px solid #e6edf7;
     }
 
-    .result-box {
-        background: #FFFFFF;
-        padding: 1rem;
-        border-left: 6px solid #2E7D32;
-        border-radius: 10px;
-        color: #0B1F18;
+    /* ====== SIDEBAR LABEL ====== */
+    section[data-testid="stSidebar"] .css-1n76uvr, /* label */
+    section[data-testid="stSidebar"] label {
+        color: #003060 !important;
         font-weight: 600;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.12);
     }
 
-    .stButton button {
-        background-color: #2E7D32;
-        color: white;
+    /* ====== MAIN CONTENT CARD ====== */
+    .block-container {
+        background: #ffffff;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        margin-top: 15px;
+    }
+
+    /* ====== TITLES ====== */
+    h1, h2, h3 {
+        color: #2A6FDB !important;
+        font-weight: 700;
+    }
+
+    /* ====== BUTTON ====== */
+    .stButton>button {
+        background: #2A6FDB !important;
+        color: white !important;
         border-radius: 8px;
-        font-weight: bold;
-        transition: 0.25s ease-in-out;
-    }
-    .stButton button:hover {
-        background-color: #0B3D91;
+        font-weight: 600;
+        border: none;
+        padding: 8px 20px;
     }
 
-    div[data-testid="stMetric"], .stDataFrame, .css-1ht1j8u {
-        background: white !important;
-        border-radius: 12px;
-        padding: 12px;
-        box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-        color: #0A1A19 !important;
+    .stButton>button:hover {
+        background: #1e57b2 !important;
+        transform: translateY(-2px);
     }
 
-    .muted-small {
-        color: #3A3A3A;
-        font-size: 0.85rem;
-        opacity: 0.7;
+    /* ====== ACTION BUTTON (giống nút vàng Bảo Việt) ====== */
+    .suggestion-btn {
+        background: #F4B000 !important;
+        color: white !important;
+        font-weight: 600;
+        padding: 12px 28px;
+        border-radius: 10px;
+        border: none;
     }
+
+    .suggestion-btn:hover {
+        background: #d9a100 !important;
+    }
+
+    /* ====== DATAFRAME (bảng TOPSIS) ====== */
+    .dataframe {
+        background: white;
+        border-radius: 10px;
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🛡️ RISKCAST v4.8 — Green ESG Insurance Advisor (FULL COMMENT)")
+
+st.title("🛡️ RISKCAST v4.8.1 — ESG Logistics Dashboard (UI Light)")
 st.caption("Fuzzy AHP + TOPSIS + Monte Carlo (C6) + VaR/CVaR + (optional) ARIMA")
 
 # ================= Sidebar inputs =================
