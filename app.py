@@ -6,7 +6,7 @@
 # VaR/CVaR, tùy chọn ARIMA)
 # - Phiên bản v4.8: tối ưu ổn định, tránh lỗi scalar/.ptp(), giảm xác suất
 # lỗi duplicate element id trên Streamlit.
-# - ĐÃ SỬA 100%: CHỮ BIỂU ĐỒ RÕ, TO, ĐẬM, ĐẸP TRÊN WEB & PDF
+# - ĐÃ SỬA 100%: NỀN XANH NHẠT + CHỮ SIÊU RÕ, TO, ĐẬM, CÓ VIỀN
 #
 # Hướng dẫn:
 # - Cài requirements từ requirements.txt (streamlit, pandas, numpy, plotly, ...)
@@ -42,52 +42,82 @@ except Exception:
 # ---------------- page config + css --------------
 st.markdown("""
 <style>
-
-    /* XÓA toàng hết opacity của mọi container Streamlit (fix bị mờ) */
-    [data-testid="stAppViewContainer"],
-    [data-testid="stVerticalBlock"],
-    .element-container,
-    .css-12w0qpk,
-    .css-1d391kg,
-    .css-1kyxreq,
-    .css-1r6slb0,
-    .css-1v0mbdj {
-        opacity: 1 !important;
-        background: transparent !important;
-        filter: none !important;
-    }
-
-    /* Container chính (phần nội dung giữa) */
-    .block-container {
-        background: rgba(255, 255, 255, 0.97) !important;
-        backdrop-filter: blur(0px) !important;
-        border-radius: 16px;
-        padding: 2rem 3rem;
-        box-shadow: 0px 4px 25px rgba(0,0,0,0.07);
-    }
-
-    /* Nền tổng thể nhẹ như website Bảo Việt */
+    /* ====== GLOBAL ====== */
     .stApp {
-        background: linear-gradient(180deg,#eef6ff 0%, #e6f2ff 100%) !important;
-        color:#00224f !important;
-        font-family:"Segoe UI", sans-serif;
+        background: linear-gradient(135deg, #e6f7ff 0%, #f0f9ff 100%) !important;
+        font-family: 'Segoe UI', sans-serif;
+        color: #003060;
     }
-
-    /* chữ trong plotly legend */
-    .legendtext {
-        fill:#003f88 !important;
-        font-weight:600 !important;
+    /* ====== SIDEBAR ====== */
+    section[data-testid="stSidebar"] {
+        background: #ffffff !important;
+        border-right: 2px solid #e6edf7;
     }
-
-    /* tiêu đề */
+    section[data-testid="stSidebar"] .css-1n76uvr,
+    section[data-testid="stSidebar"] label {
+        color: #003060 !important;
+        font-weight: 600;
+    }
+    /* ====== MAIN CONTENT CARD ====== */
+    .block-container {
+        background: #ffffff;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        margin-top: 15px;
+    }
+    /* ====== TITLES ====== */
     h1, h2, h3 {
-        color:#003f88 !important;
-        font-weight:700 !important;
+        color: #2A6FDB !important;
+        font-weight: 700;
     }
-
+    /* ====== BUTTON ====== */
+    .stButton>button {
+        background: #2A6FDB !important;
+        color: white !important;
+        border-radius: 8px;
+        font-weight: 600;
+        border: none;
+        padding: 8px 20px;
+    }
+    .stButton>button:hover {
+        background: #1e57b2 !important;
+        transform: translateY(-2px);
+    }
+    .suggestion-btn {
+        background: #F4B000 !important;
+        color: white !important;
+        font-weight: 600;
+        padding: 12px 28px;
+        border-radius: 10px;
+        border: none;
+    }
+    .suggestion-btn:hover {
+        background: #d9a100 !important;
+    }
+    /* ====== DATAFRAME & TABLE ====== */
+    .dataframe, .stTable, table {
+        font-size: 15px !important;
+        font-weight: 500 !important;
+    }
+    /* ====== IMAGE (CHART) ====== */
+    .stImage > img {
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border: 1px solid #e6edf7;
+    }
+    /* ====== RESULT BOX ====== */
+    .result-box {
+        background: linear-gradient(90deg, #2A6FDB, #1e57b2);
+        color: white;
+        padding: 12px 16px;
+        border-radius: 10px;
+        font-weight: 600;
+        text-align: center;
+        margin: 10px 0;
+    }
 </style>
 """, unsafe_allow_html=True)
-
 
 st.title("RISKCAST v4.8.1 — ESG Logistics Dashboard (UI Light)")
 st.caption("Fuzzy AHP + TOPSIS + Monte Carlo (C6) + VaR/CVaR + (optional) ARIMA")
@@ -132,8 +162,8 @@ def auto_balance(weights, locked):
 def defuzzify_centroid(low, mid, high):
     return (low + mid + high) / 3.0
 
-def fig_to_png_bytes(fig, width=1400, height=600, scale=3):
-    """Chuyển Plotly fig thành PNG bytes (chất lượng cao)"""
+def fig_to_png_bytes(fig, width=1600, height=700, scale=4):
+    """Chuyển Plotly fig thành PNG bytes (chất lượng cực cao)"""
     try:
         return fig.to_image(format="png", width=width, height=height, scale=scale)
     except:
@@ -156,7 +186,7 @@ def enhance_fig(fig, title=None, font_size=14, title_size=18):
         font=dict(family="Segoe UI, Arial, sans-serif", size=font_size, color="#003060"),
         title=dict(
             text=title or fig.layout.title.text,
-            font=dict(size=title_size, family="Segoe UI, Arial, sans-serif", color="#2A6FDB"),
+            font=dict(size=title_size, family="Arial Black", color="#003060", weight="bold"),
             x=0.5, xanchor="center"
         ),
         legend=dict(
@@ -170,8 +200,14 @@ def enhance_fig(fig, title=None, font_size=14, title_size=18):
         margin=dict(l=60, r=60, t=90, b=60),
         hoverlabel=dict(font_size=font_size)
     )
-    fig.update_xaxes(title_font=dict(size=font_size+2), tickfont=dict(size=font_size))
-    fig.update_yaxes(title_font=dict(size=font_size+2), tickfont=dict(size=font_size))
+    fig.update_xaxes(
+        title_font=dict(size=font_size+4, family="Arial", weight="bold"),
+        tickfont=dict(size=font_size+2, family="Arial", weight="bold")
+    )
+    fig.update_yaxes(
+        title_font=dict(size=font_size+4, family="Arial", weight="bold"),
+        tickfont=dict(size=font_size+2, family="Arial", weight="bold")
+    )
     return fig
 
 # ================= Sample data (demo) =================
@@ -228,7 +264,7 @@ else:
 
 weights = pd.Series(st.session_state["weights"], index=criteria)
 
-# Biểu đồ Pie Weights (Realtime) - RÕ CHỮ
+# Biểu đồ Pie Weights (Realtime)
 fig_weights = px.pie(
     values=weights.values,
     names=weights.index,
@@ -238,7 +274,7 @@ fig_weights = px.pie(
 fig_weights = enhance_fig(fig_weights, title="Phân bổ trọng số (Realtime)", font_size=14, title_size=18)
 
 # Hiển thị bằng PNG chất lượng cao
-png_weights = fig_to_png_bytes(fig_weights, width=800, height=500, scale=3)
+png_weights = fig_to_png_bytes(fig_weights, width=800, height=500, scale=4)
 if png_weights:
     st.image(png_weights, use_container_width=True)
 else:
@@ -367,7 +403,7 @@ if st.button("PHÂN TÍCH & GỢI Ý", key="run_analysis_v8"):
         months_hist = list(range(1, len(hist_series) + 1))
         months_fc = list(range(len(hist_series) + 1, len(hist_series) + 1 + len(fc)))
 
-        # Biểu đồ TOPSIS - CHỮ TO, ĐẬM, RÕ
+        # Biểu đồ TOPSIS - SIÊU RÕ, CHỮ TRẮNG + VIỀN ĐEN
         fig_topsis = px.bar(
             results.sort_values("score"),
             x="score", y="company", orientation="h",
@@ -378,10 +414,13 @@ if st.button("PHÂN TÍCH & GỢI Ý", key="run_analysis_v8"):
         fig_topsis.update_traces(
             texttemplate="%{text:.3f}",
             textposition="outside",
-            textfont=dict(size=18, color="black", family="Arial Black"),
-            marker_line_width=2
+            textfont=dict(size=20, color="white", family="Arial Black"),
+            marker_line_width=2,
+            marker_line_color="darkblue",
+            textfont_outlinecolor="black",
+            textfont_outlinewidth=2
         )
-        fig_topsis = enhance_fig(fig_topsis, font_size=16, title_size=22)
+        fig_topsis = enhance_fig(fig_topsis, font_size=18, title_size=24)
 
         # Biểu đồ Forecast
         fig_fc = go.Figure()
@@ -420,20 +459,20 @@ if st.button("PHÂN TÍCH & GỢI Ý", key="run_analysis_v8"):
         with right:
             st.metric("VaR 95%", f"${var95:,.0f}" if var95 else "N/A")
             st.metric("CVaR 95%", f"${cvar95:,.0f}" if cvar95 else "N/A")
-            png_right = fig_to_png_bytes(fig_weights_right, width=600, height=400, scale=3)
+            png_right = fig_to_png_bytes(fig_weights_right, width=600, height=400, scale=4)
             if png_right:
                 st.image(png_right, use_container_width=True)
             else:
                 st.plotly_chart(fig_weights_right, use_container_width=True, key="fig_weights_right_v8")
 
         # Hiển thị biểu đồ chính bằng PNG
-        png_topsis = fig_to_png_bytes(fig_topsis, width=1400, height=600, scale=3)
+        png_topsis = fig_to_png_bytes(fig_topsis, width=1600, height=700, scale=4)
         if png_topsis:
             st.image(png_topsis, use_container_width=True)
         else:
             st.plotly_chart(fig_topsis, use_container_width=True, key="fig_topsis_v8")
 
-        png_fc = fig_to_png_bytes(fig_fc, width=1400, height=600, scale=3)
+        png_fc = fig_to_png_bytes(fig_fc, width=1600, height=700, scale=4)
         if png_fc:
             st.image(png_fc, use_container_width=True)
         else:
@@ -480,7 +519,7 @@ if st.button("PHÂN TÍCH & GỢI Ý", key="run_analysis_v8"):
         pdf.add_page()
         pdf.set_font_size(14)
         pdf.cell(0,8,"TOPSIS Scores", ln=1)
-        img_bytes = fig_to_png_bytes(fig_topsis, width=1400, height=600, scale=3)
+        img_bytes = fig_to_png_bytes(fig_topsis, width=1600, height=700, scale=4)
         if img_bytes:
             tmp = f"tmp_{uuid.uuid4().hex}_topsis.png"
             with open(tmp, "wb") as f:
@@ -493,7 +532,7 @@ if st.button("PHÂN TÍCH & GỢI Ý", key="run_analysis_v8"):
         pdf.add_page()
         pdf.set_font_size(14)
         pdf.cell(0,8,"Forecast (ARIMA or fallback) & VaR", ln=1)
-        img_bytes2 = fig_to_png_bytes(fig_fc, width=1400, height=600, scale=3)
+        img_bytes2 = fig_to_png_bytes(fig_fc, width=1600, height=700, scale=4)
         if img_bytes2:
             tmp2 = f"tmp_{uuid.uuid4().hex}_forecast.png"
             with open(tmp2, "wb") as f:
