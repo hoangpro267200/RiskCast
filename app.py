@@ -665,4 +665,5 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý", key="run_analysis_v9"):
             pdf.set_font("Arial", "B", 14)
             pdf.cell(0, 10, "TOPSIS Scores Chart", 0, 1)
             
-            img_bytes = fig_to_png_bytes(fig_topsis, width=1000, height
+            img_bytes = fig_to_png_bytes(fig_topsis, width=1000, height=600)
+
