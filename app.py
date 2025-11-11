@@ -35,40 +35,85 @@ st.set_page_config(page_title="RISKCAST v4.9 — ESG Insurance", layout="wide")
 
 st.markdown("""
 <style>
-.stApp {
-    background: linear-gradient(135deg, #e9f2ff 0%, #f7fbff 100%) !important;
-    font-family: 'Segoe UI', sans-serif;
-}
-section[data-testid="stSidebar"] {
-    background: #ffffff !important;
-    border-right: 2px solid #e7eef7;
-}
-h1, h2, h3 {
-    color: #1565C0 !important;
-    font-weight: 700;
-}
-.stButton>button {
-    background-color: #1565C0 !important;
-    color: white !important;
-    border-radius: 10px;
-    padding: 8px 22px;
-    font-weight: 600;
-    transition: 0.2s;
-}
-.stButton>button:hover {
-    background-color: #0d47a1 !important;
-}
-.result-box {
-    background: linear-gradient(90deg, #1565C0, #0d47a1);
-    color: white;
-    padding: 12px 16px;
-    border-radius: 10px;
-    font-size: 18px;
-    font-weight: 600;
-    text-align: center;
-}
+
+    /* ====== RESET MỜ (FIX QUAN TRỌNG) ====== */
+    * {
+        opacity: 1 !important;
+    }
+
+    /* ====== BACKGROUND APP ====== */
+    .stApp {
+        background: linear-gradient(135deg, #d9e9ff 0%, #f4fbff 100%) !important;
+        font-family: 'Segoe UI', sans-serif;
+        color: #003060;
+    }
+
+    /* ====== SIDEBAR ====== */
+    section[data-testid="stSidebar"] {
+        background: #ffffff !important;
+        border-right: 2px solid #e6edf7;
+    }
+    section[data-testid="stSidebar"] label {
+        color: #003060 !important;
+        font-weight: 600 !important;
+    }
+
+    /* ====== MAIN CONTENT CONTAINER — FIX CHỮ MỜ ====== */
+    .block-container {
+        background: rgba(255,255,255,1) !important;     /* nền trắng rõ */
+        backdrop-filter: blur(6px);                    /* hiệu ứng premium */
+        padding: 2rem !important;
+        border-radius: 18px;
+        box-shadow: 0px 6px 22px rgba(0,0,0,0.08);
+        opacity: 1 !important;                        /* cực quan trọng */
+    }
+
+    /* ====== TITLES ====== */
+    h1, h2, h3 {
+        color: #2A6FDB !important;
+        font-weight: 700;
+    }
+
+    /* ====== BUTTON ====== */
+    .stButton > button {
+        background: #2A6FDB !important;
+        color: #ffffff !important;
+        border-radius: 8px;
+        padding: 8px 20px;
+        border: none;
+        font-weight: 600;
+        transition: all .25s ease-in-out;
+    }
+    .stButton > button:hover {
+        background: #1e57b2 !important;
+        transform: translateY(-2px);
+    }
+
+    /* ====== RESULT BOX ====== */
+    .result-box {
+        background: linear-gradient(90deg, #2A6FDB, #1e57b2);
+        color: white !important;
+        padding: 14px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        text-align: center;
+        font-size: 18px;
+        margin-top: 10px;
+        margin-bottom: 15px;
+        opacity: 1 !important;
+    }
+
+    /* ====== TABLE / DATAFRAME ====== */
+    table, .stDataFrame {
+        font-size: 16px !important;
+        font-weight: 500 !important;
+        color: #003060 !important;
+        opacity: 1 !important;
+    }
+
 </style>
 """, unsafe_allow_html=True)
+
 
 
 # ---------------- FIX CHỮ PLOTLY BỊ MỜ -----------------
