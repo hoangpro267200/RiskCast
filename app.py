@@ -660,19 +660,56 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý", key="run_analysis_v9"):
                 pdf.cell(40, 8, str(row["recommend_icc"]), 1)
                 pdf.ln()
             
-            # Add charts if available
-            try:
-                pdf.add_page()
-                pdf.set_font("Arial", "B", 14)
-                pdf.cell(0, 10, "TOPSIS Scores Chart", 0, 1)
-                
-                img_bytes = fig_to_png_bytes(fig_topsis, width=1000, height=500, scale=2)
-                if img_bytes:
-                    tmp = f"tmp_{uuid.uuid4().hex}_topsis.png"
-                    with open(tmp, "wb") as f:
-                        f.write(img_bytes)
-                    pdf.image(tmp, x=10, w=190)
-                    os.remove(tmp)
-                
-                pdf.add_page()
-               
+                  # ---------------- Export PDF - ĐÃ SỬA HOÀN CHỈNH ----------------
+        pdf = FPDF(unit="mm", format="A4")
+        pdf.set_auto_page_break(auto=True, margin=15)
+        try:
+            pdf.add_font("DejaVu", "", "DejaVuSans.ttf", uni=True)
+            pdf.set_font("DejaVu", size=12)
+        except:
+            pdf.set_font("Arial", size=12)
+
+        pdf.add_page()
+        pdf.set_font_size(18)
+        pdf.cell(0, 10, "RISKCAST v4.9 — Executive Summary", ln=1, align='C')
+        pdf.ln(5)
+
+        pdf.set_font_size(11)
+        pdf.cell(0, 6, f"Route: {route} | Month: {month} | Value: ${cargo_value:,}", ln=1)
+        pdf.cell(0, 6, f"Recommended: {results.iloc[0]['company']} ({results.iloc[0]['recommend_icc']})", ln=1)
+        pdf.ln(5)
+
+        # Bảng kết quả
+        pdf.set_font_size(10)
+        pdf.cell(20, 6, "Rank", 1); pdf.cell(50, 6, "Company", 1)
+        pdf.cell(35, 6, "Score", 1); pdf.cell(35, 6, "Conf.", 1); pdf.cell(30, 6, "ICC", 1); pdf.ln()
+        for _, row in results.head(5).iterrows():
+            pdf.cell(20, 6, str(int(row["rank"])), 1)
+            pdf.cell(50, 6, row["company"][:15], 1)
+            pdf.cell(35, 6, f"{row['score']:.3f}", 1)
+            pdf.cell(35, 6, f"{row['confidence']:.2f}", 1)
+            pdf.cell(30, 6, row["recommend_icc"], 1); pdf.ln()
+
+        # Thêm biểu đồ
+        for fig, title in [(fig_topsis, "TOPSIS Scores"), (fig_fc, "Climate Risk Forecast")]:
+            pdf.add_page()
+            pdf.set_font_size(14)
+            pdf.cell(0, 8, title, ln=1, align='C')
+            img_data = fig_to_png_bytes(fig, width=1600, height=700, scale=3)
+            if img_data:
+                try:
+                    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+                    tmp.write(img_data); tmp.close()
+                    pdf.image(tmp.name, x=10, w=190)
+                    os.unlink(tmp.name)
+                except Exception as e:
+                    pdf.cell(0, 10, f"(Không thể chèn biểu đồ: {e})", ln=1)
+
+        pdf_bytes = pdf.output(dest="S")
+        st.download_button(
+            "Xuất PDF Báo Cáo (3 trang)",
+            pdf_bytes,
+            "RISKCAST_v4.9_Report.pdf",
+            "application/pdf",
+            key="dl_pdf_v9"
+        )
