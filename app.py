@@ -1,4 +1,4 @@
-# app.py — RISKCAST v4.8 (NO ERROR — FULL COMMENT) — patched by Kai
+# app.py — ("🛡️ RISKCAST v4.8.1 — ESG Logistics Dashboard (UI Light)") — patched by Kai
 # -------------------------------------------------------------------
 # Mục đích:
 #   - Ứng dụng minh hoạ mô hình quyết định mua bảo hiểm vận tải quốc tế
