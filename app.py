@@ -6,7 +6,7 @@
 # VaR/CVaR, tùy chọn ARIMA)
 # - Phiên bản v4.8: tối ưu ổn định, tránh lỗi scalar/.ptp(), giảm xác suất
 # lỗi duplicate element id trên Streamlit.
-# - ĐÃ SỬA: Chữ biểu đồ rõ nét, to, đẹp, không mờ khi xem & xuất PDF
+# - ĐÃ SỬA 100%: CHỮ BIỂU ĐỒ RÕ, TO, ĐẬM, ĐẸP TRÊN WEB & PDF
 #
 # Hướng dẫn:
 # - Cài requirements từ requirements.txt (streamlit, pandas, numpy, plotly, ...)
@@ -21,6 +21,8 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 from fpdf import FPDF
+import os
+
 warnings.filterwarnings("ignore")
 
 # ---------------- optional libs ----------------
@@ -98,15 +100,11 @@ st.markdown("""
         font-size: 15px !important;
         font-weight: 500 !important;
     }
-    /* ====== PLOTLY CHART ====== */
-    .stPlotlyChart {
-        border: 1px solid #e6edf7;
+    /* ====== IMAGE (CHART) ====== */
+    .stImage > img {
         border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    .plotly .main-svg text {
-        font-weight: 600 !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border: 1px solid #e6edf7;
     }
     /* ====== RESULT BOX ====== */
     .result-box {
@@ -164,23 +162,21 @@ def auto_balance(weights, locked):
 def defuzzify_centroid(low, mid, high):
     return (low + mid + high) / 3.0
 
-def try_plotly_to_png(fig, width=1400, height=600, scale=3):
-    """Xuất PNG chất lượng cao cho PDF"""
+def fig_to_png_bytes(fig, width=1400, height=600, scale=3):
+    """Chuyển Plotly fig thành PNG bytes (chất lượng cao)"""
     try:
         return fig.to_image(format="png", width=width, height=height, scale=scale)
-    except Exception:
+    except:
         try:
-            import tempfile, os
-            tmp = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
-            path = tmp.name
-            fig.write_image(path, width=width, height=height, scale=scale)
-            tmp.close()
-            with open(path, "rb") as f:
-                data = f.read()
-            os.remove(path)
-            return data
+            import tempfile
+            with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+                fig.write_image(tmp.name, width=width, height=height, scale=scale)
+                with open(tmp.name, "rb") as f:
+                    data = f.read()
+                os.unlink(tmp.name)
+                return data
         except Exception as e:
-            st.warning(f"Không thể xuất biểu đồ: {e}")
+            st.error(f"Lỗi xuất ảnh: {e}")
             return None
 
 def enhance_fig(fig, title=None, font_size=14, title_size=18):
@@ -201,11 +197,11 @@ def enhance_fig(fig, title=None, font_size=14, title_size=18):
         ),
         plot_bgcolor="white",
         paper_bgcolor="white",
-        margin=dict(l=50, r=50, t=80, b=50),
+        margin=dict(l=60, r=60, t=90, b=60),
         hoverlabel=dict(font_size=font_size)
     )
-    fig.update_xaxes(title_font=dict(size=font_size+2), tickfont=dict(size=font_size-1))
-    fig.update_yaxes(title_font=dict(size=font_size+2), tickfont=dict(size=font_size-1))
+    fig.update_xaxes(title_font=dict(size=font_size+2), tickfont=dict(size=font_size))
+    fig.update_yaxes(title_font=dict(size=font_size+2), tickfont=dict(size=font_size))
     return fig
 
 # ================= Sample data (demo) =================
@@ -262,15 +258,21 @@ else:
 
 weights = pd.Series(st.session_state["weights"], index=criteria)
 
-# Biểu đồ Pie Weights (Realtime) - ĐÃ TỐI ƯU CHỮ
+# Biểu đồ Pie Weights (Realtime) - RÕ CHỮ
 fig_weights = px.pie(
     values=weights.values,
     names=weights.index,
     title="Phân bổ trọng số (Realtime)",
     color_discrete_sequence=px.colors.sequential.Blues
 )
-fig_weights = enhance_fig(fig_weights, title="Phân bổ trọng số (Realtime)", font_size=13, title_size=17)
-st.plotly_chart(fig_weights, use_container_width=True, key="fig_weights_main")
+fig_weights = enhance_fig(fig_weights, title="Phân bổ trọng số (Realtime)", font_size=14, title_size=18)
+
+# Hiển thị bằng PNG chất lượng cao
+png_weights = fig_to_png_bytes(fig_weights, width=800, height=500, scale=3)
+if png_weights:
+    st.image(png_weights, use_container_width=True)
+else:
+    st.plotly_chart(fig_weights, use_container_width=True, key="fig_weights_main")
 
 # ================= Insurance companies demo =================
 df = pd.DataFrame({
@@ -395,7 +397,7 @@ if st.button("PHÂN TÍCH & GỢI Ý", key="run_analysis_v8"):
         months_hist = list(range(1, len(hist_series) + 1))
         months_fc = list(range(len(hist_series) + 1, len(hist_series) + 1 + len(fc)))
 
-        # Biểu đồ TOPSIS - CHỮ RÕ, ĐẸP
+        # Biểu đồ TOPSIS - CHỮ TO, ĐẬM, RÕ
         fig_topsis = px.bar(
             results.sort_values("score"),
             x="score", y="company", orientation="h",
@@ -403,42 +405,69 @@ if st.button("PHÂN TÍCH & GỢI Ý", key="run_analysis_v8"):
             text="score", color="score",
             color_continuous_scale="Blues"
         )
-        fig_topsis.update_traces(texttemplate="%{text:.3f}", textposition="outside")
-        fig_topsis = enhance_fig(fig_topsis, font_size=14, title_size=18)
+        fig_topsis.update_traces(
+            texttemplate="%{text:.3f}",
+            textposition="outside",
+            textfont=dict(size=18, color="black", family="Arial Black"),
+            marker_line_width=2
+        )
+        fig_topsis = enhance_fig(fig_topsis, font_size=16, title_size=22)
 
-        # Biểu đồ Forecast - ĐẸP, RÕ
+        # Biểu đồ Forecast
         fig_fc = go.Figure()
         fig_fc.add_trace(go.Scatter(
             x=months_hist, y=hist_series,
             mode="lines+markers", name="Lịch sử",
-            line=dict(color="#2A6FDB", width=3),
-            marker=dict(size=6)
+            line=dict(color="#2A6FDB", width=4),
+            marker=dict(size=10)
         ))
         fig_fc.add_trace(go.Scatter(
             x=months_fc, y=fc,
             mode="lines+markers", name="Dự báo",
-            line=dict(color="#F4B000", width=3, dash="dot"),
-            marker=dict(size=7, symbol="diamond")
+            line=dict(color="#F4B000", width=4, dash="dot"),
+            marker=dict(size=11, symbol="diamond")
         ))
-        fig_fc = enhance_fig(fig_fc, title=f"Dự báo rủi ro khí hậu: {route}", font_size=13, title_size=17)
-        fig_fc.update_xaxes(title="Tháng", tickmode='linear')
-        fig_fc.update_yaxes(title="Mức rủi ro (0-1)", range=[0, 1])
+        fig_fc = enhance_fig(fig_fc, title=f"Dự báo rủi ro khí hậu: {route}", font_size=15, title_size=20)
+        fig_fc.update_xaxes(title="Tháng", tickmode='linear', tickfont=dict(size=15))
+        fig_fc.update_yaxes(title="Mức rủi ro (0-1)", range=[0, 1], tickfont=dict(size=15))
+
+        # Pie chart right
+        fig_weights_right = px.pie(
+            values=w.values, names=w.index,
+            title="Trọng số cuối cùng",
+            color_discrete_sequence=px.colors.sequential.Greens
+        )
+        fig_weights_right = enhance_fig(fig_weights_right, title="Trọng số cuối cùng", font_size=13, title_size=16)
 
         st.success("Hoàn tất phân tích")
         left, right = st.columns((2,1))
+
         with left:
             st.subheader("Kết quả xếp hạng TOPSIS")
             st.table(results[["rank", "company", "score", "confidence", "recommend_icc"]].set_index("rank"))
             st.markdown(f"<div class='result-box'><b>ĐỀ XUẤT:</b> {results.iloc[0]['company']} — Score {results.iloc[0]['score']:.3f} — Confidence {results.iloc[0]['confidence']:.2f}</div>", unsafe_allow_html=True)
+
         with right:
             st.metric("VaR 95%", f"${var95:,.0f}" if var95 else "N/A")
             st.metric("CVaR 95%", f"${cvar95:,.0f}" if cvar95 else "N/A")
-            fig_weights_right = px.pie(values=w.values, names=w.index, title="Trọng số cuối cùng", color_discrete_sequence=px.colors.sequential.Greens)
-            fig_weights_right = enhance_fig(fig_weights_right, title="Trọng số cuối cùng", font_size=12, title_size=15)
-            st.plotly_chart(fig_weights_right, use_container_width=True, key="fig_weights_right_v8")
+            png_right = fig_to_png_bytes(fig_weights_right, width=600, height=400, scale=3)
+            if png_right:
+                st.image(png_right, use_container_width=True)
+            else:
+                st.plotly_chart(fig_weights_right, use_container_width=True, key="fig_weights_right_v8")
 
-        st.plotly_chart(fig_topsis, use_container_width=True, key="fig_topsis_v8")
-        st.plotly_chart(fig_fc, use_container_width=True, key="fig_fc_v8")
+        # Hiển thị biểu đồ chính bằng PNG
+        png_topsis = fig_to_png_bytes(fig_topsis, width=1400, height=600, scale=3)
+        if png_topsis:
+            st.image(png_topsis, use_container_width=True)
+        else:
+            st.plotly_chart(fig_topsis, use_container_width=True, key="fig_topsis_v8")
+
+        png_fc = fig_to_png_bytes(fig_fc, width=1400, height=600, scale=3)
+        if png_fc:
+            st.image(png_fc, use_container_width=True)
+        else:
+            st.plotly_chart(fig_fc, use_container_width=True, key="fig_fc_v8")
 
         # ---------------- Export Excel ----------------
         excel_out = io.BytesIO()
@@ -481,32 +510,26 @@ if st.button("PHÂN TÍCH & GỢI Ý", key="run_analysis_v8"):
         pdf.add_page()
         pdf.set_font_size(14)
         pdf.cell(0,8,"TOPSIS Scores", ln=1)
-        img_bytes = try_plotly_to_png(fig_topsis, width=1400, height=600, scale=3)
+        img_bytes = fig_to_png_bytes(fig_topsis, width=1400, height=600, scale=3)
         if img_bytes:
-            try:
-                tmp = f"tmp_{uuid.uuid4().hex}_topsis.png"
-                with open(tmp, "wb") as f:
-                    f.write(img_bytes)
-                pdf.image(tmp, x=15, w=180)
-                os.remove(tmp)
-            except Exception:
-                pdf.cell(0,6,"(Không thể chèn biểu đồ TOPSIS)", ln=1)
+            tmp = f"tmp_{uuid.uuid4().hex}_topsis.png"
+            with open(tmp, "wb") as f:
+                f.write(img_bytes)
+            pdf.image(tmp, x=15, w=180)
+            os.remove(tmp)
         else:
-            pdf.cell(0,6,"(Biểu đồ TOPSIS không thể xuất)", ln=1)
+            pdf.cell(0,6,"(Không thể xuất biểu đồ TOPSIS)", ln=1)
 
         pdf.add_page()
         pdf.set_font_size(14)
         pdf.cell(0,8,"Forecast (ARIMA or fallback) & VaR", ln=1)
-        img_bytes2 = try_plotly_to_png(fig_fc, width=1400, height=600, scale=3)
+        img_bytes2 = fig_to_png_bytes(fig_fc, width=1400, height=600, scale=3)
         if img_bytes2:
-            try:
-                tmp2 = f"tmp_{uuid.uuid4().hex}_forecast.png"
-                with open(tmp2, "wb") as f:
-                    f.write(img_bytes2)
-                pdf.image(tmp2, x=10, w=190)
-                os.remove(tmp2)
-            except Exception:
-                pdf.cell(0,6,"(Không thể chèn biểu đồ Forecast)", ln=1)
+            tmp2 = f"tmp_{uuid.uuid4().hex}_forecast.png"
+            with open(tmp2, "wb") as f:
+                f.write(img_bytes2)
+            pdf.image(tmp2, x=10, w=190)
+            os.remove(tmp2)
         else:
             pdf.cell(0,6,"(Biểu đồ Forecast không thể xuất)", ln=1)
         pdf.ln(6)
@@ -522,4 +545,4 @@ if st.button("PHÂN TÍCH & GỢI Ý", key="run_analysis_v8"):
         st.download_button("Xuất PDF báo cáo (3 trang)", data=pdf_bytes, file_name="RISKCAST_report.pdf", mime="application/pdf", key="dl_pdf_v8")
 
 # ================= Footer =================
-st.markdown("<br><div class='muted-small'>RISKCAST v4.8 — Full comment version. Author: Bùi Xuân Hoàng. UI Enhanced by Grok.</div>", unsafe_allow_html=True)
+st.markdown("<br><div class='muted-small'>RISKCAST v4.8 — Full comment version. Author: Bùi Xuân Hoàng. UI & Chart Clarity Enhanced by Grok.</div>", unsafe_allow_html=True)
