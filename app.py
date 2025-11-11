@@ -43,45 +43,51 @@ except Exception:
 st.markdown("""
 <style>
 
-    /* --- XÓA hiệu ứng mờ (opacity) làm chữ mờ --- */
+    /* XÓA toàng hết opacity của mọi container Streamlit (fix bị mờ) */
+    [data-testid="stAppViewContainer"],
+    [data-testid="stVerticalBlock"],
+    .element-container,
+    .css-12w0qpk,
+    .css-1d391kg,
+    .css-1kyxreq,
+    .css-1r6slb0,
+    .css-1v0mbdj {
+        opacity: 1 !important;
+        background: transparent !important;
+        filter: none !important;
+    }
+
+    /* Container chính (phần nội dung giữa) */
+    .block-container {
+        background: rgba(255, 255, 255, 0.97) !important;
+        backdrop-filter: blur(0px) !important;
+        border-radius: 16px;
+        padding: 2rem 3rem;
+        box-shadow: 0px 4px 25px rgba(0,0,0,0.07);
+    }
+
+    /* Nền tổng thể nhẹ như website Bảo Việt */
     .stApp {
         background: linear-gradient(180deg,#eef6ff 0%, #e6f2ff 100%) !important;
         color:#00224f !important;
         font-family:"Segoe UI", sans-serif;
     }
 
-    /* Container chính */
-    .block-container {
-        background: rgba(255,255,255,0.92) !important;
-        border-radius: 16px;
-        padding: 2rem 3rem;
-        box-shadow: 0px 4px 25px rgba(0,0,0,0.08);
-    }
-
-    /* Chữ tiêu đề */
-    h1, h2, h3, h4 {
-        color: #003f88 !important;
-        font-weight: 700;
-    }
-
-    /* KHUNG kết quả đề xuất */
-    .result-box {
-        background:#ffffff !important;
-        border-left: 6px solid #2d77ff !important;
-        border-radius: 10px;
-        padding: 1rem;
-        font-size:1.1rem;
-        color:#003f88 !important;
-    }
-
-    /* Nhãn legend biểu đồ (để khỏi bị mờ) */
+    /* chữ trong plotly legend */
     .legendtext {
-        fill: #003f88 !important;
-        font-weight: 600 !important;
+        fill:#003f88 !important;
+        font-weight:600 !important;
+    }
+
+    /* tiêu đề */
+    h1, h2, h3 {
+        color:#003f88 !important;
+        font-weight:700 !important;
     }
 
 </style>
 """, unsafe_allow_html=True)
+
 
 st.title("RISKCAST v4.8.1 — ESG Logistics Dashboard (UI Light)")
 st.caption("Fuzzy AHP + TOPSIS + Monte Carlo (C6) + VaR/CVaR + (optional) ARIMA")
