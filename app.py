@@ -56,11 +56,15 @@ SENSITIVITY_MAP = {
 }
 
 COLOR_PALETTE = {
-    "primary": "#2A6FDB",
-    "secondary": "#1e57b2",
-    "accent": "#FF6B6B",
-    "success": "#4CAF50",
-    "text": "#003060"
+    "primary": "#0066CC",        # Xanh dương sáng
+    "secondary": "#FFB800",      # Vàng gold
+    "accent": "#FF6B35",         # Cam rõ nét
+    "success": "#00C853",        # Xanh lá sáng
+    "info": "#00B8D4",          # Xanh cyan
+    "text_dark": "#1A1A1A",     # Đen đậm
+    "text_medium": "#424242",   # Xám đậm
+    "bg_light": "#F8FAFC",      # Nền sáng
+    "border": "#E0E7FF"         # Viền xanh nhạt
 }
 
 # =============================================================================
@@ -79,148 +83,221 @@ def apply_custom_css():
             -moz-osx-font-smoothing: grayscale !important;
         }
         
-        /* App Background */
+        /* App Background - Clean White/Light Blue */
         .stApp {
-            background: linear-gradient(135deg, #e8f4ff 0%, #ffffff 100%) !important;
+            background: linear-gradient(135deg, #F0F4FF 0%, #FFFFFF 100%) !important;
             font-family: 'Inter', 'Segoe UI', 'Arial', sans-serif !important;
         }
         
-        /* Main Container - White Card Design */
+        /* Main Container - Bright White Card */
         .block-container {
-            background: rgba(255, 255, 255, 0.98) !important;
-            backdrop-filter: blur(10px);
-            padding: 2rem 3rem !important;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 48, 96, 0.08);
-            border: 1px solid rgba(42, 111, 219, 0.1);
+            background: #FFFFFF !important;
+            padding: 2.5rem 3rem !important;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 102, 204, 0.08);
+            border: 2px solid #E0E7FF;
             max-width: 1400px;
             margin: 2rem auto;
         }
         
-        /* Typography - Bold & Clear */
+        /* Typography - Bold & Clear with Bright Colors */
         h1 {
-            color: #2A6FDB !important;
+            color: #0066CC !important;
             font-weight: 800 !important;
-            font-size: 2.5rem !important;
-            letter-spacing: -0.02em !important;
-            margin-bottom: 1.5rem !important;
+            font-size: 2.75rem !important;
+            letter-spacing: -0.03em !important;
+            margin-bottom: 0.5rem !important;
+            text-shadow: 0 2px 4px rgba(0,102,204,0.1);
         }
         
         h2 {
-            color: #1e57b2 !important;
+            color: #1A1A1A !important;
             font-weight: 700 !important;
-            font-size: 1.8rem !important;
+            font-size: 1.9rem !important;
             margin: 1.5rem 0 1rem 0 !important;
         }
         
         h3 {
-            color: #003060 !important;
-            font-weight: 600 !important;
-            font-size: 1.3rem !important;
-        }
-        
-        /* Text Elements */
-        .stMarkdown, p, label, .stText {
-            color: #003060 !important;
-            font-weight: 500 !important;
-            font-size: 1rem !important;
-            line-height: 1.6 !important;
-        }
-        
-        /* Enhanced Buttons */
-        .stButton > button {
-            background: linear-gradient(135deg, #2A6FDB 0%, #1e57b2 100%) !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 12px !important;
-            padding: 0.75rem 2rem !important;
-            font-weight: 700 !important;
-            font-size: 1.1rem !important;
-            letter-spacing: 0.5px !important;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            box-shadow: 0 4px 15px rgba(42, 111, 219, 0.3) !important;
-        }
-        
-        .stButton > button:hover {
-            background: linear-gradient(135deg, #1e57b2 0%, #164a9e 100%) !important;
-            transform: translateY(-2px) !important;
-            box-shadow: 0 6px 20px rgba(42, 111, 219, 0.4) !important;
-        }
-        
-        /* Result Box - Premium Look */
-        .result-box {
-            background: linear-gradient(135deg, #2A6FDB 0%, #1e57b2 100%);
-            color: white !important;
-            padding: 1.5rem 2rem;
-            border-radius: 16px;
-            font-weight: 700;
-            font-size: 1.25rem;
-            text-align: center;
-            margin: 1.5rem 0;
-            box-shadow: 0 8px 25px rgba(42, 111, 219, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        /* Data Tables */
-        .stDataFrame {
-            font-size: 1rem !important;
-            font-weight: 600 !important;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        /* Sidebar - Clean & Professional */
-        section[data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%) !important;
-            border-right: 2px solid #e6edf7;
-            padding: 2rem 1rem;
-        }
-        
-        section[data-testid="stSidebar"] h2 {
-            color: #2A6FDB !important;
+            color: #424242 !important;
             font-weight: 700 !important;
             font-size: 1.4rem !important;
         }
         
-        section[data-testid="stSidebar"] label {
-            color: #003060 !important;
-            font-weight: 600 !important;
-            font-size: 0.95rem !important;
+        /* Text Elements - High Contrast */
+        .stMarkdown, p, label, .stText {
+            color: #1A1A1A !important;
+            font-weight: 500 !important;
+            font-size: 1.05rem !important;
+            line-height: 1.7 !important;
         }
         
-        /* Metric Cards */
-        [data-testid="stMetricValue"] {
-            color: #2A6FDB !important;
+        /* Subtitle Text */
+        .stMarkdown strong {
+            color: #424242 !important;
+            font-weight: 600 !important;
+        }
+        
+        /* Enhanced Buttons - Bright Blue & Gold */
+        .stButton > button {
+            background: linear-gradient(135deg, #0066CC 0%, #0052A3 100%) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 10px !important;
+            padding: 0.85rem 2.5rem !important;
+            font-weight: 700 !important;
+            font-size: 1.15rem !important;
+            letter-spacing: 0.3px !important;
+            transition: all 0.25s ease !important;
+            box-shadow: 0 4px 14px rgba(0, 102, 204, 0.25) !important;
+            text-transform: uppercase;
+        }
+        
+        .stButton > button:hover {
+            background: linear-gradient(135deg, #0052A3 0%, #003D7A 100%) !important;
+            transform: translateY(-3px) !important;
+            box-shadow: 0 6px 20px rgba(0, 102, 204, 0.35) !important;
+        }
+        
+        /* Result Box - Gold Gradient */
+        .result-box {
+            background: linear-gradient(135deg, #FFB800 0%, #FFA000 100%);
+            color: #1A1A1A !important;
+            padding: 1.8rem 2.5rem;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 1.3rem;
+            text-align: center;
+            margin: 1.5rem 0;
+            box-shadow: 0 6px 20px rgba(255, 184, 0, 0.3);
+            border: 3px solid #FFD54F;
+        }
+        
+        /* Data Tables - Clean White */
+        .stDataFrame {
+            font-size: 1.05rem !important;
+            font-weight: 600 !important;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            background: white !important;
+            border: 1px solid #E0E7FF;
+        }
+        
+        .stDataFrame th {
+            background: #0066CC !important;
+            color: white !important;
+            font-weight: 700 !important;
+            padding: 12px !important;
+        }
+        
+        .stDataFrame td {
+            padding: 10px !important;
+            color: #1A1A1A !important;
+        }
+        
+        /* Sidebar - Bright & Clean */
+        section[data-testid="stSidebar"] {
+            background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%) !important;
+            border-right: 3px solid #0066CC;
+            padding: 2rem 1.5rem;
+        }
+        
+        section[data-testid="stSidebar"] h2 {
+            color: #0066CC !important;
             font-weight: 800 !important;
-            font-size: 2rem !important;
+            font-size: 1.5rem !important;
+            border-bottom: 3px solid #FFB800;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
         }
         
-        [data-testid="stMetricLabel"] {
-            color: #003060 !important;
-            font-weight: 600 !important;
+        section[data-testid="stSidebar"] label {
+            color: #1A1A1A !important;
+            font-weight: 700 !important;
             font-size: 1rem !important;
         }
         
-        /* Input Fields */
-        .stNumberInput input, .stSelectbox select {
-            border: 2px solid #e6edf7 !important;
+        /* Metric Cards - Bright Colors */
+        [data-testid="stMetricValue"] {
+            color: #0066CC !important;
+            font-weight: 900 !important;
+            font-size: 2.2rem !important;
+        }
+        
+        [data-testid="stMetricLabel"] {
+            color: #424242 !important;
+            font-weight: 700 !important;
+            font-size: 1.1rem !important;
+        }
+        
+        /* Input Fields - High Contrast */
+        .stNumberInput input, .stSelectbox select, .stSlider {
+            border: 2px solid #0066CC !important;
             border-radius: 8px !important;
-            padding: 0.5rem !important;
+            padding: 0.6rem !important;
             font-weight: 600 !important;
-            color: #003060 !important;
+            color: #1A1A1A !important;
+            background: white !important;
         }
         
-        /* Success/Info Messages */
-        .stSuccess, .stInfo {
-            border-radius: 12px !important;
-            border-left: 4px solid #2A6FDB !important;
-            font-weight: 600 !important;
+        .stNumberInput input:focus, .stSelectbox select:focus {
+            border-color: #FFB800 !important;
+            box-shadow: 0 0 0 3px rgba(255, 184, 0, 0.2) !important;
         }
         
-        /* Spinner */
+        /* Checkboxes - Bright Blue */
+        .stCheckbox {
+            font-weight: 600 !important;
+            color: #1A1A1A !important;
+        }
+        
+        .stCheckbox input:checked {
+            background-color: #0066CC !important;
+        }
+        
+        /* Success/Info Messages - High Visibility */
+        .stSuccess {
+            background: #E8F5E9 !important;
+            border-radius: 10px !important;
+            border-left: 5px solid #00C853 !important;
+            font-weight: 600 !important;
+            color: #1B5E20 !important;
+            padding: 1rem 1.5rem !important;
+        }
+        
+        .stInfo {
+            background: #E1F5FE !important;
+            border-radius: 10px !important;
+            border-left: 5px solid #00B8D4 !important;
+            font-weight: 600 !important;
+            color: #01579B !important;
+            padding: 1rem 1.5rem !important;
+        }
+        
+        /* Spinner - Blue */
         .stSpinner > div {
-            border-top-color: #2A6FDB !important;
+            border-top-color: #0066CC !important;
+        }
+        
+        /* Horizontal Divider */
+        hr {
+            border: none;
+            height: 3px;
+            background: linear-gradient(90deg, #0066CC, #FFB800);
+            margin: 2rem 0;
+        }
+        
+        /* Download Buttons */
+        .stDownloadButton > button {
+            background: linear-gradient(135deg, #FFB800 0%, #FFA000 100%) !important;
+            color: #1A1A1A !important;
+            font-weight: 700 !important;
+            border: 2px solid #FFD54F !important;
+        }
+        
+        .stDownloadButton > button:hover {
+            background: linear-gradient(135deg, #FFA000 0%, #FF8F00 100%) !important;
+            transform: scale(1.05) !important;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -534,57 +611,68 @@ def create_plotly_figure(fig: go.Figure, title: str) -> go.Figure:
         template="plotly_white",
         title=dict(
             text=title,
-            font=dict(size=20, color=COLOR_PALETTE["primary"], family="Inter, Arial"),
+            font=dict(size=22, color="#0066CC", family="Inter, Arial", weight="bold"),
             x=0.5,
             xanchor="center"
         ),
         font=dict(
             family="Inter, Arial, sans-serif",
-            size=14,
-            color=COLOR_PALETTE["text"]
+            size=15,
+            color="#1A1A1A"
         ),
         legend=dict(
-            font=dict(size=13),
-            bgcolor="rgba(255,255,255,0.95)",
-            bordercolor="#e6edf7",
+            font=dict(size=14, color="#1A1A1A"),
+            bgcolor="rgba(255,255,255,0.98)",
+            bordercolor="#E0E7FF",
             borderwidth=2
         ),
         plot_bgcolor="white",
         paper_bgcolor="white",
-        margin=dict(l=60, r=60, t=80, b=60),
+        margin=dict(l=70, r=70, t=90, b=70),
         hoverlabel=dict(
             bgcolor="white",
-            font_size=14,
-            bordercolor=COLOR_PALETTE["primary"]
+            font_size=15,
+            bordercolor="#0066CC"
         )
     )
     
     fig.update_xaxes(
         showgrid=True,
-        gridcolor="#f0f0f0",
-        linecolor="#e6edf7",
+        gridcolor="#F0F4FF",
+        linecolor="#E0E7FF",
         linewidth=2,
-        tickfont=dict(size=13, color=COLOR_PALETTE["text"])
+        tickfont=dict(size=14, color="#1A1A1A", family="Inter, Arial")
     )
     
     fig.update_yaxes(
         showgrid=True,
-        gridcolor="#f0f0f0",
-        linecolor="#e6edf7",
+        gridcolor="#F0F4FF",
+        linecolor="#E0E7FF",
         linewidth=2,
-        tickfont=dict(size=13, color=COLOR_PALETTE["text"])
+        tickfont=dict(size=14, color="#1A1A1A", family="Inter, Arial")
     )
     
     return fig
 
 def create_weights_pie_chart(weights: pd.Series, title: str) -> go.Figure:
     """Create pie chart for weight distribution"""
+    # Bright color palette
+    colors = ['#0066CC', '#FFB800', '#00C853', '#FF6B35', '#00B8D4', '#9C27B0']
+    
     fig = px.pie(
         values=weights.values,
         names=weights.index,
         title=title,
-        color_discrete_sequence=px.colors.sequential.Blues_r
+        color_discrete_sequence=colors
     )
+    
+    fig.update_traces(
+        textposition='outside',
+        textinfo='percent+label',
+        textfont=dict(size=14, color='#1A1A1A', family="Inter, Arial", weight="bold"),
+        marker=dict(line=dict(color='white', width=3))
+    )
+    
     return create_plotly_figure(fig, title)
 
 def create_topsis_bar_chart(results: pd.DataFrame) -> go.Figure:
@@ -597,16 +685,19 @@ def create_topsis_bar_chart(results: pd.DataFrame) -> go.Figure:
         title="🏆 TOPSIS Score (cao hơn = tốt hơn)",
         text="score",
         color="score",
-        color_continuous_scale="Blues_r"
+        color_continuous_scale=[[0, '#E3F2FD'], [0.5, '#0066CC'], [1, '#003D7A']]
     )
     
     fig.update_traces(
-        texttemplate="%{text:.3f}",
+        texttemplate="<b>%{text:.3f}</b>",
         textposition="outside",
-        textfont=dict(size=16, color="black", weight="bold"),
-        marker_line_width=2,
-        marker_line_color="white"
+        textfont=dict(size=17, color="#1A1A1A", weight="bold"),
+        marker_line_width=0,
+        hovertemplate='<b>%{y}</b><br>Score: %{x:.3f}<extra></extra>'
     )
+    
+    fig.update_xaxes(title="<b>TOPSIS Score</b>", range=[0, 1])
+    fig.update_yaxes(title="<b>Công ty</b>")
     
     return create_plotly_figure(fig, "🏆 TOPSIS Score (cao hơn = tốt hơn)")
 
@@ -627,8 +718,10 @@ def create_forecast_chart(
         y=historical,
         mode="lines+markers",
         name="📈 Lịch sử",
-        line=dict(color=COLOR_PALETTE["primary"], width=3),
-        marker=dict(size=8, symbol="circle")
+        line=dict(color="#0066CC", width=4),
+        marker=dict(size=10, symbol="circle", color="#0066CC",
+                   line=dict(width=2, color='white')),
+        hovertemplate='<b>Tháng %{x}</b><br>Rủi ro: %{y:.2%}<extra></extra>'
     ))
     
     fig.add_trace(go.Scatter(
@@ -636,21 +729,25 @@ def create_forecast_chart(
         y=forecast,
         mode="lines+markers",
         name="🔮 Dự báo",
-        line=dict(color=COLOR_PALETTE["accent"], width=3, dash="dash"),
-        marker=dict(size=9, symbol="diamond")
+        line=dict(color="#FF6B35", width=4, dash="dash"),
+        marker=dict(size=12, symbol="diamond", color="#FF6B35",
+                   line=dict(width=2, color='white')),
+        hovertemplate='<b>Tháng %{x}</b><br>Dự báo: %{y:.2%}<extra></extra>'
     ))
     
     fig = create_plotly_figure(fig, f"📊 Dự báo rủi ro khí hậu: {route}")
     
     fig.update_xaxes(
-        title="Tháng",
+        title="<b>Tháng</b>",
         tickmode="linear",
-        tickvals=list(range(1, 13))
+        tickvals=list(range(1, 13)),
+        dtick=1
     )
     
     fig.update_yaxes(
-        title="Mức rủi ro (0-1)",
-        range=[0, 1]
+        title="<b>Mức rủi ro (0-1)</b>",
+        range=[0, max(1, max(historical.max(), forecast.max()) * 1.1)],
+        tickformat='.0%'
     )
     
     return fig
@@ -991,7 +1088,7 @@ def display_results(analysis: Dict, params: Dict):
     results = analysis["results"]
     weights = analysis["weights"]
     
-    st.success("✅ Hoàn tất phân tích")
+    st.success("✅ **Hoàn tất phân tích thành công!**")
     
     # Main layout
     left_col, right_col = st.columns([2, 1])
@@ -1000,29 +1097,42 @@ def display_results(analysis: Dict, params: Dict):
         st.subheader("🏅 Kết quả xếp hạng TOPSIS")
         
         display_df = results[["rank", "company", "score", "confidence", "recommend_icc"]].set_index("rank")
+        display_df.columns = ["Công ty", "Điểm số", "Độ tin cậy", "ICC khuyến nghị"]
         st.dataframe(display_df, use_container_width=True)
         
-        # Top recommendation
+        # Top recommendation - Gold highlight
         top = results.iloc[0]
         st.markdown(
             f"""<div class='result-box'>
-            <b>🎯 ĐỀ XUẤT TỐT NHẤT:</b> {top['company']}<br>
-            Score: {top['score']:.3f} | Confidence: {top['confidence']:.2f} | {top['recommend_icc']}
+            🏆 <b>KHUYẾN NGHỊ HÀNG ĐẦU</b> 🏆<br><br>
+            <span style='font-size:1.5rem;'><b>{top['company']}</b></span><br>
+            Điểm số: <b>{top['score']:.3f}</b> | 
+            Độ tin cậy: <b>{top['confidence']:.2f}</b> | 
+            <b>{top['recommend_icc']}</b>
             </div>""",
             unsafe_allow_html=True
         )
     
     with right_col:
         if analysis["var"] and analysis["cvar"]:
-            st.metric("💰 VaR 95%", f"${analysis['var']:,.0f}", help="Value at Risk")
-            st.metric("🛡️ CVaR 95%", f"${analysis['cvar']:,.0f}", help="Conditional VaR")
+            st.metric(
+                "💰 VaR 95%", 
+                f"${analysis['var']:,.0f}", 
+                help="Value at Risk - Tổn thất tối đa với độ tin cậy 95%"
+            )
+            st.metric(
+                "🛡️ CVaR 95%", 
+                f"${analysis['cvar']:,.0f}", 
+                help="Conditional VaR - Tổn thất trung bình vượt VaR"
+            )
         
         # Weight distribution pie chart
-        fig_weights = create_weights_pie_chart(weights, "⚖️ Trọng số cuối cùng")
+        fig_weights = create_weights_pie_chart(weights, "⚖️ Phân bổ trọng số cuối")
         st.plotly_chart(fig_weights, use_container_width=True)
     
     # Charts
-    st.subheader("📈 Biểu đồ Phân tích")
+    st.markdown("---")
+    st.subheader("📈 Biểu đồ Phân tích Chi tiết")
     
     # TOPSIS bar chart
     fig_topsis = create_topsis_bar_chart(results)
@@ -1037,6 +1147,9 @@ def display_results(analysis: Dict, params: Dict):
     st.plotly_chart(fig_forecast, use_container_width=True)
     
     # Export buttons
+    st.markdown("---")
+    st.subheader("📥 Xuất báo cáo")
+    
     col1, col2 = st.columns(2)
     
     with col1:
@@ -1046,10 +1159,11 @@ def display_results(analysis: Dict, params: Dict):
             weights
         )
         st.download_button(
-            "📥 Xuất Excel",
+            "📊 Tải xuống Excel",
             data=excel_data,
-            file_name="riskcast_results.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            file_name=f"riskcast_report_{params['route'].replace(' - ', '_')}.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True
         )
     
     with col2:
@@ -1066,10 +1180,11 @@ def display_results(analysis: Dict, params: Dict):
         
         if pdf_data:
             st.download_button(
-                "📄 Xuất PDF",
+                "📄 Tải xuống PDF",
                 data=pdf_data,
-                file_name="riskcast_report.pdf",
-                mime="application/pdf"
+                file_name=f"riskcast_summary_{params['route'].replace(' - ', '_')}.pdf",
+                mime="application/pdf",
+                use_container_width=True
             )
 
 def main():
