@@ -42,80 +42,44 @@ except Exception:
 # ---------------- page config + css --------------
 st.markdown("""
 <style>
-    /* ====== GLOBAL ====== */
+
+    /* --- XÓA hiệu ứng mờ (opacity) làm chữ mờ --- */
     .stApp {
-        background: linear-gradient(135deg, #d9e9ff 0%, #f4fbff 100%) !important;
-        font-family: 'Segoe UI', sans-serif;
-        color: #003060;
+        background: linear-gradient(180deg,#eef6ff 0%, #e6f2ff 100%) !important;
+        color:#00224f !important;
+        font-family:"Segoe UI", sans-serif;
     }
-    /* ====== SIDEBAR ====== */
-    section[data-testid="stSidebar"] {
-        background: #ffffff !important;
-        border-right: 2px solid #e6edf7;
-    }
-    section[data-testid="stSidebar"] .css-1n76uvr,
-    section[data-testid="stSidebar"] label {
-        color: #003060 !important;
-        font-weight: 600;
-    }
-    /* ====== MAIN CONTENT CARD ====== */
+
+    /* Container chính */
     .block-container {
-        background: #ffffff;
-        padding: 2rem;
-        border-radius: 20px;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-        margin-top: 15px;
+        background: rgba(255,255,255,0.92) !important;
+        border-radius: 16px;
+        padding: 2rem 3rem;
+        box-shadow: 0px 4px 25px rgba(0,0,0,0.08);
     }
-    /* ====== TITLES ====== */
-    h1, h2, h3 {
-        color: #2A6FDB !important;
+
+    /* Chữ tiêu đề */
+    h1, h2, h3, h4 {
+        color: #003f88 !important;
         font-weight: 700;
     }
-    /* ====== BUTTON ====== */
-    .stButton>button {
-        background: #2A6FDB !important;
-        color: white !important;
-        border-radius: 8px;
-        font-weight: 600;
-        border: none;
-        padding: 8px 20px;
-    }
-    .stButton>button:hover {
-        background: #1e57b2 !important;
-        transform: translateY(-2px);
-    }
-    .suggestion-btn {
-        background: #F4B000 !important;
-        color: white !important;
-        font-weight: 600;
-        padding: 12px 28px;
-        border-radius: 10px;
-        border: none;
-    }
-    .suggestion-btn:hover {
-        background: #d9a100 !important;
-    }
-    /* ====== DATAFRAME & TABLE ====== */
-    .dataframe, .stTable, table {
-        font-size: 15px !important;
-        font-weight: 500 !important;
-    }
-    /* ====== IMAGE (CHART) ====== */
-    .stImage > img {
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        border: 1px solid #e6edf7;
-    }
-    /* ====== RESULT BOX ====== */
+
+    /* KHUNG kết quả đề xuất */
     .result-box {
-        background: linear-gradient(90deg, #2A6FDB, #1e57b2);
-        color: white;
-        padding: 12px 16px;
+        background:#ffffff !important;
+        border-left: 6px solid #2d77ff !important;
         border-radius: 10px;
-        font-weight: 600;
-        text-align: center;
-        margin: 10px 0;
+        padding: 1rem;
+        font-size:1.1rem;
+        color:#003f88 !important;
     }
+
+    /* Nhãn legend biểu đồ (để khỏi bị mờ) */
+    .legendtext {
+        fill: #003f88 !important;
+        font-weight: 600 !important;
+    }
+
 </style>
 """, unsafe_allow_html=True)
 
