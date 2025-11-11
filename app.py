@@ -1,17 +1,8 @@
-# app.py — ("RISKCAST v4.8.1 — ESG Logistics Dashboard (UI Light)") — patched by Kai + Grok
-# -------------------------------------------------------------------
-# Mục đích:
-# - Ứng dụng minh hoạ mô hình quyết định mua bảo hiểm vận tải quốc tế
-# (Fuzzy AHP -> trọng số, TOPSIS -> xếp hạng, Monte Carlo cho C6,
-# VaR/CVaR, tùy chọn ARIMA)
-# - Phiên bản v4.8: tối ưu ổn định, tránh lỗi scalar/.ptp(), giảm xác suất
-# lỗi duplicate element id trên Streamlit.
-# - ĐÃ SỬA 100%: CHỮ BIỂU ĐỒ RÕ, TO, ĐẬM, ĐẸP TRÊN WEB & PDF
-#
-# Hướng dẫn:
-# - Cài requirements từ requirements.txt (streamlit, pandas, numpy, plotly, ...)
-# - Chạy: streamlit run app.py
-# -------------------------------------------------------------------
+# =============================================================
+# RISKCAST v4.9 — ESG Logistics Dashboard (PREMIUM BLUE UI)
+# Author: Bùi Xuân Hoàng — UI + Chart Clarity Enhanced by Kai
+# =============================================================
+
 import io
 import uuid
 import warnings
@@ -25,99 +16,81 @@ import os
 
 warnings.filterwarnings("ignore")
 
-# ---------------- optional libs ----------------
+# Optional libs
 try:
     from statsmodels.tsa.arima.model import ARIMA
     ARIMA_AVAILABLE = True
 except Exception:
     ARIMA_AVAILABLE = False
 
-HAS_PIL = False
 try:
     from PIL import Image
     HAS_PIL = True
 except Exception:
     HAS_PIL = False
 
-# ---------------- page config + css --------------
+
+# ---------------- PREMIUM UI (BLUE INSURANCE STYLE) ----------
+st.set_page_config(page_title="RISKCAST v4.9 — ESG Insurance", layout="wide")
+
 st.markdown("""
 <style>
-    /* ====== GLOBAL ====== */
-    .stApp {
-        background: linear-gradient(135deg, #d9e9ff 0%, #f4fbff 100%) !important;
-        font-family: 'Segoe UI', sans-serif;
-        color: #003060;
-    }
-    /* ====== SIDEBAR ====== */
-    section[data-testid="stSidebar"] {
-        background: #ffffff !important;
-        border-right: 2px solid #e6edf7;
-    }
-    section[data-testid="stSidebar"] .css-1n76uvr,
-    section[data-testid="stSidebar"] label {
-        color: #003060 !important;
-        font-weight: 600;
-    }
-    /* ====== MAIN CONTENT CARD ====== */
-    .block-container {
-        background: #ffffff;
-        padding: 2rem;
-        border-radius: 20px;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-        margin-top: 15px;
-    }
-    /* ====== TITLES ====== */
-    h1, h2, h3 {
-        color: #2A6FDB !important;
-        font-weight: 700;
-    }
-    /* ====== BUTTON ====== */
-    .stButton>button {
-        background: #2A6FDB !important;
-        color: white !important;
-        border-radius: 8px;
-        font-weight: 600;
-        border: none;
-        padding: 8px 20px;
-    }
-    .stButton>button:hover {
-        background: #1e57b2 !important;
-        transform: translateY(-2px);
-    }
-    .suggestion-btn {
-        background: #F4B000 !important;
-        color: white !important;
-        font-weight: 600;
-        padding: 12px 28px;
-        border-radius: 10px;
-        border: none;
-    }
-    .suggestion-btn:hover {
-        background: #d9a100 !important;
-    }
-    /* ====== DATAFRAME & TABLE ====== */
-    .dataframe, .stTable, table {
-        font-size: 15px !important;
-        font-weight: 500 !important;
-    }
-    /* ====== IMAGE (CHART) ====== */
-    .stImage > img {
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        border: 1px solid #e6edf7;
-    }
-    /* ====== RESULT BOX ====== */
-    .result-box {
-        background: linear-gradient(90deg, #2A6FDB, #1e57b2);
-        color: white;
-        padding: 12px 16px;
-        border-radius: 10px;
-        font-weight: 600;
-        text-align: center;
-        margin: 10px 0;
-    }
+.stApp {
+    background: linear-gradient(135deg, #e9f2ff 0%, #f7fbff 100%) !important;
+    font-family: 'Segoe UI', sans-serif;
+}
+section[data-testid="stSidebar"] {
+    background: #ffffff !important;
+    border-right: 2px solid #e7eef7;
+}
+h1, h2, h3 {
+    color: #1565C0 !important;
+    font-weight: 700;
+}
+.stButton>button {
+    background-color: #1565C0 !important;
+    color: white !important;
+    border-radius: 10px;
+    padding: 8px 22px;
+    font-weight: 600;
+    transition: 0.2s;
+}
+.stButton>button:hover {
+    background-color: #0d47a1 !important;
+}
+.result-box {
+    background: linear-gradient(90deg, #1565C0, #0d47a1);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+}
 </style>
 """, unsafe_allow_html=True)
+
+
+# ---------------- FIX CHỮ PLOTLY BỊ MỜ -----------------
+def enhance_fig(fig, title=None, font_size=16, title_size=20):
+    fig.update_layout(
+        template="simple_white",
+        font=dict(family="Segoe UI", size=font_size, color="#003060"),
+        title=dict(text=title or fig.layout.title.text,
+                   x=0.5, font=dict(size=title_size, color="#1565C0")),
+        legend=dict(font=dict(color="#003060", size=14)),
+        paper_bgcolor="white",
+        plot_bgcolor="white",
+        margin=dict(l=50, r=50, t=90, b=60),
+    )
+    return fig
+
+
+def fig_to_png_bytes(fig):
+    try:
+        return fig.to_image(format="png", width=1400, height=600, scale=3)
+    except:
+        return None
 
 st.title("RISKCAST v4.8.1 — ESG Logistics Dashboard (UI Light)")
 st.caption("Fuzzy AHP + TOPSIS + Monte Carlo (C6) + VaR/CVaR + (optional) ARIMA")
