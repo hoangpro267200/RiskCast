@@ -405,29 +405,46 @@ def compute_var_cvar(loss_rates, cargo_value, alpha=0.95):
     cvar = float(tail.mean()) if tail.size > 0 else float(var)
     return float(var), float(cvar)
 
-# ================= Forecast (ARIMA fallback) - FIXED =================
-def forecast_route(route_key, months_ahead=3):
-    """Fixed forecast function - ensures valid month ranges"""
+# ================= Forecast - FIXED & ENHANCED =================
+def forecast_route(route_key, months_ahead=12):
+    """Enhanced forecast function with proper data handling"""
     if route_key not in historical.columns:
         route_key = historical.columns[1]  # fallback to first available route
     
+    # Get historical data for the selected route
     series = historical[route_key].values
     
-    # Ensure we don't forecast beyond reasonable bounds
+    # Create extended forecast for full year visualization
     if use_arima and ARIMA_AVAILABLE and len(series) >= 6:
         try:
             model = ARIMA(series, order=(1,1,1)).fit()
             fc = model.forecast(months_ahead)
             fc = np.clip(fc, 0, 1)  # Ensure values are between 0-1
             return np.asarray(series), np.asarray(fc)
-        except Exception:
-            pass
+        except Exception as e:
+            st.warning(f"ARIMA failed: {e}. Using fallback method.")
     
-    # Simple fallback with bounds
+    # Enhanced fallback method with seasonal pattern
     last = np.array(series)
-    trend = (last[-1] - last[-3]) / 3.0 if len(last) >= 3 else 0.0
-    fc = np.array([max(0, min(1, last[-1] + (i+1)*trend)) for i in range(months_ahead)])
-    return last, fc
+    
+    # Calculate trend based on recent months
+    if len(last) >= 3:
+        recent_trend = (last[-1] - last[-3]) / 3.0
+    else:
+        recent_trend = 0.0
+    
+    # Add some seasonal variation to make forecast more realistic
+    seasonal_factor = np.array([0.95, 0.98, 1.02, 1.05, 1.08, 1.10, 1.12, 1.08, 1.05, 1.02, 0.98, 0.95])
+    
+    # Generate forecast with trend and seasonal adjustment
+    fc = []
+    for i in range(months_ahead):
+        base_value = last[-1] + (i+1) * recent_trend * 0.5  # Reduced trend effect
+        seasonal_adj = seasonal_factor[i % 12] if i < len(seasonal_factor) else 1.0
+        forecast_value = max(0, min(1, base_value * seasonal_adj))
+        fc.append(forecast_value)
+    
+    return last, np.array(fc)
 
 # ================= Main action =================
 if st.button("🚀 PHÂN TÍCH & GỢI Ý", key="run_analysis_v9"):
@@ -475,13 +492,17 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý", key="run_analysis_v9"):
         var95, cvar95 = (compute_var_cvar(results["C6_mean"].values, cargo_value, alpha=0.95) 
                         if use_var else (None, None))
         
-        # FIXED: Proper forecast with valid month ranges
-        hist_series, fc = forecast_route(route)
+        # FIXED: Enhanced forecast with full year data
+        hist_series, fc = forecast_route(route, months_ahead=12)
+        
+        # Create proper month labels
         months_hist = list(range(1, len(hist_series) + 1))
         months_fc = list(range(len(hist_series) + 1, len(hist_series) + 1 + len(fc)))
         
-        # Ensure forecast months don't exceed 12
-        months_fc = [min(m, 12) for m in months_fc]
+        # Ensure we don't exceed 12 months for display
+        display_months_hist = months_hist
+        display_months_fc = [m for m in months_fc if m <= 12]
+        display_fc = fc[:len(display_months_fc)]
 
         # Biểu đồ TOPSIS - CHỮ TO, ĐẬM, RÕ
         fig_topsis = px.bar(
@@ -500,32 +521,45 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý", key="run_analysis_v9"):
         )
         fig_topsis = enhance_fig(fig_topsis, font_size=16, title_size=22)
 
-        # Biểu đồ Forecast - FIXED
+        # Biểu đồ Forecast - ENHANCED
         fig_fc = go.Figure()
+        
+        # Historical data
         fig_fc.add_trace(go.Scatter(
-            x=months_hist, y=hist_series,
+            x=display_months_hist, y=hist_series,
             mode="lines+markers", name="📈 Lịch sử",
             line=dict(color="#2A6FDB", width=4),
-            marker=dict(size=10, symbol="circle")
+            marker=dict(size=8, symbol="circle")
         ))
+        
+        # Forecast data
+        if len(display_months_fc) > 0:
+            fig_fc.add_trace(go.Scatter(
+                x=display_months_fc, y=display_fc,
+                mode="lines+markers", name="🔮 Dự báo",
+                line=dict(color="#FF6B6B", width=4, dash="dash"),
+                marker=dict(size=9, symbol="diamond")
+            ))
+        
+        # Current month marker
         fig_fc.add_trace(go.Scatter(
-            x=months_fc, y=fc,
-            mode="lines+markers", name="🔮 Dự báo",
-            line=dict(color="#FF6B6B", width=4, dash="dash"),
-            marker=dict(size=11, symbol="diamond")
+            x=[month], y=[hist_series[month-1] if month <= len(hist_series) else 0],
+            mode="markers", name="📍 Tháng hiện tại",
+            marker=dict(size=15, symbol="star", color="gold", line=dict(width=2, color="black"))
         ))
+        
         fig_fc = enhance_fig(fig_fc, title=f"📊 Dự báo rủi ro khí hậu: {route}", 
                            font_size=15, title_size=20)
         fig_fc.update_xaxes(
             title="Tháng", 
             tickmode='linear',
-            tickvals=list(range(1, 13)),  # Fixed: Only show valid months 1-12
-            tickfont=dict(size=15)
+            tickvals=list(range(1, 13)),
+            tickfont=dict(size=14)
         )
         fig_fc.update_yaxes(
             title="Mức rủi ro (0-1)", 
             range=[0, 1], 
-            tickfont=dict(size=15)
+            tickfont=dict(size=14)
         )
 
         # Pie chart right
@@ -564,25 +598,24 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý", key="run_analysis_v9"):
             else:
                 st.info("📊 VaR/CVaR chưa được tính")
             
-            png_right = fig_to_png_bytes(fig_weights_right, width=600, height=400, scale=3)
-            if png_right:
-                st.image(png_right, use_container_width=True)
-            else:
-                st.plotly_chart(fig_weights_right, use_container_width=True, key="fig_weights_right_v9")
+            # Display forecast summary
+            st.subheader("📈 Tóm tắt dự báo")
+            current_risk = hist_series[month-1] if month <= len(hist_series) else 0
+            st.metric("Rủi ro tháng hiện tại", f"{current_risk:.2%}")
+            
+            if len(display_fc) > 0:
+                avg_forecast = np.mean(display_fc)
+                st.metric("Rủi ro trung bình dự báo", f"{avg_forecast:.2%}")
 
-        # Hiển thị biểu đồ chính bằng PNG
+        # Hiển thị biểu đồ chính
         st.subheader("📈 Biểu đồ Phân tích")
         
-        png_topsis = fig_to_png_bytes(fig_topsis, width=1400, height=600, scale=3)
-        if png_topsis:
-            st.image(png_topsis, use_container_width=True)
-        else:
+        col1, col2 = st.columns(2)
+        
+        with col1:
             st.plotly_chart(fig_topsis, use_container_width=True, key="fig_topsis_v9")
         
-        png_fc = fig_to_png_bytes(fig_fc, width=1400, height=600, scale=3)
-        if png_fc:
-            st.image(png_fc, use_container_width=True)
-        else:
+        with col2:
             st.plotly_chart(fig_fc, use_container_width=True, key="fig_fc_v9")
 
         # ---------------- Export Excel ----------------
@@ -591,6 +624,15 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý", key="run_analysis_v9"):
             results.to_excel(writer, sheet_name="Result", index=False)
             df_adj.to_excel(writer, sheet_name="Adjusted_Data")
             pd.DataFrame({"weight": w.values}, index=w.index).to_excel(writer, sheet_name="Weights")
+            
+            # Add forecast data
+            forecast_df = pd.DataFrame({
+                "Month": list(range(1, 13)),
+                "Historical_Risk": list(hist_series) + [None] * (12 - len(hist_series)),
+                "Forecast_Risk": [None] * len(hist_series) + list(display_fc)
+            })
+            forecast_df.to_excel(writer, sheet_name="Forecast", index=False)
+            
         excel_out.seek(0)
         
         st.download_button(
@@ -601,18 +643,19 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý", key="run_analysis_v9"):
             key="dl_excel_v9"
         )
 
-        # ---------------- Export PDF - FIXED & SIMPLIFIED ----------------
+        # ---------------- Export PDF - FIXED FONT ISSUE ----------------
         try:
+            # Create PDF with basic font that supports all characters
             pdf = FPDF()
             pdf.set_auto_page_break(auto=True, margin=15)
             pdf.add_page()
             
-            # Title
+            # Use only basic ASCII characters in PDF to avoid font issues
             pdf.set_font("Arial", "B", 16)
             pdf.cell(0, 10, "RISKCAST v4.9 - Executive Summary", 0, 1, "C")
             pdf.ln(10)
             
-            # Basic info
+            # Basic info (English only to avoid font issues)
             pdf.set_font("Arial", "", 12)
             pdf.cell(0, 8, f"Route: {route}", 0, 1)
             pdf.cell(0, 8, f"Month: {month} | Method: {method}", 0, 1)
@@ -628,47 +671,8 @@ if st.button("🚀 PHÂN TÍCH & GỢI Ý", key="run_analysis_v9"):
             pdf.cell(0, 8, top_rec, 0, 1)
             pdf.ln(10)
             
-            # Results table
+            # Forecast summary
             pdf.set_font("Arial", "B", 12)
-            pdf.cell(0, 10, "Ranking Results:", 0, 1)
-            
-            pdf.set_font("Arial", "B", 10)
-            pdf.cell(15, 8, "Rank", 1)
-            pdf.cell(50, 8, "Company", 1)
-            pdf.cell(25, 8, "Score", 1)
-            pdf.cell(25, 8, "Confidence", 1)
-            pdf.cell(30, 8, "ICC Level", 1)
-            pdf.ln()
-            
+            pdf.cell(0, 10, "Risk Forecast Summary:", 0, 1)
             pdf.set_font("Arial", "", 10)
-            for idx, row in results.iterrows():
-                pdf.cell(15, 8, str(int(row["rank"])), 1)
-                pdf.cell(50, 8, str(row["company"])[:20], 1)
-                pdf.cell(25, 8, f"{row['score']:.3f}", 1)
-                pdf.cell(25, 8, f"{row['confidence']:.2f}", 1)
-                pdf.cell(30, 8, str(row["recommend_icc"]), 1)
-                pdf.ln()
-            
-            # Risk metrics
-            if var95 and cvar95:
-                pdf.ln(10)
-                pdf.set_font("Arial", "B", 12)
-                pdf.cell(0, 10, "Risk Metrics:", 0, 1)
-                pdf.set_font("Arial", "", 10)
-                pdf.cell(0, 8, f"VaR 95%: ${var95:,.0f}", 0, 1)
-                pdf.cell(0, 8, f"CVaR 95%: ${cvar95:,.0f}", 0, 1)
-            
-            pdf_output = pdf.output(dest='S').encode('latin1')
-            
-            st.download_button(
-                "📄 Xuất PDF báo cáo",
-                data=pdf_output,
-                file_name="RISKCAST_Report.pdf",
-                mime="application/pdf",
-                key="dl_pdf_v9"
-            )
-            
-        except Exception as e:
-            st.error(f"Lỗi tạo PDF: {e}")
-
-# ================= Footer =================
+            current_risk = hist_series[month-1] if month <= len(hist_series) else 0
