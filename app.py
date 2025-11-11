@@ -39,13 +39,56 @@ except Exception:
     HAS_PIL = False
 
 # ---------------- page config + css --------------
-st.set_page_config(page_title="RISKCAST v4.8 — Green ESG", layout="wide", page_icon="🛡️")
 st.markdown("""
 <style>
-  .stApp { background: linear-gradient(180deg,#0b3d0b 0%, #05320a 100%); color:#e9fbf0; font-family:'Segoe UI'; }
-  h1 { color:#a3ff96; text-align:center; font-weight:800; }
-  .result-box { background:#0f3d1f;padding:1rem;border-left:6px solid #3ef08a;border-radius:8px; }
-  .muted-small { color:#bfe8c6; font-size:0.85rem; }
+    /* Nền toàn app */
+    .stApp {
+        background: #E8F5E9;              /* Xanh lá nhạt ESG */
+        color: #0A1A19;                   /* Text xanh đen */
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    h1 {
+        color: #1B5E20;                   /* Xanh lá đậm */
+        text-align: center;
+        font-weight: 800;
+        padding-top: 12px;
+    }
+
+    .result-box {
+        background: #FFFFFF;
+        padding: 1rem;
+        border-left: 6px solid #2E7D32;
+        border-radius: 10px;
+        color: #0B1F18;
+        font-weight: 600;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    }
+
+    .stButton button {
+        background-color: #2E7D32;
+        color: white;
+        border-radius: 8px;
+        font-weight: bold;
+        transition: 0.25s ease-in-out;
+    }
+    .stButton button:hover {
+        background-color: #0B3D91;
+    }
+
+    div[data-testid="stMetric"], .stDataFrame, .css-1ht1j8u {
+        background: white !important;
+        border-radius: 12px;
+        padding: 12px;
+        box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
+        color: #0A1A19 !important;
+    }
+
+    .muted-small {
+        color: #3A3A3A;
+        font-size: 0.85rem;
+        opacity: 0.7;
+    }
 </style>
 """, unsafe_allow_html=True)
 
