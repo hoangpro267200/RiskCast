@@ -105,76 +105,160 @@ def apply_custom_css() -> None:
     """Streamlined CSS with essential styling only"""
     st.markdown("""
     <style>
-        /* Global Settings */
+        /* Global Settings - High Contrast */
         * {
             text-rendering: optimizeLegibility !important;
             -webkit-font-smoothing: antialiased !important;
         }
         
         .stApp {
-            background: linear-gradient(135deg, #F0F4FF 0%, #FFFFFF 100%) !important;
-            font-family: 'Inter', sans-serif !important;
+            background: #FFFFFF !important;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
         }
         
         .block-container {
             background: #FFFFFF !important;
             padding: 2rem 2.5rem !important;
             border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0,102,204,0.08);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
             max-width: 1400px;
             margin: 1.5rem auto;
         }
         
-        /* Typography */
-        h1 { color: #0066CC !important; font-weight: 800 !important; font-size: 2.5rem !important; }
-        h2 { color: #1A1A1A !important; font-weight: 700 !important; font-size: 1.8rem !important; }
-        h3 { color: #424242 !important; font-weight: 600 !important; }
-        
-        /* Buttons */
-        .stButton > button {
-            background: linear-gradient(135deg, #0066CC, #0052A3) !important;
-            color: white !important;
-            border-radius: 8px !important;
-            padding: 0.75rem 2rem !important;
+        /* Typography - HIGH CONTRAST */
+        h1 { 
+            color: #0052A3 !important; 
+            font-weight: 900 !important; 
+            font-size: 2.8rem !important;
+            text-shadow: none !important;
+        }
+        h2 { 
+            color: #000000 !important; 
+            font-weight: 800 !important; 
+            font-size: 2rem !important;
+        }
+        h3 { 
+            color: #1A1A1A !important; 
             font-weight: 700 !important;
+            font-size: 1.5rem !important;
+        }
+        
+        /* Text - Maximum Contrast */
+        p, span, div, label, .stMarkdown {
+            color: #000000 !important;
+            font-weight: 600 !important;
+        }
+        
+        /* Buttons - High Contrast */
+        .stButton > button {
+            background: #0052A3 !important;
+            color: #FFFFFF !important;
+            border-radius: 8px !important;
+            padding: 0.85rem 2.5rem !important;
+            font-weight: 800 !important;
+            font-size: 1.1rem !important;
             transition: all 0.2s !important;
-            box-shadow: 0 3px 10px rgba(0,102,204,0.2) !important;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2) !important;
+            border: 2px solid #0052A3 !important;
         }
         
         .stButton > button:hover {
+            background: #003D7A !important;
             transform: translateY(-2px) !important;
-            box-shadow: 0 5px 15px rgba(0,102,204,0.3) !important;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important;
         }
         
-        /* Result Box */
+        /* Result Box - Maximum Visibility */
         .result-box {
-            background: linear-gradient(135deg, #FFB800, #FFA000);
-            color: #1A1A1A !important;
-            padding: 1.5rem 2rem;
-            border-radius: 10px;
-            font-weight: 700;
+            background: linear-gradient(135deg, #FFB800, #FF9800);
+            color: #000000 !important;
+            padding: 2rem 2.5rem;
+            border-radius: 12px;
+            font-weight: 800 !important;
+            font-size: 1.3rem !important;
             text-align: center;
-            margin: 1rem 0;
-            box-shadow: 0 4px 15px rgba(255,184,0,0.25);
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            border: 3px solid #FF9800;
         }
         
-        /* Tables */
+        /* Tables - High Contrast */
         .stDataFrame {
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            border: 2px solid #E0E0E0 !important;
         }
         
-        /* Sidebar */
-        section[data-testid="stSidebar"] {
-            background: #FFFFFF !important;
-            border-right: 2px solid #0066CC;
-        }
-        
-        /* Metrics */
-        [data-testid="stMetricValue"] {
-            color: #0066CC !important;
+        .stDataFrame thead tr th {
+            background-color: #0052A3 !important;
+            color: #FFFFFF !important;
             font-weight: 800 !important;
+            font-size: 1.1rem !important;
+        }
+        
+        .stDataFrame tbody tr td {
+            color: #000000 !important;
+            font-weight: 700 !important;
+            font-size: 1.05rem !important;
+        }
+        
+        /* Sidebar - High Contrast */
+        section[data-testid="stSidebar"] {
+            background: #F5F5F5 !important;
+            border-right: 3px solid #0052A3;
+        }
+        
+        section[data-testid="stSidebar"] h2 {
+            color: #000000 !important;
+            font-weight: 900 !important;
+        }
+        
+        section[data-testid="stSidebar"] label {
+            color: #000000 !important;
+            font-weight: 700 !important;
+            font-size: 1rem !important;
+        }
+        
+        /* Metrics - Bold */
+        [data-testid="stMetricValue"] {
+            color: #0052A3 !important;
+            font-weight: 900 !important;
+            font-size: 2.5rem !important;
+        }
+        
+        [data-testid="stMetricLabel"] {
+            color: #000000 !important;
+            font-weight: 800 !important;
+            font-size: 1.2rem !important;
+        }
+        
+        /* Explanations Box */
+        .explanation-box {
+            background: #F0F7FF;
+            border-left: 5px solid #0052A3;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            color: #000000 !important;
+            font-weight: 600 !important;
+        }
+        
+        .explanation-box h4 {
+            color: #0052A3 !important;
+            font-weight: 800 !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        .explanation-box ul {
+            color: #000000 !important;
+        }
+        
+        .explanation-box li {
+            margin: 0.8rem 0;
+            color: #000000 !important;
+            font-weight: 600 !important;
+            line-height: 1.6;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -721,7 +805,7 @@ class StreamlitUI:
             )
     
     def display_results(self, result: AnalysisResult, params: AnalysisParams):
-        """Display analysis results"""
+        """Display analysis results with detailed explanations"""
         st.success("✅ **Phân tích hoàn tất!**")
         
         # Main results
@@ -737,19 +821,92 @@ class StreamlitUI:
             st.markdown(
                 f"""<div class='result-box'>
                 🏆 <b>KHUYẾN NGHỊ HÀNG ĐẦU</b><br><br>
-                <span style='font-size:1.4rem;'><b>{top['company']}</b></span><br>
-                Score: <b>{top['score']:.3f}</b> | Confidence: <b>{top['confidence']:.2f}</b> | <b>{top['recommend_icc']}</b>
+                <span style='font-size:1.6rem; font-weight:900;'>{top['company']}</span><br><br>
+                <span style='font-size:1.2rem;'>
+                Score: <b>{top['score']:.3f}</b> | 
+                Confidence: <b>{top['confidence']:.2f}</b> | 
+                <b>{top['recommend_icc']}</b>
+                </span>
                 </div>""",
                 unsafe_allow_html=True
             )
         
         with right:
             if result.var and result.cvar:
-                st.metric("💰 VaR 95%", f"${result.var:,.0f}")
-                st.metric("🛡️ CVaR 95%", f"${result.cvar:,.0f}")
+                st.metric("💰 VaR 95%", f"${result.var:,.0f}", 
+                         help="Tổn thất tối đa với độ tin cậy 95%")
+                st.metric("🛡️ CVaR 95%", f"${result.cvar:,.0f}",
+                         help="Tổn thất trung bình vượt VaR")
             
             fig_weights = self.chart_factory.create_weights_pie(result.weights, "⚖️ Trọng số")
             st.plotly_chart(fig_weights, use_container_width=True)
+        
+        # DETAILED EXPLANATION SECTION
+        st.markdown("---")
+        st.subheader("📋 GIẢI THÍCH CHI TIẾT KẾT QUẢ")
+        
+        top_3 = result.results.head(3)
+        
+        # Why this ranking?
+        st.markdown(f"""
+        <div class='explanation-box'>
+            <h4>🎯 Tại sao {top['company']} được khuyến nghị?</h4>
+            <ul>
+                <li><b>Điểm TOPSIS cao nhất ({top['score']:.3f}):</b> Công ty này cân bằng tốt nhất giữa tất cả tiêu chí đánh giá</li>
+                <li><b>Độ tin cậy {top['confidence']:.2%}:</b> Mức độ ổn định và dự đoán được cao</li>
+                <li><b>Khuyến nghị {top['recommend_icc']}:</b> Phù hợp với mức rủi ro của tuyến {params.route}</li>
+                <li><b>Giá trị hàng hóa ${params.cargo_value:,}:</b> Đủ điều kiện cho mức bảo hiểm này</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Comparison explanation
+        comparison_text = f"""
+        <div class='explanation-box'>
+            <h4>📊 So sánh Top 3:</h4>
+            <ul>
+                <li><b>#{1} {top_3.iloc[0]['company']} (Score: {top_3.iloc[0]['score']:.3f}):</b> 
+                    Cân bằng tốt nhất, rủi ro khí hậu thấp ({top_3.iloc[0]['C6_mean']:.2%})</li>
+                <li><b>#{2} {top_3.iloc[1]['company']} (Score: {top_3.iloc[1]['score']:.3f}):</b> 
+                    Kém {(top_3.iloc[0]['score'] - top_3.iloc[1]['score']):.3f} điểm, 
+                    rủi ro khí hậu cao hơn ({top_3.iloc[1]['C6_mean']:.2%})</li>
+                <li><b>#{3} {top_3.iloc[2]['company']} (Score: {top_3.iloc[2]['score']:.3f}):</b> 
+                    Kém {(top_3.iloc[0]['score'] - top_3.iloc[2]['score']):.3f} điểm,
+                    độ tin cậy thấp hơn ({top_3.iloc[2]['confidence']:.2f})</li>
+            </ul>
+        </div>
+        """
+        st.markdown(comparison_text, unsafe_allow_html=True)
+        
+        # Key factors explanation
+        key_factors = result.data_adjusted.loc[top['company']]
+        st.markdown(f"""
+        <div class='explanation-box'>
+            <h4>🔑 Các yếu tố quyết định cho {top['company']}:</h4>
+            <ul>
+                <li><b>Tỷ lệ phí:</b> {key_factors['C1: Tỷ lệ phí']:.2%} - {"Cạnh tranh" if key_factors['C1: Tỷ lệ phí'] < 0.30 else "Cao"}</li>
+                <li><b>Thời gian xử lý:</b> {key_factors['C2: Thời gian xử lý']:.0f} ngày - {"Nhanh" if key_factors['C2: Thời gian xử lý'] < 6 else "Trung bình"}</li>
+                <li><b>Tỷ lệ tổn thất:</b> {key_factors['C3: Tỷ lệ tổn thất']:.2%} - {"Tốt" if key_factors['C3: Tỷ lệ tổn thất'] < 0.08 else "Chấp nhận được"}</li>
+                <li><b>Hỗ trợ ICC:</b> {key_factors['C4: Hỗ trợ ICC']:.0f}/10 - {"Xuất sắc" if key_factors['C4: Hỗ trợ ICC'] >= 8 else "Tốt"}</li>
+                <li><b>Chăm sóc KH:</b> {key_factors['C5: Chăm sóc KH']:.0f}/10 - {"Xuất sắc" if key_factors['C5: Chăm sóc KH'] >= 8 else "Tốt"}</li>
+                <li><b>Rủi ro khí hậu:</b> {top['C6_mean']:.2%} ± {top['C6_std']:.2%} - {"Thấp" if top['C6_mean'] < 0.30 else "Trung bình"}</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Risk assessment
+        if result.var and result.cvar:
+            st.markdown(f"""
+            <div class='explanation-box'>
+                <h4>⚠️ Đánh giá rủi ro tài chính:</h4>
+                <ul>
+                    <li><b>VaR 95% = ${result.var:,.0f}:</b> Có 95% khả năng tổn thất không vượt quá mức này</li>
+                    <li><b>CVaR 95% = ${result.cvar:,.0f}:</b> Nếu tổn thất vượt VaR, trung bình sẽ ở mức này</li>
+                    <li><b>Tỷ lệ rủi ro:</b> {(result.var/params.cargo_value)*100:.1f}% giá trị hàng hóa</li>
+                    <li><b>Khuyến nghị:</b> {"Chấp nhận được" if result.var/params.cargo_value < 0.10 else "Cần xem xét kỹ"}</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
         
         # Charts
         st.markdown("---")
