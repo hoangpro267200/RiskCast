@@ -203,49 +203,62 @@ def apply_custom_css() -> None:
             font-size: 1.05rem !important;
         }
         
-        /* Sidebar - High Contrast with Light Text */
+        /* Sidebar - Complete White Text Theme */
         section[data-testid="stSidebar"] {
             background: linear-gradient(180deg, #1A1A1A 0%, #2D2D2D 100%) !important;
             border-right: 3px solid #0052A3;
             padding: 1.5rem;
         }
         
-        section[data-testid="stSidebar"] h2 {
+        section[data-testid="stSidebar"] * {
+            color: #FFFFFF !important;
+        }
+        
+        section[data-testid="stSidebar"] h1,
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3 {
             color: #FFFFFF !important;
             font-weight: 900 !important;
-            font-size: 1.8rem !important;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        section[data-testid="stSidebar"] h2 {
+            font-size: 1.8rem !important;
             border-bottom: 3px solid #0052A3;
             padding-bottom: 0.8rem;
             margin-bottom: 1.5rem;
         }
         
-        section[data-testid="stSidebar"] h3 {
-            color: #FFFFFF !important;
-            font-weight: 800 !important;
-        }
-        
-        section[data-testid="stSidebar"] label {
+        section[data-testid="stSidebar"] label,
+        section[data-testid="stSidebar"] .stMarkdown,
+        section[data-testid="stSidebar"] p,
+        section[data-testid="stSidebar"] span,
+        section[data-testid="stSidebar"] div {
             color: #FFFFFF !important;
             font-weight: 700 !important;
-            font-size: 1.1rem !important;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
         
-        section[data-testid="stSidebar"] p {
-            color: #E0E0E0 !important;
-            font-weight: 600 !important;
-        }
-        
-        /* Sidebar Inputs - Light on Dark */
-        section[data-testid="stSidebar"] .stNumberInput input,
-        section[data-testid="stSidebar"] .stSelectbox select {
+        /* Sidebar Inputs */
+        section[data-testid="stSidebar"] input,
+        section[data-testid="stSidebar"] select,
+        section[data-testid="stSidebar"] textarea {
             background: #3D3D3D !important;
             color: #FFFFFF !important;
             border: 2px solid #0052A3 !important;
             font-weight: 700 !important;
         }
         
+        section[data-testid="stSidebar"] .stSelectbox > div > div {
+            background: #3D3D3D !important;
+            color: #FFFFFF !important;
+        }
+        
+        section[data-testid="stSidebar"] .stNumberInput input {
+            background: #3D3D3D !important;
+            color: #FFFFFF !important;
+        }
+        
+        /* Checkboxes */
         section[data-testid="stSidebar"] .stCheckbox label {
             color: #FFFFFF !important;
             font-weight: 700 !important;
@@ -253,10 +266,6 @@ def apply_custom_css() -> None:
         
         section[data-testid="stSidebar"] .stCheckbox input:checked + div {
             background-color: #0052A3 !important;
-        }
-        
-        section[data-testid="stSidebar"] .stSlider label {
-            color: #FFFFFF !important;
         }
         
         /* Metrics - Bold */
@@ -1181,3 +1190,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
