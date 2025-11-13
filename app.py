@@ -535,34 +535,44 @@ class ChartFactory:
     
     @staticmethod
     def create_weights_pie(weights: pd.Series, title: str) -> go.Figure:
-        """Create weight distribution pie chart with bold labels"""
-        colors = ['#0052A3', '#FF9800', '#00C853', '#FF5252', '#00BCD4', '#9C27B0']
+        """Create weight distribution pie chart with white background and bold labels"""
+        colors = ['#0052A3', '#00C853', '#FF5252', '#FF9800', '#9C27B0', '#00BCD4']
         
         fig = go.Figure(data=[go.Pie(
             labels=weights.index,
             values=weights.values,
-            marker=dict(colors=colors, line=dict(color='#000000', width=3)),
-            textfont=dict(size=18, color="#000000", family="Arial Black", weight="bold"),
+            marker=dict(colors=colors, line=dict(color='#FFFFFF', width=4)),
+            textfont=dict(size=20, color="#000000", family="Arial Black", weight="bold"),
             textposition='outside',
             textinfo='label+percent',
             insidetextorientation='radial',
-            pull=[0.05] * len(weights)  # Slight pull for better label visibility
+            pull=[0.08] * len(weights),  # Pull out for better visibility
+            hovertemplate='<b>%{label}</b><br>%{percent}<extra></extra>'
         )])
         
         fig.update_layout(
             title=dict(
                 text=f"<b>{title}</b>",
-                font=dict(size=22, color="#000000", family="Arial Black"),
-                x=0.5
+                font=dict(size=24, color="#000000", family="Arial Black"),
+                x=0.5,
+                xanchor='center'
             ),
-            font=dict(size=16, color="#000000", weight="bold"),
+            font=dict(size=18, color="#000000", weight="bold"),
             showlegend=True,
             legend=dict(
-                font=dict(size=16, color="#000000", weight="bold"),
-                bgcolor="white",
+                font=dict(size=18, color="#000000", family="Arial", weight="bold"),
+                bgcolor="rgba(255,255,255,0.95)",
                 bordercolor="#000000",
-                borderwidth=2
-            )
+                borderwidth=2,
+                orientation="v",
+                yanchor="middle",
+                y=0.5,
+                xanchor="left",
+                x=1.05
+            ),
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+            margin=dict(l=20, r=200, t=100, b=20)
         )
         
         return fig
