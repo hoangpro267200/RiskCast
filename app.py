@@ -119,7 +119,7 @@ SENSITIVITY_MAP = {
 # =============================================================================
 
 def apply_custom_css() -> None:
-    """CSS cho giao diện Premium Green ESG + Mobile Neon."""
+    """CSS Premium Green ESG + Enterprise Font Size."""
     st.markdown("""
     <style>
 
@@ -128,18 +128,48 @@ def apply_custom_css() -> None:
         -webkit-font-smoothing: antialiased !important;
     }
 
-    /* NỀN 3D PREMIUM */
+    /* BACKGROUND PREMIUM */
     .stApp {
         background: radial-gradient(circle at top, #00ff99 0%, #001a0f 35%, #000c08 100%) !important;
         font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
         color: #e6fff7 !important;
+
+        /* 🔥 TĂNG SIZE CHỮ TOÀN BỘ 15% */
+        font-size: 1.15rem !important;
     }
 
-    /* MẨU MOBILE FIXED — KHẮC PHỤC LỖI HIỂN THỊ IPHONE/ANDROID */
+    /* 🔥 TĂNG FONT H1, H2, H3 */
+    h1 {
+        font-size: 2.8rem !important;
+        font-weight: 900 !important;
+    }
+    h2 {
+        font-size: 2.2rem !important;
+        font-weight: 800 !important;
+    }
+    h3 {
+        font-size: 1.65rem !important;
+        font-weight: 750 !important;
+    }
+
+    /* 🔥 TĂNG FONT LABEL + SIDEBAR */
+    label, .stSelectbox, .stNumberInput, .sidebar-content {
+        font-size: 1.15rem !important;
+    }
+
+    .css-10trblm, .css-1y4p8pa {
+        font-size: 1.15rem !important;
+    }
+
+    /* CARD TRỌNG SỐ */
+    .stButton > button {
+        font-size: 1.2rem !important;
+    }
+
+    /* Mobile scale */
     @media (max-width: 768px) {
-        .block-container {
-            padding-left: 1rem !important;
-            padding-right: 1rem !important;
+        .stApp {
+            font-size: 1.25rem !important; /* chữ to thêm trên điện thoại */
         }
 
         h1 {
