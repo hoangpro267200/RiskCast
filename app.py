@@ -1253,8 +1253,13 @@ class StreamlitUI:
 # =============================================================================
 
 def main():
-    st.set_page_config(...)
-    apply_custom_css()   # ← HOÀNG NHỚ ĐẶT DÒNG NÀY Ở ĐÂY
+    st.set_page_config(
+        page_title="RISKCAST v5.2 — Enterprise",
+        page_icon="🛡️",
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
+    apply_custom_css()
 
 if __name__ == "__main__":
     main()
