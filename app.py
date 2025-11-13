@@ -1,24 +1,18 @@
 # =============================================================================
-# RISKCAST v5.1.5 — ESG Logistics Risk Assessment Dashboard
-# REAL DATA ENGINE (Industry Standard Level 1)
+# RISKCAST v5.2 — ENTERPRISE EDITION (Hybrid Responsive)
+# ESG Logistics Risk Assessment Dashboard
 #
 # Author: Bùi Xuân Hoàng (original idea)
-# Refactor + UI + Real Data Engine: Kai assistant
+# Refactor + UI + Real Data Engine + Enterprise UX: Kai assistant
 #
-# Nổi bật trong v5.1.5:
-#   - UI siêu premium kiểu hệ thống doanh nghiệp (ESG Green)
-#   - Forecast rủi ro khí hậu chỉ dự báo đúng 1 tháng tiếp theo
-#   - Không còn tháng 13–14, trục tháng luôn 1..12
-#   - Nút RESET dùng st.rerun (không còn experimental)
-#   - Fuzzy AHP PREMIUM:
-#       + Bảng Low – Mid – High – Centroid
-#       + Highlight tiêu chí dao động (High - Low) mạnh nhất
-#       + Heatmap Premium Green mức dao động Fuzzy
-#       + Biểu đồ Fuzzy Premium (Low / Mid / High cho từng tiêu chí)
-#   - DỮ LIỆU CHUẨN NGÀNH (INDUSTRY STANDARD LEVEL 1):
-#       + 5 công ty bảo hiểm: Chubb, PVI, BaoViet, BaoMinh, MIC
-#       + C1–C5 theo chuẩn ngành VN 2023–2024 (mô phỏng hợp lý)
-#       + C6 rủi ro khí hậu theo tuyến (12 tháng, 0–1)
+# Nổi bật trong v5.2 Enterprise:
+#   - Sidebar Enterprise style (Salesforce-like)
+#   - Header Enterprise: logo chữ “RISKCAST Enterprise”, subtitle, badge
+#   - Card Enterprise (Oracle Fusion style)
+#   - Bảng Enterprise (Bloomberg Terminal style)
+#   - Fuzzy AHP Enterprise module (heatmap + radar-style line)
+#   - Forecast chart nền tối + line neon
+#   - Hybrid responsive: đẹp trên cả desktop & mobile
 # =============================================================================
 
 import io
@@ -42,6 +36,7 @@ try:
     ARIMA_AVAILABLE = True
 except ImportError:
     ARIMA_AVAILABLE = False
+
 
 # =============================================================================
 # DOMAIN MODELS & CONSTANTS
@@ -107,20 +102,363 @@ COST_BENEFIT_MAP = {
 
 # Độ nhạy rủi ro khí hậu theo công ty (Industry Standard – mô phỏng hợp lý)
 SENSITIVITY_MAP = {
-    "Chubb":     0.95,  # quản trị rủi ro khí hậu tốt hơn trung bình
+    "Chubb":     0.95,  # quản trị rủ ro khí hậu tốt hơn trung bình
     "PVI":       1.05,  # chịu tác động hơi cao hơn chút
     "BaoViet":   1.00,
     "BaoMinh":   1.02,
     "MIC":       1.03
 }
 
+
 # =============================================================================
-# UI STYLING (ENTERPRISE ESG GREEN THEME)
+# UI STYLING — ENTERPRISE ESG PREMIUM GREEN
 # =============================================================================
 
-def apply_custom_css():
-    css = open("assets/enterprise.css", "r", encoding="utf-8").read()
-    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+def apply_custom_css() -> None:
+    """CSS Enterprise: Sidebar, Header, Card, Table, Mobile Hybrid Responsive."""
+    st.markdown("""
+    <style>
+    * {
+        text-rendering: optimizeLegibility !important;
+        -webkit-font-smoothing: antialiased !important;
+    }
+
+    /* =========================
+       GLOBAL BACKGROUND & FONT
+       ========================= */
+    .stApp {
+        background: radial-gradient(circle at top, #00ff99 0%, #001a0f 35%, #000c08 100%) !important;
+        font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+        color: #e6fff7 !important;
+        font-size: 1.05rem !important;
+    }
+
+    .block-container {
+        padding-top: 1rem !important;
+        padding-bottom: 2rem !important;
+        max-width: 1400px !important;
+    }
+
+    h1 {
+        font-size: 2.8rem !important;
+        font-weight: 900 !important;
+        letter-spacing: 0.03em;
+    }
+    h2 {
+        font-size: 2.1rem !important;
+        font-weight: 800 !important;
+    }
+    h3 {
+        font-size: 1.5rem !important;
+        font-weight: 700 !important;
+    }
+
+    /* =========================
+       ENTERPRISE HEADER
+       ========================= */
+    .app-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.1rem 1.5rem;
+        border-radius: 18px;
+        background: linear-gradient(120deg, rgba(0, 255, 153, 0.14), rgba(0, 0, 0, 0.88));
+        border: 1px solid rgba(0, 255, 153, 0.45);
+        box-shadow:
+            0 0 0 1px rgba(0, 255, 153, 0.12),
+            0 18px 45px rgba(0, 0, 0, 0.85);
+        margin-bottom: 1.2rem;
+        gap: 1.5rem;
+    }
+
+    .app-header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+    }
+
+    .app-logo-circle {
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
+        background: radial-gradient(circle at 30% 30%, #b9f6ca 0%, #00c853 38%, #00381f 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 1.4rem;
+        color: #00130d;
+        box-shadow:
+            0 0 14px rgba(0, 255, 153, 0.65),
+            0 0 36px rgba(0, 0, 0, 0.75);
+        border: 2px solid #e8f5e9;
+    }
+
+    .app-header-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #e8fffb, #b9f6ca, #e8fffb);
+        -webkit-background-clip: text;
+        color: transparent;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .app-header-subtitle {
+        font-size: 0.9rem;
+        color: #ccffec;
+        opacity: 0.9;
+    }
+
+    .app-header-badge {
+        font-size: 0.86rem;
+        font-weight: 600;
+        padding: 0.55rem 0.9rem;
+        border-radius: 999px;
+        background: radial-gradient(circle at 0 0, #00e676, #00bfa5);
+        color: #00130d;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        white-space: nowrap;
+        box-shadow:
+            0 0 14px rgba(0, 255, 153, 0.65),
+            0 0 22px rgba(0, 0, 0, 0.7);
+    }
+
+    /* =========================
+       SIDEBAR — ENTERPRISE STYLE
+       ========================= */
+    section[data-testid="stSidebar"] {
+        background: radial-gradient(circle at 0 0, #003322 0%, #000f0a 40%, #000805 100%) !important;
+        border-right: 1px solid rgba(0, 230, 118, 0.55);
+        box-shadow: 8px 0 22px rgba(0, 0, 0, 0.85);
+    }
+
+    section[data-testid="stSidebar"] > div {
+        padding-top: 1.1rem;
+    }
+
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {
+        color: #a5ffdc !important;
+        font-weight: 800 !important;
+    }
+
+    section[data-testid="stSidebar"] label {
+        color: #e0f2f1 !important;
+        font-weight: 600 !important;
+        font-size: 0.92rem !important;
+    }
+
+    section[data-testid="stSidebar"] .stNumberInput input,
+    section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {
+        background-color: #000f0a !important;
+        color: #e6fff7 !important;
+        border-radius: 10px !important;
+        border: 1.4px solid rgba(0, 230, 118, 0.85) !important;
+        font-size: 0.9rem !important;
+    }
+
+    section[data-testid="stSidebar"] .stNumberInput input:focus,
+    section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div:focus {
+        outline: none !important;
+        border-color: #00ff99 !important;
+        box-shadow: 0 0 0 1px #00ff99 !important;
+    }
+
+    /* =========================
+       BUTTONS — ENTERPRISE PRIMARY
+       ========================= */
+    .stButton > button {
+        background: linear-gradient(120deg, #00ff99, #00e676, #00bfa5) !important;
+        color: #00130d !important;
+        font-weight: 800 !important;
+        border-radius: 999px !important;
+        border: none !important;
+        padding: 0.65rem 1.9rem !important;
+        box-shadow:
+            0 0 14px rgba(0, 255, 153, 0.7),
+            0 10px 22px rgba(0, 0, 0, 0.85) !important;
+        transition: all 0.12s ease-out;
+        font-size: 0.98rem !important;
+    }
+
+    .stButton > button:hover {
+        transform: translateY(-1px) scale(1.02);
+        box-shadow:
+            0 0 20px rgba(0, 255, 153, 0.95),
+            0 14px 30px rgba(0, 0, 0, 0.9) !important;
+    }
+
+    /* =========================
+       ENTERPRISE CARDS
+       ========================= */
+    .premium-card {
+        background: radial-gradient(circle at top left, rgba(0, 255, 153, 0.10), rgba(0, 0, 0, 0.95));
+        border-radius: 16px;
+        padding: 1.1rem 1.2rem;
+        border: 1px solid rgba(0, 255, 153, 0.45);
+        box-shadow:
+            0 0 0 1px rgba(0, 255, 153, 0.08),
+            0 16px 38px rgba(0, 0, 0, 0.9);
+        margin-bottom: 1.2rem;
+    }
+
+    .result-box {
+        background: radial-gradient(circle at top left,#00ff99,#00bfa5);
+        color: #00130d !important;
+        padding: 1.6rem 2rem;
+        border-radius: 18px;
+        font-weight: 800;
+        box-shadow:
+            0 0 22px rgba(0, 255, 153, 0.7),
+            0 18px 40px rgba(0, 0, 0, 0.9);
+        border: 2px solid #b9f6ca;
+        margin-top: 0.6rem;
+    }
+
+    .explanation-box {
+        background: rgba(0,40,28,0.92);
+        border-left: 4px solid #00e676;
+        padding: 1.2rem 1.5rem;
+        border-radius: 12px;
+        margin-top: 0.7rem;
+        box-shadow: 0 0 16px rgba(0,0,0,0.7);
+    }
+
+    .explanation-box h4 {
+        color: #a5ffdc !important;
+        font-weight: 800;
+    }
+
+    .explanation-box li {
+        color: #e0f2f1 !important;
+        font-weight: 500;
+        margin: 0.25rem 0;
+    }
+
+    /* =========================
+       BLOOMBERG TABLE STYLE
+       ========================= */
+    div[data-testid="stDataFrame"] {
+        border-radius: 14px !important;
+        border: 1px solid rgba(0, 255, 170, 0.45) !important;
+        overflow: hidden !important;
+        box-shadow:
+            0 0 0 1px rgba(0, 255, 170, 0.10),
+            0 16px 40px rgba(0, 0, 0, 0.85) !important;
+    }
+
+    div[data-testid="stDataFrame"] thead tr {
+        background: linear-gradient(90deg, #003325, #004d40) !important;
+    }
+    div[data-testid="stDataFrame"] thead tr th {
+        color: #e0f2f1 !important;
+        font-weight: 700 !important;
+        font-size: 0.86rem !important;
+        border-bottom: 1px solid #00e676 !important;
+    }
+    div[data-testid="stDataFrame"] tbody tr {
+        font-size: 0.86rem !important;
+    }
+    div[data-testid="stDataFrame"] tbody tr:hover {
+        background-color: rgba(0, 255, 153, 0.08) !important;
+    }
+
+    /* =========================
+       METRIC STYLE
+       ========================= */
+    [data-testid="stMetricValue"] {
+        color: #76ff03 !important;
+        font-weight: 900 !important;
+        font-size: 1.1rem !important;
+    }
+    [data-testid="stMetricLabel"] {
+        color: #e0f2f1 !important;
+        font-weight: 600 !important;
+    }
+
+    .stPlotlyChart {
+        border-radius: 16px !important;
+        box-shadow: 0 0 18px rgba(0,0,0,0.75) !important;
+        padding: 0.25rem !important;
+    }
+
+    /* =========================
+       MOBILE — HYBRID RESPONSIVE
+       ========================= */
+    @media (max-width: 900px) {
+        .block-container {
+            padding-left: 0.8rem !important;
+            padding-right: 0.8rem !important;
+        }
+
+        .app-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .app-header-badge {
+            align-self: flex-start;
+        }
+
+        .app-logo-circle {
+            width: 52px;
+            height: 52px;
+            font-size: 1.2rem;
+        }
+
+        .app-header-title {
+            font-size: 1.2rem;
+        }
+
+        .premium-card {
+            padding: 0.9rem 0.9rem;
+            border-radius: 14px;
+        }
+
+        .result-box {
+            padding: 1.2rem 1.3rem;
+            font-size: 0.94rem;
+            border-radius: 16px;
+        }
+
+        .stButton > button {
+            width: 100% !important;
+            padding-top: 0.75rem !important;
+            padding-bottom: 0.75rem !important;
+            font-size: 0.94rem !important;
+        }
+
+        /* cột → xếp dọc */
+        div[data-testid="column"] {
+            flex: 0 0 100% !important;
+            width: 100% !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        section[data-testid="stSidebar"] {
+            width: 100% !important;
+            max-width: 100% !important;
+            position: relative !important;
+            border-right: none !important;
+            border-bottom: 1px solid rgba(0, 230, 118, 0.7) !important;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.85);
+        }
+        section[data-testid="stSidebar"] > div {
+            padding: 0.7rem 0.9rem !important;
+        }
+
+        div[data-testid="stDataFrame"] {
+            box-shadow: 0 0 10px rgba(0,0,0,0.7) !important;
+        }
+    }
+
+    </style>
+    """, unsafe_allow_html=True)
+
 
 # =============================================================================
 # DATA LAYER — INDUSTRY STANDARD LEVEL 1
@@ -196,6 +534,7 @@ class DataService:
             })
             .set_index("Company")
         )
+
 
 # =============================================================================
 # CORE ALGORITHMS
@@ -389,6 +728,7 @@ class Forecaster:
         next_val = np.clip(train_series[-1] + trend, 0.0, 1.0)
         return hist_series, np.array([next_val])
 
+
 # =============================================================================
 # FUZZY VISUAL UTILITIES (PREMIUM GREEN)
 # =============================================================================
@@ -545,6 +885,7 @@ def fuzzy_chart_premium(weights: pd.Series, fuzzy_pct: float) -> go.Figure:
     )
     return fig
 
+
 # =============================================================================
 # VISUALIZATION
 # =============================================================================
@@ -562,8 +903,8 @@ class ChartFactory:
                 x=0.5
             ),
             font=dict(size=15, color="#e6fff7"),
-            plot_bgcolor="#001a12",
-            paper_bgcolor="#001a12",
+            plot_bgcolor="#001016",
+            paper_bgcolor="#000c11",
             margin=dict(l=70, r=40, t=80, b=70),
             legend=dict(
                 bgcolor="rgba(0,0,0,0.3)",
@@ -573,12 +914,12 @@ class ChartFactory:
         )
         fig.update_xaxes(
             showgrid=True,
-            gridcolor="#004d40",
+            gridcolor="#00332b",
             tickfont=dict(size=14, color="#e6fff7")
         )
         fig.update_yaxes(
             showgrid=True,
-            gridcolor="#004d40",
+            gridcolor="#00332b",
             tickfont=dict(size=14, color="#e6fff7")
         )
         return fig
@@ -612,8 +953,8 @@ class ChartFactory:
                 title="<b>Các tiêu chí</b>",
                 font=dict(size=13, color="#e6fff7")
             ),
-            paper_bgcolor="#001a12",
-            plot_bgcolor="#001a12",
+            paper_bgcolor="#001016",
+            plot_bgcolor="#001016",
             margin=dict(l=0, r=0, t=60, b=0),
             height=430
         )
@@ -663,6 +1004,7 @@ class ChartFactory:
 
         fig = go.Figure()
 
+        # Lịch sử – line neon
         fig.add_trace(go.Scatter(
             x=months_hist,
             y=historical,
@@ -673,6 +1015,7 @@ class ChartFactory:
             hovertemplate="Tháng %{x}<br>Rủi ro: %{y:.1%}<extra></extra>"
         ))
 
+        # Dự báo – marker sáng hơn
         fig.add_trace(go.Scatter(
             x=months_fc,
             y=forecast,
@@ -703,6 +1046,7 @@ class ChartFactory:
 
         return fig
 
+
 # =============================================================================
 # EXPORT UTILITIES
 # =============================================================================
@@ -722,7 +1066,7 @@ class ReportGenerator:
             pdf.add_page()
 
             pdf.set_font("Arial", "B", 16)
-            pdf.cell(0, 10, "RISKCAST v5.1.5 - Executive Summary", 0, 1, "C")
+            pdf.cell(0, 10, "RISKCAST v5.2 - Enterprise Summary", 0, 1, "C")
             pdf.ln(4)
 
             pdf.set_font("Arial", "", 11)
@@ -778,6 +1122,7 @@ class ReportGenerator:
             )
         buffer.seek(0)
         return buffer.getvalue()
+
 
 # =============================================================================
 # APPLICATION CONTROLLER
@@ -868,6 +1213,7 @@ class AnalysisController:
             forecast=forecast
         )
 
+
 # =============================================================================
 # STREAMLIT UI
 # =============================================================================
@@ -880,7 +1226,7 @@ class StreamlitUI:
 
     def initialize(self):
         st.set_page_config(
-            page_title="RISKCAST v5.1.5 — Fuzzy Premium Green (Real Data Engine)",
+            page_title="RISKCAST v5.2 — Enterprise ESG Fuzzy Premium Green",
             page_icon="🛡️",
             layout="wide"
         )
@@ -1014,7 +1360,7 @@ class StreamlitUI:
         left, right = st.columns([2.1, 1.1])
 
         with left:
-            st.subheader("🏅 Bảng xếp hạng công ty bảo hiểm")
+            st.subheader("🏅 Bảng xếp hạng công ty bảo hiểm (Enterprise Table)")
             df_show = result.results[["rank", "company", "score", "confidence", "recommend_icc"]].set_index("rank")
             df_show.columns = ["Công ty", "Điểm số", "Độ tin cậy", "ICC khuyến nghị"]
             st.dataframe(df_show, use_container_width=True)
@@ -1054,6 +1400,7 @@ class StreamlitUI:
         st.subheader("📋 Giải thích kết quả")
 
         top3 = result.results.head(3)
+        top = result.results.iloc[0]
 
         st.markdown(
             f"""
@@ -1137,7 +1484,7 @@ class StreamlitUI:
         # LAYER 4: Khu vực Fuzzy Premium
         if params.use_fuzzy:
             st.markdown("---")
-            st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số (Premium Green)")
+            st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số (Enterprise Module)")
 
             # Biểu đồ Fuzzy
             fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
@@ -1157,7 +1504,7 @@ class StreamlitUI:
                 🔍 <b>Tiêu chí dao động mạnh nhất (High - Low lớn nhất):</b><br>
                 <span style="color:#00FFAA; font-size:20px;"><b>{most_unc}</b></span><br><br>
                 💡 Điều này nghĩa là tiêu chí này <b>nhạy cảm nhất</b> khi thay đổi trọng số đầu vào (Fuzzy). 
-                 “Mô hình Fuzzy cho thấy tiêu chí này có độ bất định cao, 
+                “Mô hình Fuzzy cho thấy tiêu chí này có độ bất định cao, 
                 nên cần được chuyên gia cân nhắc kỹ khi hiệu chỉnh trọng số.”
                 </div>
                 """, unsafe_allow_html=True
@@ -1206,19 +1553,20 @@ class StreamlitUI:
             """
             <div class="app-header">
                 <div class="app-header-left">
-                    <div class="app-header-title">🚢 RISKCAST v5.1.5 — ESG Fuzzy Premium Green</div>
-                    <div class="app-header-subtitle">
-                        Hệ hỗ trợ ra quyết định mua bảo hiểm vận tải quốc tế | Fuzzy AHP · TOPSIS · Monte Carlo · VaR/CVaR · Forecast · Real Data Engine
+                    <div class="app-logo-circle">RC</div>
+                    <div>
+                        <div class="app-header-title">RISKCAST v5.2 — ENTERPRISE EDITION</div>
+                        <div class="app-header-subtitle">
+                            Hệ hỗ trợ ra quyết định mua bảo hiểm vận tải quốc tế · Fuzzy AHP · TOPSIS · Monte Carlo · VaR/CVaR · Forecast · Real Data Engine
+                        </div>
                     </div>
                 </div>
-                <div>
-                    <div class="app-header-pill">
-                        <span>🧠 Fuzzy AHP Enterprise</span>
-                        <span>·</span>
-                        <span>Monte Carlo ESG</span>
-                        <span>·</span>
-                        <span>VaR / CVaR</span>
-                    </div>
+                <div class="app-header-badge">
+                    <span>🧠 Fuzzy AHP Enterprise</span>
+                    <span>·</span>
+                    <span>Monte Carlo ESG</span>
+                    <span>·</span>
+                    <span>VaR / CVaR</span>
                 </div>
             </div>
             """,
@@ -1248,18 +1596,15 @@ class StreamlitUI:
                     st.error(f"❌ Lỗi trong quá trình phân tích: {e}")
                     st.exception(e)
 
+
 # =============================================================================
 # MAIN
 # =============================================================================
 
 def main():
-    st.set_page_config(
-        page_title="RISKCAST v5.2 — Enterprise",
-        page_icon="🛡️",
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
-    apply_custom_css()
+    app = StreamlitUI()
+    app.run()
+
 
 if __name__ == "__main__":
     main()
