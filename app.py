@@ -203,69 +203,21 @@ def apply_custom_css() -> None:
             font-size: 1.05rem !important;
         }
         
-        /* Sidebar - Complete White Text Theme */
+        /* Sidebar - High Contrast */
         section[data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #1A1A1A 0%, #2D2D2D 100%) !important;
+            background: #F5F5F5 !important;
             border-right: 3px solid #0052A3;
-            padding: 1.5rem;
-        }
-        
-        section[data-testid="stSidebar"] * {
-            color: #FFFFFF !important;
-        }
-        
-        section[data-testid="stSidebar"] h1,
-        section[data-testid="stSidebar"] h2,
-        section[data-testid="stSidebar"] h3 {
-            color: #FFFFFF !important;
-            font-weight: 900 !important;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         
         section[data-testid="stSidebar"] h2 {
-            font-size: 1.8rem !important;
-            border-bottom: 3px solid #0052A3;
-            padding-bottom: 0.8rem;
-            margin-bottom: 1.5rem;
+            color: #000000 !important;
+            font-weight: 900 !important;
         }
         
-        section[data-testid="stSidebar"] label,
-        section[data-testid="stSidebar"] .stMarkdown,
-        section[data-testid="stSidebar"] p,
-        section[data-testid="stSidebar"] span,
-        section[data-testid="stSidebar"] div {
-            color: #FFFFFF !important;
+        section[data-testid="stSidebar"] label {
+            color: #000000 !important;
             font-weight: 700 !important;
-        }
-        
-        /* Sidebar Inputs */
-        section[data-testid="stSidebar"] input,
-        section[data-testid="stSidebar"] select,
-        section[data-testid="stSidebar"] textarea {
-            background: #3D3D3D !important;
-            color: #FFFFFF !important;
-            border: 2px solid #0052A3 !important;
-            font-weight: 700 !important;
-        }
-        
-        section[data-testid="stSidebar"] .stSelectbox > div > div {
-            background: #3D3D3D !important;
-            color: #FFFFFF !important;
-        }
-        
-        section[data-testid="stSidebar"] .stNumberInput input {
-            background: #3D3D3D !important;
-            color: #FFFFFF !important;
-        }
-        
-        /* Checkboxes */
-        section[data-testid="stSidebar"] .stCheckbox label {
-            color: #FFFFFF !important;
-            font-weight: 700 !important;
-        }
-        
-        section[data-testid="stSidebar"] .stCheckbox input:checked + div {
-            background-color: #0052A3 !important;
+            font-size: 1rem !important;
         }
         
         /* Metrics - Bold */
@@ -583,40 +535,32 @@ class ChartFactory:
     
     @staticmethod
     def create_weights_pie(weights: pd.Series, title: str) -> go.Figure:
-        """Create weight distribution pie chart - FIXED layout"""
+        """Create weight distribution pie chart with white background and bold labels"""
         colors = ['#0052A3', '#00C853', '#FF5252', '#FF9800', '#9C27B0', '#00BCD4']
         
-        # Create labels with only criterion codes (shorter)
-        short_labels = [label.split(':')[0] for label in weights.index]
-        
         fig = go.Figure(data=[go.Pie(
-            labels=short_labels,
+            labels=weights.index,
             values=weights.values,
             marker=dict(colors=colors, line=dict(color='#FFFFFF', width=4)),
-            textfont=dict(size=22, color="#000000", family="Arial Black", weight="bold"),
-            textposition='inside',  # Changed to inside to prevent overlap
-            textinfo='percent',  # Only show percentage inside
-            insidetextorientation='horizontal',
-            hole=0.3,  # Donut chart for better space
+            textfont=dict(size=20, color="#000000", family="Arial Black", weight="bold"),
+            textposition='outside',
+            textinfo='label+percent',
+            insidetextorientation='radial',
+            pull=[0.08] * len(weights),  # Pull out for better visibility
             hovertemplate='<b>%{label}</b><br>%{percent}<extra></extra>'
         )])
-        
-        # Create custom legend with full descriptions
-        legend_labels = [f"<b>{label}</b>" for label in weights.index]
         
         fig.update_layout(
             title=dict(
                 text=f"<b>{title}</b>",
                 font=dict(size=24, color="#000000", family="Arial Black"),
                 x=0.5,
-                xanchor='center',
-                y=0.98
+                xanchor='center'
             ),
-            font=dict(size=16, color="#000000", weight="bold"),
+            font=dict(size=18, color="#000000", weight="bold"),
             showlegend=True,
             legend=dict(
-                title=dict(text="<b>Tiêu chí:</b>", font=dict(size=18, color="#000000")),
-                font=dict(size=16, color="#000000", family="Arial", weight="bold"),
+                font=dict(size=18, color="#000000", family="Arial", weight="bold"),
                 bgcolor="rgba(255,255,255,0.95)",
                 bordercolor="#000000",
                 borderwidth=2,
@@ -624,32 +568,12 @@ class ChartFactory:
                 yanchor="middle",
                 y=0.5,
                 xanchor="left",
-                x=1.05,
-                itemsizing='constant',
-                tracegroupgap=10
+                x=1.05
             ),
             plot_bgcolor="white",
             paper_bgcolor="white",
-            margin=dict(l=40, r=280, t=100, b=40),
-            height=500
+            margin=dict(l=20, r=200, t=100, b=20)
         )
-        
-        # Update legend labels manually
-        for i, label in enumerate(weights.index):
-            fig.data[0].labels = tuple(short_labels)
-        
-        # Add annotations for legend mapping
-        annotations = []
-        for i, (short, full) in enumerate(zip(short_labels, weights.index)):
-            annotations.append(dict(
-                x=1.05, y=0.9 - i*0.15,
-                xref='paper', yref='paper',
-                text=f"<b>{short}:</b> {full.split(':')[1].strip()}",
-                showarrow=False,
-                font=dict(size=14, color="#000000", weight="bold"),
-                xanchor='left',
-                align='left'
-            ))
         
         return fig
     
@@ -1190,4 +1114,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
