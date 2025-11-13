@@ -119,7 +119,6 @@ def apply_custom_css():
             box-shadow: 0 0 25px rgba(0,255,150,0.15);
         }
 
-        /* HEADERS -----------------------------------------------------------*/
         h1 {
             color: #00FFAA !important;
             font-weight: 900 !important;
@@ -141,6 +140,7 @@ def apply_custom_css():
             background: #001E14 !important;
             border-right: 3px solid #00FFAA;
         }
+
         section[data-testid="stSidebar"] h2 {
             color: #00FFAA !important;
             background: #003822;
@@ -151,12 +151,6 @@ def apply_custom_css():
             border: 1.3px solid #00D387;
         }
 
-        section[data-testid="stSidebar"] label {
-            color: #CFFFEF !important;
-            font-size: 1rem;
-        }
-
-        /* INPUT FIELDS -------------------------------------------------------*/
         section[data-testid="stSidebar"] input,
         section[data-testid="stSidebar"] select {
             background: #002C1A !important;
@@ -165,71 +159,13 @@ def apply_custom_css():
             border-radius: 8px !important;
         }
 
-        /* BUTTONS ------------------------------------------------------------*/
         .stButton > button {
             background: linear-gradient(135deg,#00A86B,#00FFAA) !important;
             color: #002214 !important;
             border-radius: 12px !important;
-            padding: 12px 18px !important;
             font-size: 1.15rem !important;
             font-weight: 900 !important;
             border: none !important;
-            box-shadow: 0 0 18px rgba(0,255,160,0.4) !important;
-            transition: all 0.2s ease-in-out;
-        }
-        .stButton > button:hover {
-            transform: translateY(-2px) scale(1.03);
-            box-shadow: 0 0 25px rgba(0,255,160,0.7) !important;
-        }
-
-        /* TABLE --------------------------------------------------------------*/
-        .stDataFrame table {
-            border-radius: 12px !important;
-            overflow: hidden !important;
-        }
-        .stDataFrame thead tr th {
-            background: #004A32 !important;
-            color: #CFFFF0 !important;
-            font-weight: 900;
-        }
-        .stDataFrame tbody tr td {
-            background: rgba(0,40,25,0.4) !important;
-            color: #E6FFF5 !important;
-        }
-
-        /* RESULT BOX ---------------------------------------------------------*/
-        .result-box {
-            background: linear-gradient(135deg,#00FFAA,#00C47A);
-            padding: 20px;
-            text-align: center;
-            border-radius: 16px;
-            color: #002313 !important;
-            font-weight: 900;
-            font-size: 1.4rem;
-            box-shadow: 0 0 25px rgba(0,255,170,0.45);
-        }
-
-        /* METRICS ------------------------------------------------------------*/
-        [data-testid="stMetricValue"] {
-            color: #00FFAA !important;
-            text-shadow: 0 0 8px rgba(0,255,160,0.5);
-            font-weight: 900;
-        }
-        [data-testid="stMetricLabel"] {
-            color: #CFFFF0 !important;
-        }
-
-        /* EXPLANATION BOX ----------------------------------------------------*/
-        .explanation-box {
-            background: rgba(0, 45, 25, 0.45);
-            padding: 1.3rem;
-            border-left: 6px solid #00FFAA;
-            border-radius: 10px;
-            box-shadow: 0 0 18px rgba(0,255,160,0.15);
-        }
-        .explanation-box h4 {
-            color: #00FFAA !important;
-            font-weight: 900;
         }
 
         </style>
@@ -237,70 +173,41 @@ def apply_custom_css():
         unsafe_allow_html=True,
     )
 # =============================================================================
-# CORE ALGORITHMS — PREMIUM DARK v5.1.5
+# DATA SERVICE (Mock data for demo) — RISKCAST v5.1.5
 # =============================================================================
 
-
-# ============================
-# 1. TRỌNG SỐ (AUTO-BALANCE)
-# ============================
-
-class WeightManager:
-    """Tự cân bằng trọng số sao cho tổng = 1, có khóa từng tiêu chí."""
+class DataService:
+    """Cung cấp dữ liệu lịch sử rủi ro khí hậu (12 tháng)."""
 
     @staticmethod
-    def auto_balance(weights: np.ndarray, locked: List[bool]) -> np.ndarray:
-        w = np.array(weights, dtype=float)
-        locked_flags = np.array(locked, dtype=bool)
-
-        total_locked = w[locked_flags].sum()
-        free_idx = np.where(~locked_flags)[0]
-
-        # Không còn tiêu chí nào free
-        if len(free_idx) == 0:
-            total = w.sum() or 1.0
-            return np.round(w / total, 6)
-
-        remaining = max(0.0, 1.0 - total_locked)
-        free_sum = w[free_idx].sum()
-
-        if free_sum > 0:
-            w[free_idx] = w[free_idx] / free_sum * remaining
-        else:
-            w[free_idx] = remaining / len(free_idx)
-
-        w = np.clip(w, 0.0, 1.0)
-        diff = 1.0 - w.sum()
-        if abs(diff) > 1e-8 and len(free_idx) > 0:
-            w[free_idx[0]] += diff
-
-        return np.round(w, 6)
-
-
-
-# ============================
-# 2. FUZZY AHP
-# ============================
+    @st.cache_data(ttl=600)
+    def load_historical_data() -> pd.DataFrame:
+        # 12 tháng rủi ro (0–1)
+        data = {
+            "VN - EU": [0.20, 0.22, 0.25, 0.28, 0.27, 0.30, 0.33, 0.35, 0.32, 0.28, 0.25, 0.22],
+            "VN - US": [0.18, 0.19, 0.21, 0.24, 0.26, 0.29, 0.31, 0.34, 0.33, 0.29, 0.26, 0.22],
+            "VN - Singapore": [0.12, 0.13, 0.15, 0.16, 0.14, 0.15, 0.17, 0.18, 0.17, 0.15, 0.14, 0.12],
+            "VN - China": [0.14, 0.15, 0.17, 0.18, 0.20, 0.23, 0.25, 0.27, 0.26, 0.23, 0.20, 0.17],
+            "Domestic": [0.08, 0.09, 0.10, 0.11, 0.10, 0.11, 0.12, 0.13, 0.12, 0.10, 0.09, 0.08],
+        }
+        return pd.DataFrame(data)
+# =============================================================================
+# FUZZY AHP — Premium Green
+# =============================================================================
 
 class FuzzyAHP:
-    """
-    Fuzzy AHP tam giác: low, mid, high.
-    Tạo thêm:
-      - centroid (defuzzified)
-      - range (high - low)
-    """
 
     @staticmethod
     def build_fuzzy_table(weights: pd.Series, uncertainty_pct: float) -> pd.DataFrame:
         factor = uncertainty_pct / 100
         base = weights.values
 
-        # raw fuzzy
+        # raw (chưa normalize)
         low_raw = np.maximum(base * (1 - factor), 1e-9)
         mid_raw = base.copy()
         high_raw = np.minimum(base * (1 + factor), 0.999)
 
-        # normalize helper
+        # normalize
         def normalize(arr):
             s = arr.sum()
             return arr / s if s > 0 else np.full_like(arr, 1/len(arr))
@@ -314,7 +221,7 @@ class FuzzyAHP:
 
         rng = high - low
 
-        df = pd.DataFrame({
+        return pd.DataFrame({
             "low": low,
             "mid": mid,
             "high": high,
@@ -322,49 +229,39 @@ class FuzzyAHP:
             "range": rng,
         }, index=weights.index)
 
-        return df
-
     @staticmethod
     def apply(weights: pd.Series, uncertainty_pct: float):
         fuzzy_table = FuzzyAHP.build_fuzzy_table(weights, uncertainty_pct)
         centroid_weight = fuzzy_table["centroid"]
         return centroid_weight, fuzzy_table
-
-
-
-# ============================
-# 3. MONTE CARLO
-# ============================
+# =============================================================================
+# MONTE CARLO SIMULATOR
+# =============================================================================
 
 class MonteCarloSimulator:
-    """Monte Carlo cho rủi ro khí hậu C6."""
 
     @staticmethod
     @st.cache_data(ttl=600)
     def simulate(base_risk: float, sensitivity_map: Dict[str, float], n_simulations: int):
+
         rng = np.random.default_rng(2025)
         companies = list(sensitivity_map.keys())
 
         mu = np.array([base_risk * sensitivity_map[c] for c in companies])
-        sigma = np.maximum(0.025, mu * 0.12)
+        sigma = np.maximum(0.02, mu * 0.12)
 
         sims = rng.normal(mu, sigma, size=(n_simulations, len(companies)))
         sims = np.clip(sims, 0.0, 1.0)
 
         return companies, sims.mean(axis=0), sims.std(axis=0)
-
-
-
-# ============================
-# 4. TOPSIS
-# ============================
+# =============================================================================
+# TOPSIS ANALYZER
+# =============================================================================
 
 class TOPSISAnalyzer:
-    """Chuẩn TOPSIS: normalize → weight → ideal → distance."""
 
     @staticmethod
     def analyze(data: pd.DataFrame, weights: pd.Series, cost_benefit: Dict[str, CriterionType]):
-
         M = data[list(weights.index)].values.astype(float)
 
         denom = np.sqrt((M ** 2).sum(axis=0))
@@ -374,6 +271,7 @@ class TOPSISAnalyzer:
         V = R * weights.values
 
         is_cost = np.array([cost_benefit[c] == CriterionType.COST for c in weights.index])
+
         ideal_best = np.where(is_cost, V.min(axis=0), V.max(axis=0))
         ideal_worst = np.where(is_cost, V.max(axis=0), V.min(axis=0))
 
@@ -381,31 +279,31 @@ class TOPSISAnalyzer:
         d_minus = np.sqrt(((V - ideal_worst) ** 2).sum(axis=1))
 
         return d_minus / (d_plus + d_minus + 1e-12)
-
-
-
-# ============================
-# 5. VaR / CVaR + CONFIDENCE
-# ============================
+# =============================================================================
+# RISK CALCULATOR
+# =============================================================================
 
 class RiskCalculator:
 
     @staticmethod
     def calculate_var_cvar(loss_rates: np.ndarray, cargo_value: float, confidence=0.95):
+
         if len(loss_rates) == 0:
             return 0.0, 0.0
 
         losses = loss_rates * cargo_value
         var = float(np.percentile(losses, confidence * 100))
         tail = losses[losses >= var]
+
         cvar = float(tail.mean()) if len(tail) > 0 else var
         return var, cvar
 
     @staticmethod
     def calculate_confidence(results: pd.DataFrame, data: pd.DataFrame):
-        eps = 1e-9
 
+        eps = 1e-9
         cv_c6 = results["C6_std"] / (results["C6_mean"] + eps)
+
         conf_c6 = 1 / (1 + cv_c6)
         conf_c6 = 0.3 + 0.7 * (conf_c6 - conf_c6.min()) / (np.ptp(conf_c6) + eps)
 
@@ -414,25 +312,22 @@ class RiskCalculator:
         conf_crit = 0.3 + 0.7 * (conf_crit - conf_crit.min()) / (np.ptp(conf_crit) + eps)
 
         return np.sqrt(conf_c6 * conf_crit)
-
-
-
-# ============================
-# 6. FORECASTER (FIX MONTH 14)
-# ============================
+# =============================================================================
+# FORECASTER — Only 1-month forecast (fix jumping month)
+# =============================================================================
 
 class Forecaster:
-    """Chỉ dự báo 1 tháng — luôn chính xác và không nhảy sang tháng 14."""
 
     @staticmethod
-    def forecast(historical: pd.DataFrame, route: str, current_month: int, months_ahead=1, use_arima=True):
+    def forecast(historical: pd.DataFrame, route: str, current_month: int,
+                 months_ahead=1, use_arima=True):
 
         if route not in historical.columns:
-            route = historical.columns[1]
+            route = historical.columns[0]
 
-        series = historical[route].values  # 12 tháng
+        series = historical[route].values  # length = 12
 
-        # ARIMA hoặc fallback
+        # ARIMA or fallback
         if use_arima and ARIMA_AVAILABLE and len(series) >= 6:
             try:
                 model = ARIMA(series, order=(1,1,1))
@@ -451,15 +346,146 @@ class Forecaster:
         next_month = (current_month % 12) + 1
         return series, fc, np.array([next_month])
 # =============================================================================
-# VISUALIZATION — PREMIUM GREEN DARK v5.1.5
+# ANALYSIS CONTROLLER — RISKCAST v5.1.5
+# =============================================================================
+
+class AnalysisController:
+    """Điều phối toàn bộ pipeline phân tích RISKCAST."""
+
+    def __init__(self):
+        self.fuzzy_ahp = FuzzyAHP()
+        self.mc = MonteCarloSimulator()
+        self.topsis = TOPSISAnalyzer()
+        self.riskcalc = RiskCalculator()
+        self.forecaster = Forecaster()
+
+    # -------------------------------------------------------------------------
+    # MAIN PIPELINE
+    # -------------------------------------------------------------------------
+    def run_analysis(self, params: AnalysisParams, historical: pd.DataFrame) -> AnalysisResult:
+
+        # 1. Load company data
+        company_data = pd.DataFrame({
+            "Company": ["Chubb", "PVI", "InternationalIns", "BaoViet", "Aon"],
+            "C1: Tỷ lệ phí": [0.30, 0.28, 0.26, 0.32, 0.24],
+            "C2: Thời gian xử lý": [6, 5, 8, 7, 4],
+            "C3: Tỷ lệ tổn thất": [0.08, 0.06, 0.09, 0.10, 0.07],
+            "C4: Hỗ trợ ICC": [9, 8, 6, 9, 7],
+            "C5: Chăm sóc KH": [9, 8, 5, 7, 6],
+        }).set_index("Company")
+
+        # ---------------------------------------------------------------------
+        # 2. Climate base risk (C6)
+        # ---------------------------------------------------------------------
+        series_12 = historical[params.route].values
+        base_risk = float(series_12[params.month - 1])  # tháng 1 → index 0
+
+        # ---------------------------------------------------------------------
+        # 3. Monte Carlo (mean + std) → C6
+        # ---------------------------------------------------------------------
+        if params.use_mc:
+            companies, mc_mean, mc_std = self.mc.simulate(
+                base_risk,
+                SENSITIVITY_MAP,
+                params.mc_runs
+            )
+            order = [companies.index(c) for c in company_data.index]
+            mc_mean = mc_mean[order]
+            mc_std = mc_std[order]
+        else:
+            mc_mean = np.zeros(len(company_data))
+            mc_std = np.zeros(len(company_data))
+
+        # ---------------------------------------------------------------------
+        # 4. Adjust company data
+        # ---------------------------------------------------------------------
+        data_adj = company_data.copy()
+        data_adj["C6: Rủi ro khí hậu"] = mc_mean
+
+        # Hàng giá trị cao → phí tăng nhẹ
+        if params.cargo_value > 50000:
+            data_adj["C1: Tỷ lệ phí"] *= 1.1
+
+        # ---------------------------------------------------------------------
+        # 5. Lấy trọng số (từ sidebar)
+        # ---------------------------------------------------------------------
+        base_weights = pd.Series(st.session_state["weights"], index=CRITERIA)
+
+        fuzzy_table = None
+        if params.use_fuzzy:
+            weights, fuzzy_table = self.fuzzy_ahp.apply(base_weights, params.fuzzy_uncertainty)
+        else:
+            weights = base_weights.copy()
+
+        # ---------------------------------------------------------------------
+        # 6. TOPSIS
+        # ---------------------------------------------------------------------
+        scores = self.topsis.analyze(data_adj, weights, COST_BENEFIT_MAP)
+
+        results = pd.DataFrame({
+            "company": data_adj.index,
+            "score": scores,
+            "C6_mean": mc_mean,
+            "C6_std": mc_std,
+        }).sort_values("score", ascending=False).reset_index(drop=True)
+
+        results["rank"] = results.index + 1
+        results["recommend_icc"] = results["score"].apply(
+            lambda s: "ICC A" if s >= 0.75 else ("ICC B" if s >= 0.5 else "ICC C")
+        )
+
+        # ---------------------------------------------------------------------
+        # 7. CONFIDENCE SCORE
+        # ---------------------------------------------------------------------
+        conf = self.riskcalc.calculate_confidence(results, data_adj)
+        order_map = {comp: conf[i] for i, comp in enumerate(data_adj.index)}
+        results["confidence"] = results["company"].map(order_map).round(3)
+
+        # ---------------------------------------------------------------------
+        # 8. VaR / CVaR
+        # ---------------------------------------------------------------------
+        var = cvar = None
+        if params.use_var:
+            var, cvar = self.riskcalc.calculate_var_cvar(
+                results["C6_mean"].values,
+                params.cargo_value,
+            )
+
+        # ---------------------------------------------------------------------
+        # 9. FORECASTER (chỉ dự báo 1 tháng)
+        # ---------------------------------------------------------------------
+        hist_series, fc_values, fc_months = self.forecaster.forecast(
+            historical,
+            params.route,
+            current_month=params.month,
+            months_ahead=1,
+            use_arima=params.use_arima,
+        )
+
+        # ---------------------------------------------------------------------
+        # 10. RETURN FULL RESULT OBJECT
+        # ---------------------------------------------------------------------
+        return AnalysisResult(
+            results=results,
+            weights=weights,
+            data_adjusted=data_adj,
+            var=var,
+            cvar=cvar,
+            historical=hist_series,
+            forecast=fc_values,
+            forecast_months=fc_months,
+            fuzzy_table=fuzzy_table,
+        )
+# =============================================================================
+# CHART FACTORY — PREMIUM GREEN DARK
 # =============================================================================
 
 class ChartFactory:
     """Toàn bộ chart style Premium Green DARK Neon."""
 
-    # -------------------------------------------------------------
+    # -------------------------------------------------------------------------
     # APPLY PREMIUM THEME
-    # -------------------------------------------------------------
+    # -------------------------------------------------------------------------
     @staticmethod
     def _apply_theme(fig: go.Figure, title: str) -> go.Figure:
         fig.update_layout(
@@ -474,11 +500,11 @@ class ChartFactory:
             plot_bgcolor="#001A12",
             margin=dict(l=60, r=40, t=80, b=70),
             legend=dict(
-                bgcolor="rgba(0,0,0,0.3)",
+                bgcolor="rgba(0,0,0,0.30)",
                 bordercolor="#00FFAA",
                 borderwidth=1.6,
                 font=dict(size=13, color="#CFFFF0"),
-            ),
+            )
         )
 
         fig.update_xaxes(
@@ -488,6 +514,7 @@ class ChartFactory:
             linewidth=1.3,
             zeroline=False,
         )
+
         fig.update_yaxes(
             showgrid=True,
             gridcolor="rgba(0,255,160,0.08)",
@@ -497,16 +524,12 @@ class ChartFactory:
         )
         return fig
 
-
-    # -------------------------------------------------------------
-    # PIE CHART — TRỌNG SỐ (PREMIUM GREEN)
-    # -------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # PIE CHART — Trọng số
+    # -------------------------------------------------------------------------
     @staticmethod
     def create_weights_pie(weights: pd.Series, title: str) -> go.Figure:
-        colors = [
-            "#00FFAA", "#00D387", "#00A86B",
-            "#008F5D", "#66FFCA", "#33FFB2"
-        ]
+        colors = ["#00FFAA", "#00D387", "#00A86B", "#008F5D", "#66FFCA", "#33FFB2"]
 
         fig = go.Figure(
             data=[
@@ -516,27 +539,21 @@ class ChartFactory:
                     hole=0.45,
                     marker=dict(colors=colors, line=dict(color="#001A12", width=3)),
                     textinfo="percent",
-                    textfont=dict(size=15, color="#001A12", family="Inter"),
-                    pull=[0.03]*len(weights),
-                    hovertemplate="<b>%{label}</b><br>Tỉ trọng: %{value:.2%}<extra></extra>",
+                    textfont=dict(size=15, color="#001A12"),
+                    pull=[0.03] * len(weights),
                 )
             ]
         )
 
         fig.update_layout(
-            title=dict(
-                text=f"<b>{title}</b>",
-                font=dict(size=22, color="#00FFAA"),
-                x=0.5,
-            ),
             paper_bgcolor="#002016",
+            title=dict(text=f"<b>{title}</b>", font=dict(size=22, color="#00FFAA"), x=0.5)
         )
         return fig
 
-
-    # -------------------------------------------------------------
-    # TOPSIS BAR — NEON PREMIUM
-    # -------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # TOPSIS Bar Chart
+    # -------------------------------------------------------------------------
     @staticmethod
     def create_topsis_bar(results: pd.DataFrame) -> go.Figure:
         df = results.sort_values("score", ascending=True)
@@ -552,32 +569,29 @@ class ChartFactory:
                     marker=dict(
                         color=df["score"],
                         colorscale=[
-                            [0.00, "#004D36"],
+                            [0.0, "#004D36"],
                             [0.25, "#00A06B"],
                             [0.50, "#00D387"],
                             [0.75, "#00FFAA"],
                             [1.00, "#66FFD1"],
                         ],
                         line=dict(color="#00FFAA", width=1.8),
-                    ),
-                    hovertemplate="<b>%{y}</b><br>Score: %{x:.3f}<extra></extra>",
+                    )
                 )
             ]
         )
 
-        fig = ChartFactory._apply_theme(fig, "🏆 TOPSIS Score (cao hơn = tốt hơn)")
+        fig = ChartFactory._apply_theme(fig, "🏆 TOPSIS Ranking")
         fig.update_xaxes(range=[0, 1], title="Điểm TOPSIS")
-        fig.update_yaxes(title="Công ty")
         return fig
 
-
-    # -------------------------------------------------------------
-    # FORECAST — CLIMATE RISK (1 THÁNG)
-    # -------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # FORECAST — 1 tháng
+    # -------------------------------------------------------------------------
     @staticmethod
     def create_forecast_chart(historical, forecast, forecast_months, route: str):
 
-        months_hist = list(range(1, len(historical)+1))
+        months_hist = list(range(1, len(historical) + 1))
         months_fc = list(forecast_months)
 
         fig = go.Figure()
@@ -585,54 +599,33 @@ class ChartFactory:
         # Lịch sử
         fig.add_trace(
             go.Scatter(
-                x=months_hist,
-                y=historical,
+                x=months_hist, y=historical,
                 mode="lines+markers",
                 name="📈 Lịch sử",
                 line=dict(color="#00FFAA", width=3),
-                marker=dict(size=9, color="#00D387", line=dict(width=2, color="#001A12")),
-                hovertemplate="Tháng %{x}<br>Rủi ro: %{y:.2%}<extra></extra>",
+                marker=dict(color="#00D387", size=9),
             )
         )
 
         # Dự báo
         fig.add_trace(
             go.Scatter(
-                x=months_fc,
-                y=forecast,
+                x=months_fc, y=forecast,
                 mode="lines+markers",
-                name="🔮 Dự báo 1 tháng",
+                name="🔮 Dự báo",
                 line=dict(color="#FFB44C", width=3, dash="dash"),
-                marker=dict(
-                    size=11,
-                    color="#FF9800",
-                    symbol="diamond",
-                    line=dict(width=2.5, color="#FFF"),
-                ),
-                hovertemplate="Tháng %{x}<br>Dự báo: %{y:.2%}<extra></extra>",
+                marker=dict(color="#FF9800", size=11, symbol="diamond"),
             )
         )
 
-        ymax = max(1.0, float(max(historical.max(), forecast.max()) * 1.15))
-
-        fig = ChartFactory._apply_theme(fig, f"📊 Dự báo rủi ro khí hậu — {route}")
-        fig.update_xaxes(
-            title="Tháng",
-            tickmode="linear",
-            tickvals=list(range(1, 13)),
-            dtick=1,
-        )
-        fig.update_yaxes(
-            title="Mức rủi ro (0–1)",
-            range=[0, ymax],
-            tickformat=".0%",
-        )
+        fig = ChartFactory._apply_theme(fig, f"📊 Forecast — {route}")
+        fig.update_xaxes(title="Tháng", dtick=1, tickmode="linear")
+        fig.update_yaxes(title="Mức rủi ro", tickformat=".0%")
         return fig
 
-
-    # -------------------------------------------------------------
-    # FUZZY HEATMAP (LOW–MID–HIGH–CENTROID)
-    # -------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # FUZZY HEATMAP
+    # -------------------------------------------------------------------------
     @staticmethod
     def create_fuzzy_heatmap(fuzzy_table: pd.DataFrame):
         data = fuzzy_table[["low", "mid", "high", "centroid"]].values
@@ -654,18 +647,15 @@ class ChartFactory:
             ],
         )
         fig.update_traces(texttemplate="%{text}", textfont=dict(size=11, color="#001A12"))
-        fig = ChartFactory._apply_theme(fig, "🌿 Fuzzy Heatmap (Low–Mid–High–Centroid)")
-        fig.update_xaxes(title="")
-        fig.update_yaxes(title="Tiêu chí")
+
+        fig = ChartFactory._apply_theme(fig, "🌿 Fuzzy Heatmap")
         return fig
 
-
-    # -------------------------------------------------------------
-    # FUZZY TRIANGLE CHART
-    # -------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # FUZZY TRIANGLE
+    # -------------------------------------------------------------------------
     @staticmethod
     def create_fuzzy_triangle(fuzzy_table: pd.DataFrame, criterion: str):
-        """Vẽ tam giác Fuzzy cho 1 tiêu chí."""
 
         row = fuzzy_table.loc[criterion]
         x = [row["low"], row["mid"], row["high"]]
@@ -674,37 +664,109 @@ class ChartFactory:
         fig = go.Figure()
         fig.add_trace(
             go.Scatter(
-                x=x,
-                y=y,
+                x=x, y=y,
                 mode="lines+markers",
                 fill="tozeroy",
-                name="Fuzzy",
                 line=dict(color="#00FFAA", width=3),
-                marker=dict(size=10, color="#00D387", line=dict(width=2, color="#001A12")),
+                marker=dict(size=10, color="#00D387"),
             )
         )
+
         fig = ChartFactory._apply_theme(fig, f"🔺 Fuzzy Triangle — {criterion}")
-        fig.update_xaxes(title="Trọng số", range=[0, max(0.3, row["high"]+0.05)])
+        fig.update_xaxes(title="Trọng số", range=[0, max(0.3, row["high"] + 0.05)])
         fig.update_yaxes(title="Membership", range=[0, 1.2])
         return fig
+
+
 # =============================================================================
-# STREAMLIT UI & MAIN — RISKCAST v5.1.5 Premium Chart
+# REPORT GENERATOR — EXPORT EXCEL + PDF
+# =============================================================================
+
+class ReportGenerator:
+
+    # -------------------------------------------------------------------------
+    # EXCEL EXPORT
+    # -------------------------------------------------------------------------
+    def generate_excel(self, results, data_adj, weights, fuzzy_table):
+        import openpyxl
+        from openpyxl.utils.dataframe import dataframe_to_rows
+        from io import BytesIO
+
+        wb = openpyxl.Workbook()
+        ws1 = wb.active
+        ws1.title = "Results"
+
+        for r in dataframe_to_rows(results, index=False, header=True):
+            ws1.append(r)
+
+        ws2 = wb.create_sheet("Adjusted Data")
+        for r in dataframe_to_rows(data_adj, index=True, header=True):
+            ws2.append(r)
+
+        ws3 = wb.create_sheet("Weights")
+        df_w = pd.DataFrame({"Criterion": weights.index, "Weight": weights.values})
+        for r in dataframe_to_rows(df_w, index=False, header=True):
+            ws3.append(r)
+
+        if fuzzy_table is not None:
+            ws4 = wb.create_sheet("Fuzzy Table")
+            for r in dataframe_to_rows(fuzzy_table, index=True, header=True):
+                ws4.append(r)
+
+        bio = BytesIO()
+        wb.save(bio)
+        return bio.getvalue()
+
+    # -------------------------------------------------------------------------
+    # PDF EXPORT
+    # -------------------------------------------------------------------------
+    def generate_pdf(self, results, params, var, cvar):
+        try:
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", "B", 16)
+            pdf.cell(0, 10, "RISKCAST Summary Report", ln=True)
+
+            pdf.set_font("Arial", "", 12)
+            top = results.iloc[0]
+
+            pdf.ln(5)
+            pdf.cell(0, 8, f"Recommended Company: {top['company']}", ln=True)
+            pdf.cell(0, 8, f"TOPSIS Score: {top['score']:.3f}", ln=True)
+            pdf.cell(0, 8, f"Confidence: {top['confidence']:.2f}", ln=True)
+            pdf.cell(0, 8, f"ICC Recommendation: {top['recommend_icc']}", ln=True)
+
+            pdf.ln(5)
+            pdf.cell(0, 8, f"Route: {params.route}", ln=True)
+            pdf.cell(0, 8, f"Cargo Value: ${params.cargo_value:,.0f}", ln=True)
+
+            if var is not None:
+                pdf.ln(5)
+                pdf.cell(0, 8, f"VaR 95%: ${var:,.0f}", ln=True)
+                pdf.cell(0, 8, f"CVaR 95%: ${cvar:,.0f}", ln=True)
+
+            return pdf.output(dest="S").encode("latin-1")
+
+        except Exception:
+            return None
+# =============================================================================
+# STREAMLIT UI — RISKCAST v5.1.5 PREMIUM GREEN DARK
 # =============================================================================
 
 class StreamlitUI:
-    """Quản lý toàn bộ UI Streamlit cho RISKCAST v5.1.5."""
+    """Quản lý toàn bộ UI frontend của RISKCAST."""
 
     def __init__(self):
         self.controller = AnalysisController()
-        self.chart_factory = ChartFactory()
-        self.report_gen = ReportGenerator()
+        self.chart = ChartFactory()
+        self.exporter = ReportGenerator()
 
-    # ---------------------------------------------------------
+    # -------------------------------------------------------------------------
     # INIT
-    # ---------------------------------------------------------
+    # -------------------------------------------------------------------------
     def initialize(self):
         st.set_page_config(
-            page_title="RISKCAST v5.1.5 — ESG Risk Assessment",
+            page_title="RISKCAST v5.1.5 — ESG Logistics Risk Assessment",
             page_icon="🛡️",
             layout="wide",
         )
@@ -712,32 +774,30 @@ class StreamlitUI:
 
         if "weights" not in st.session_state:
             st.session_state["weights"] = DEFAULT_WEIGHTS.copy()
+
         if "locked" not in st.session_state:
             st.session_state["locked"] = [False] * len(CRITERIA)
 
-    # ---------------------------------------------------------
-    # SIDEBAR
-    # ---------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # SIDEBAR INPUTS
+    # -------------------------------------------------------------------------
     def render_sidebar(self) -> AnalysisParams:
         with st.sidebar:
-            st.header("📊 Thông tin lô hàng")
+            st.header("📦 Thông tin lô hàng")
 
             cargo_value = st.number_input(
-                "Giá trị lô hàng (USD)",
-                min_value=1000,
-                value=39000,
-                step=1000,
+                "Giá trị lô hàng (USD)", min_value=1000, value=38000, step=1000
             )
             good_type = st.selectbox(
                 "Loại hàng",
                 ["Điện tử", "Đông lạnh", "Hàng khô", "Hàng nguy hiểm", "Khác"],
             )
             route = st.selectbox(
-                "Tuyến",
+                "Tuyến vận tải",
                 ["VN - EU", "VN - US", "VN - Singapore", "VN - China", "Domestic"],
             )
-            method = st.selectbox("Phương thức vận tải", ["Sea", "Air", "Truck"])
-            month = st.selectbox("Tháng (1–12)", list(range(1, 13)), index=8)
+            method = st.selectbox("Phương thức", ["Sea", "Air", "Truck"])
+            month = st.selectbox("Tháng hiện tại", list(range(1, 12 + 1)), index=8)
             priority = st.selectbox(
                 "Ưu tiên của chủ hàng",
                 ["An toàn tối đa", "Cân bằng", "Tối ưu chi phí"],
@@ -746,21 +806,20 @@ class StreamlitUI:
             st.markdown("---")
             st.header("⚙️ Cấu hình mô hình")
 
-            use_fuzzy = st.checkbox("Bật Fuzzy AHP", True)
-            use_arima = st.checkbox("Dùng ARIMA dự báo C6", True)
-            use_mc = st.checkbox("Monte Carlo cho C6", True)
-            use_var = st.checkbox("Tính VaR & CVaR", True)
+            use_fuzzy = st.checkbox("Fuzzy AHP", True)
+            use_arima = st.checkbox("ARIMA dự báo khí hậu", True)
+            use_mc = st.checkbox("Monte Carlo", True)
+            use_var = st.checkbox("Tính VaR / CVaR", True)
 
             mc_runs = st.number_input(
-                "Số vòng Monte Carlo",
-                min_value=500,
-                max_value=10000,
-                value=2000,
-                step=500,
+                "Số vòng mô phỏng Monte Carlo",
+                min_value=500, max_value=20000, value=2000, step=500,
             )
-            fuzzy_uncertainty = (
-                st.slider("Mức bất định Fuzzy (%)", 0, 50, 15) if use_fuzzy else 15
-            )
+
+            fuzzy_uncertainty = st.slider(
+                "Mức bất định Fuzzy (%)",
+                0, 50, 15
+            ) if use_fuzzy else 15
 
             return AnalysisParams(
                 cargo_value=cargo_value,
@@ -777,348 +836,183 @@ class StreamlitUI:
                 fuzzy_uncertainty=fuzzy_uncertainty,
             )
 
-    # ---------------------------------------------------------
-    # WEIGHT CONTROLS
-    # ---------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # WEIGHT SLIDERS
+    # -------------------------------------------------------------------------
     def render_weight_controls(self):
-        st.subheader("🎯 Phân bổ trọng số tiêu chí")
-
-        st.markdown(
-            """
-            <div class="explanation-box">
-                <h4>📋 Ý nghĩa các tiêu chí:</h4>
-                <ul>
-                    <li><b>C1 – Tỷ lệ phí:</b> phần trăm phí bảo hiểm (càng thấp càng tốt).</li>
-                    <li><b>C2 – Thời gian xử lý:</b> số ngày giải quyết hồ sơ (càng nhanh càng tốt).</li>
-                    <li><b>C3 – Tỷ lệ tổn thất:</b> xác suất/tần suất tổn thất (càng thấp càng tốt).</li>
-                    <li><b>C4 – Hỗ trợ ICC:</b> mức hỗ trợ điều khoản ICC A/B/C (càng cao càng tốt).</li>
-                    <li><b>C5 – Chăm sóc khách hàng:</b> dịch vụ CSKH, hỗ trợ claim (càng cao càng tốt).</li>
-                    <li><b>C6 – Rủi ro khí hậu:</b> rủi ro thiên tai, bão, thời tiết xấu trên tuyến (càng thấp càng tốt).</li>
-                </ul>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        st.subheader("⚖️ Trọng số tiêu chí (Auto-balance)")
 
         cols = st.columns(len(CRITERIA))
         new_weights = st.session_state["weights"].copy()
 
-        for i, criterion in enumerate(CRITERIA):
+        for i, crit in enumerate(CRITERIA):
             with cols[i]:
-                short = criterion.split(":")[0]
-                detail = criterion.split(":")[1].strip() if ":" in criterion else ""
+                st.markdown(f"**{crit.split(':')[0]}**")
 
-                st.markdown(
-                    f"""
-                    <div style="
-                        text-align:center;
-                        padding:8px;
-                        margin-bottom:6px;
-                        background:#e8f5e9;
-                        border-radius:8px;
-                        border:2px solid #66bb6a;">
-                        <b style="color:#1b5e20;">{short}</b><br>
-                        <span style="font-size:0.8rem; color:#33691e;">{detail}</span>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
+                locked = st.checkbox(
+                    "🔒", value=st.session_state["locked"][i], key=f"lock_{i}"
                 )
+                st.session_state["locked"][i] = locked
 
-                lock = st.checkbox(
-                    "🔒 Khóa",
-                    value=st.session_state["locked"][i],
-                    key=f"lock_{i}",
-                )
-                st.session_state["locked"][i] = lock
-
-                w_val = st.number_input(
+                new_w = st.number_input(
                     "Tỉ lệ",
                     min_value=0.0,
                     max_value=1.0,
-                    value=float(new_weights[i]),
                     step=0.01,
-                    key=f"weight_{i}",
+                    value=float(new_weights[i]),
+                    key=f"w_{i}",
                     label_visibility="collapsed",
                 )
-                new_weights[i] = w_val
+                new_weights[i] = new_w
 
-                st.markdown(
-                    f"""
-                    <div style="
-                        text-align:center;
-                        background:#e3f2fd;
-                        padding:6px;
-                        border-radius:6px;
-                        border:2px solid #42a5f5;">
-                        <span style="color:#1565c0; font-weight:800;">{w_val:.1%}</span>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
+                st.write(f"**{new_w:.1%}**")
 
-        st.markdown("<br>", unsafe_allow_html=True)
-        col_reset, col_info = st.columns([1, 2])
-
-        with col_reset:
-            if st.button("🔄 Reset trọng số mặc định", use_container_width=True):
-                st.session_state["weights"] = DEFAULT_WEIGHTS.copy()
-                st.session_state["locked"] = [False] * len(CRITERIA)
-                st.rerun()
-
-        with col_info:
-            total = float(new_weights.sum())
-            if abs(total - 1.0) > 0.01:
-                st.warning(f"⚠️ Tổng trọng số hiện tại: {total:.1%} (mục tiêu = 100%)")
-            else:
-                st.success(f"✅ Tổng trọng số: {total:.1%}")
-
+        # Auto normalize
         st.session_state["weights"] = WeightManager.auto_balance(
-            new_weights,
-            st.session_state["locked"],
+            new_weights, st.session_state["locked"]
         )
 
-    # ---------------------------------------------------------
+        total = st.session_state["weights"].sum()
+        if abs(total - 1.0) > 0.01:
+            st.warning(f"Tổng hiện tại: {total:.1%}")
+        else:
+            st.success(f"✨ Tổng trọng số = 100%")
+
+    # -------------------------------------------------------------------------
     # DISPLAY RESULTS
-    # ---------------------------------------------------------
+    # -------------------------------------------------------------------------
     def display_results(self, result: AnalysisResult, params: AnalysisParams):
-        st.success("✅ Đã hoàn tất phân tích RISKCAST!")
+        st.success("🎉 Hoàn tất phân tích!")
 
-        left, right = st.columns([2, 1])
+        # 1. TABLE
+        st.subheader("🏅 Kết quả TOPSIS")
+        df_view = result.results[
+            ["rank", "company", "score", "confidence", "recommend_icc"]
+        ].set_index("rank")
 
-        with left:
-            st.subheader("🏅 Bảng xếp hạng TOPSIS")
-            df_view = result.results[
-                ["rank", "company", "score", "confidence", "recommend_icc"]
-            ].set_index("rank")
-            df_view.columns = ["Công ty", "Điểm số", "Độ tin cậy", "ICC"]
-            st.dataframe(df_view, use_container_width=True)
+        df_view.columns = [
+            "Công ty",
+            "Điểm TOPSIS",
+            "Độ tin cậy",
+            "ICC đề xuất",
+        ]
+        st.dataframe(df_view, use_container_width=True)
 
-            top = result.results.iloc[0]
-            st.markdown(
-                f"""
-                <div class="result-box">
-                    🏆 <b>KHUYẾN NGHỊ HÀNG ĐẦU</b><br><br>
-                    <span style="font-size:1.5rem;">{top['company']}</span><br><br>
-                    Score: <b>{top['score']:.3f}</b> |
-                    Confidence: <b>{top['confidence']:.2f}</b> |
-                    <b>{top['recommend_icc']}</b>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-        with right:
-            if result.var is not None and result.cvar is not None:
-                st.metric(
-                    "💰 VaR 95%",
-                    f"${result.var:,.0f}",
-                    help="Tổn thất tối đa với độ tin cậy 95%.",
-                )
-                st.metric(
-                    "🛡️ CVaR 95%",
-                    f"${result.cvar:,.0f}",
-                    help="Tổn thất trung bình khi tổn thất vượt VaR.",
-                )
-
-            fig_weights = self.chart_factory.create_weights_pie(
-                result.weights, "⚖️ Trọng số sử dụng cuối cùng"
-            )
-            st.plotly_chart(fig_weights, use_container_width=True)
-
-        # Giải thích chi tiết
-        st.markdown("---")
-        st.subheader("📋 Giải thích kết quả cho hội đồng")
-
-        top3 = result.results.head(3)
-        top = result.results.iloc[0]
-
+        # BEST
+        best = result.results.iloc[0]
         st.markdown(
             f"""
-            <div class="explanation-box">
-                <h4>🎯 Vì sao <b>{top['company']}</b> đứng hạng 1?</h4>
-                <ul>
-                    <li>Điểm TOPSIS cao nhất: <b>{top['score']:.3f}</b>, cân bằng tốt giữa chi phí, rủi ro và dịch vụ.</li>
-                    <li>Độ tin cậy mô hình: <b>{top['confidence']:.2f}</b> (gần 1 càng tốt).</li>
-                    <li>ICC khuyến nghị: <b>{top['recommend_icc']}</b>, phù hợp tuyến <b>{params.route}</b> và ưu tiên <b>{params.priority}</b>.</li>
-                    <li>Giá trị lô hàng: <b>${params.cargo_value:,.0f}</b>, phù hợp với mức bảo hiểm đề xuất.</li>
-                </ul>
+            <div class="result-box">
+                🏆 <b>Gợi ý tốt nhất: {best['company']}</b><br><br>
+                Score: {best['score']:.3f} |
+                Confidence: {best['confidence']:.2f} |
+                {best['recommend_icc']}
             </div>
             """,
             unsafe_allow_html=True,
         )
 
-        comp_text = f"""
-        <div class="explanation-box">
-            <h4>📊 So sánh Top 3 công ty:</h4>
-            <ul>
-                <li><b>#1 {top3.iloc[0]['company']}</b> — Score: {top3.iloc[0]['score']:.3f}, C6_mean: {top3.iloc[0]['C6_mean']:.2%}</li>
-                <li><b>#2 {top3.iloc[1]['company']}</b> — Score: {top3.iloc[1]['score']:.3f} (kém {top3.iloc[0]['score'] - top3.iloc[1]['score']:.3f}), C6_mean: {top3.iloc[1]['C6_mean']:.2%}</li>
-                <li><b>#3 {top3.iloc[2]['company']}</b> — Score: {top3.iloc[2]['score']:.3f} (kém {top3.iloc[0]['score'] - top3.iloc[2]['score']:.3f}), C6_mean: {top3.iloc[2]['C6_mean']:.2%}</li>
-            </ul>
-        </div>
-        """
-        st.markdown(comp_text, unsafe_allow_html=True)
+        # 2. WEIGHTS PIE
+        st.subheader("📊 Trọng số cuối cùng")
+        pie = self.chart.create_weights_pie(result.weights, "Final Weights")
+        st.plotly_chart(pie, use_container_width=True)
 
-        key = result.data_adjusted.loc[top["company"]]
-        st.markdown(
-            f"""
-            <div class="explanation-box">
-                <h4>🔑 Các yếu tố quyết định cho {top['company']}:</h4>
-                <ul>
-                    <li>Tỷ lệ phí: <b>{key['C1: Tỷ lệ phí']:.2%}</b> – {"cạnh tranh" if key['C1: Tỷ lệ phí'] < 0.30 else "khá cao"}.</li>
-                    <li>Thời gian xử lý: <b>{key['C2: Thời gian xử lý']:.0f} ngày</b> – {"nhanh" if key['C2: Thời gian xử lý'] < 6 else "trung bình"}.</li>
-                    <li>Tỷ lệ tổn thất: <b>{key['C3: Tỷ lệ tổn thất']:.2%}</b> – {"tốt" if key['C3: Tỷ lệ tổn thất'] < 0.08 else "chấp nhận được"}.</li>
-                    <li>Hỗ trợ ICC: <b>{key['C4: Hỗ trợ ICC']:.0f}/10</b>.</li>
-                    <li>Chăm sóc KH: <b>{key['C5: Chăm sóc KH']:.0f}/10</b>.</li>
-                    <li>Rủi ro khí hậu C6: <b>{top['C6_mean']:.2%} ± {top['C6_std']:.2%}</b>.</li>
-                </ul>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        # 3. TOPSIS CHART
+        st.subheader("📈 Biểu đồ TOPSIS")
+        fig_top = self.chart.create_topsis_bar(result.results)
+        st.plotly_chart(fig_top, use_container_width=True)
 
-        if result.var is not None and result.cvar is not None:
-            risk_ratio = result.var / params.cargo_value if params.cargo_value > 0 else 0
-            st.markdown(
-                f"""
-                <div class="explanation-box">
-                    <h4>⚠️ Đánh giá rủi ro tài chính (VaR / CVaR):</h4>
-                    <ul>
-                        <li>VaR 95% ≈ <b>${result.var:,.0f}</b> — 95% trường hợp tổn thất không vượt mức này.</li>
-                        <li>CVaR 95% ≈ <b>${result.cvar:,.0f}</b> — tổn thất trung bình nếu vượt qua VaR.</li>
-                        <li>Tỷ lệ rủi ro so với giá trị lô hàng: <b>{risk_ratio*100:.1f}%</b>.</li>
-                    </ul>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-        # Biểu đồ TOPSIS + Forecast
-        st.markdown("---")
-        st.subheader("📈 Biểu đồ phân tích")
-
-        fig_topsis = self.chart_factory.create_topsis_bar(result.results)
-        st.plotly_chart(fig_topsis, use_container_width=True)
-
-        fig_fc = self.chart_factory.create_forecast_chart(
-            result.historical,
-            result.forecast,
-            result.forecast_months,
-            params.route,
+        # 4. CLIMATE FORECAST
+        st.subheader("🌦️ Dự báo rủi ro khí hậu")
+        fig_fc = self.chart.create_forecast_chart(
+            result.historical, result.forecast, result.forecast_months, params.route
         )
         st.plotly_chart(fig_fc, use_container_width=True)
 
-        # Fuzzy AHP Visual
+        # 5. FUZZY
         if result.fuzzy_table is not None:
-            st.markdown("---")
-            st.subheader("🌿 Fuzzy AHP – Premium Green")
+            st.subheader("🌿 Fuzzy AHP")
 
-            fuzzy_df = result.fuzzy_table.copy()
-            display_df = fuzzy_df.copy()
-            display_df.columns = ["Low", "Mid", "High", "Centroid", "Biên độ (High-Low)"]
+            display = result.fuzzy_table.copy()
+            display.columns = ["Low", "Mid", "High", "Centroid", "Range"]
 
-            st.markdown("**Bảng tham số Fuzzy cho từng tiêu chí:**")
-            st.dataframe(display_df.style.format("{:.3f}"), use_container_width=True)
+            st.dataframe(display.style.format("{:.3f}"), use_container_width=True)
 
-            strongest = fuzzy_df["range"].idxmax()
-            max_range = float(fuzzy_df["range"].max())
-            st.markdown(
-                f"""
-                <div class="explanation-box">
-                    <h4>🔥 Tiêu chí dao động mạnh nhất (Fuzzy):</h4>
-                    <p>
-                        <b>{strongest}</b> có biên độ Fuzzy (High–Low) lớn nhất: 
-                        <b>{max_range:.3f}</b>. Điều này nghĩa là đánh giá chuyên gia về tiêu chí này 
-                        còn nhiều bất định → cần giải thích kỹ hơn trong phần thuyết trình.
-                    </p>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            # Highlight biggest uncertainty
+            strongest = display["Range"].idxmax()
+            st.info(f"🔥 Tiêu chí bất định mạnh nhất: **{strongest}**")
 
-            # Heatmap
-            fig_fuzzy = self.chart_factory.create_fuzzy_heatmap(fuzzy_df)
-            st.plotly_chart(fig_fuzzy, use_container_width=True)
+            heat = self.chart.create_fuzzy_heatmap(result.fuzzy_table)
+            st.plotly_chart(heat, use_container_width=True)
 
-            # Triangle cho 1 tiêu chí
-            chosen_crit = st.selectbox(
-                "Chọn tiêu chí để xem đồ thị Fuzzy Triangle:",
-                list(fuzzy_df.index),
-            )
-            fig_tri = self.chart_factory.create_fuzzy_triangle(
-                fuzzy_df, chosen_crit
-            )
-            st.plotly_chart(fig_tri, use_container_width=True)
+            crit_sel = st.selectbox("Xem Fuzzy Triangle cho tiêu chí:", display.index)
+            tri = self.chart.create_fuzzy_triangle(result.fuzzy_table, crit_sel)
+            st.plotly_chart(tri, use_container_width=True)
 
-        # Export
-        st.markdown("---")
+        # 6. ESG FINANCE RISK
+        if params.use_var:
+            st.subheader("💰 VaR & CVaR")
+            st.metric("VaR 95%", f"${result.var:,.0f}")
+            st.metric("CVaR 95%", f"${result.cvar:,.0f}")
+
+        # 7. EXPORT
         st.subheader("📥 Xuất báo cáo")
 
         col1, col2 = st.columns(2)
 
         with col1:
-            excel_data = self.report_gen.generate_excel(
+            excel = self.exporter.generate_excel(
                 result.results,
                 result.data_adjusted,
                 result.weights,
                 result.fuzzy_table,
             )
             st.download_button(
-                "📊 Tải Excel (Results + Fuzzy)",
-                data=excel_data,
-                file_name=f"riskcast_{params.route.replace(' - ', '_')}.xlsx",
+                "📊 Tải Excel đầy đủ",
+                data=excel,
+                file_name="riskcast_results.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True,
             )
 
         with col2:
-            pdf_data = self.report_gen.generate_pdf(
+            pdf = self.exporter.generate_pdf(
                 result.results,
                 params,
                 result.var,
                 result.cvar,
             )
-            if pdf_data:
+            if pdf:
                 st.download_button(
                     "📄 Tải PDF Executive Summary",
-                    data=pdf_data,
-                    file_name=f"riskcast_summary_{params.route.replace(' - ', '_')}.pdf",
+                    data=pdf,
+                    file_name="riskcast_summary.pdf",
                     mime="application/pdf",
                     use_container_width=True,
                 )
 
-    # ---------------------------------------------------------
+    # -------------------------------------------------------------------------
     # RUN
-    # ---------------------------------------------------------
+    # -------------------------------------------------------------------------
     def run(self):
         self.initialize()
 
         st.title("🚢 RISKCAST v5.1.5 — ESG Logistics Risk Assessment")
-        st.markdown(
-            "**Decision Support System cho lựa chọn bảo hiểm vận tải quốc tế (Fuzzy + Monte Carlo + VaR/CVaR + ARIMA).**"
-        )
+        st.write("Fuzzy AHP • Monte Carlo • VaR & CVaR • Climate Forecast • TOPSIS")
+
         st.markdown("---")
 
         historical = DataService.load_historical_data()
         params = self.render_sidebar()
+
+        st.markdown("---")
         self.render_weight_controls()
 
         st.markdown("---")
-        weights_series = pd.Series(st.session_state["weights"], index=CRITERIA)
-        fig_current = self.chart_factory.create_weights_pie(
-            weights_series, "📊 Trọng số hiện tại (trước Fuzzy)"
-        )
-        st.plotly_chart(fig_current, use_container_width=True)
-
-        st.markdown("---")
-        if st.button("🚀 PHÂN TÍCH & GỢI Ý", type="primary", use_container_width=True):
-            with st.spinner("🔄 Đang chạy mô hình RISKCAST..."):
-                try:
-                    result = self.controller.run_analysis(params, historical)
-                    self.display_results(result, params)
-                except Exception as e:
-                    st.error(f"❌ Lỗi trong quá trình phân tích: {e}")
-                    st.exception(e)
+        if st.button("🚀 PHÂN TÍCH NGAY", use_container_width=True):
+            with st.spinner("Đang xử lý..."):
+                result = self.controller.run_analysis(params, historical)
+                self.display_results(result, params)
 
 
 # =============================================================================
@@ -1128,7 +1022,6 @@ class StreamlitUI:
 def main():
     app = StreamlitUI()
     app.run()
-
 
 if __name__ == "__main__":
     main()
