@@ -203,21 +203,41 @@ def apply_custom_css() -> None:
             font-size: 1.05rem !important;
         }
         
-        /* Sidebar - High Contrast */
+        /* Sidebar - High Contrast with White Background */
         section[data-testid="stSidebar"] {
-            background: #F5F5F5 !important;
+            background: #FFFFFF !important;
             border-right: 3px solid #0052A3;
         }
         
         section[data-testid="stSidebar"] h2 {
-            color: #000000 !important;
+            color: #0052A3 !important;
             font-weight: 900 !important;
+            background: #FFF9E6 !important;
+            padding: 12px !important;
+            border-radius: 8px !important;
+            margin-bottom: 15px !important;
         }
         
         section[data-testid="stSidebar"] label {
             color: #000000 !important;
             font-weight: 700 !important;
-            font-size: 1rem !important;
+            font-size: 1.05rem !important;
+        }
+        
+        section[data-testid="stSidebar"] .stSelectbox label,
+        section[data-testid="stSidebar"] .stNumberInput label {
+            color: #000000 !important;
+            font-weight: 800 !important;
+            font-size: 1.1rem !important;
+        }
+        
+        /* Sidebar inputs */
+        section[data-testid="stSidebar"] input,
+        section[data-testid="stSidebar"] select {
+            background: #FFFFFF !important;
+            color: #000000 !important;
+            font-weight: 700 !important;
+            border: 2px solid #0052A3 !important;
         }
         
         /* Metrics - Bold */
@@ -535,39 +555,43 @@ class ChartFactory:
     
     @staticmethod
     def create_weights_pie(weights: pd.Series, title: str) -> go.Figure:
-        """Create weight distribution pie chart with white background and bold labels"""
-        colors = ['#0052A3', '#00C853', '#FF5252', '#FF9800', '#9C27B0', '#00BCD4']
+        """Create weight distribution pie chart with better visibility"""
+        colors = ['#0052A3', '#FF5252', '#FF9800', '#00C853', '#00BCD4', '#9C27B0']
         
-        # Simplify labels to avoid overlap
+        # Create labels with full names for legend
+        full_labels = [c for c in weights.index]
         short_labels = [c.split(':')[0] for c in weights.index]
         
         fig = go.Figure(data=[go.Pie(
-            labels=short_labels,
+            labels=full_labels,
             values=weights.values,
-            marker=dict(colors=colors, line=dict(color='#FFFFFF', width=3)),
-            textfont=dict(size=16, color="#000000", family="Arial", weight="bold"),
-            textposition='auto',  # Changed from 'outside' to 'auto'
+            marker=dict(colors=colors, line=dict(color='#FFFFFF', width=4)),
+            textfont=dict(size=20, color="#000000", family="Arial Black", weight="bold"),
+            textposition='inside',
             textinfo='label+percent',
-            insidetextorientation='horizontal',  # Changed from 'radial'
-            pull=[0.05] * len(weights),  # Reduced pull
-            hovertemplate='<b>%{label}</b><br>%{value:.2%}<br>%{percent}<extra></extra>'
+            insidetextorientation='horizontal',
+            pull=[0.08] * len(weights),
+            hovertemplate='<b>%{label}</b><br>Tỉ trọng: %{value:.2%}<br>%{percent}<extra></extra>',
+            # Use short labels inside, full labels in legend
+            text=short_labels
         )])
         
         fig.update_layout(
             title=dict(
                 text=f"<b>{title}</b>",
-                font=dict(size=22, color="#000000", family="Arial"),
+                font=dict(size=24, color="#0052A3", family="Arial Black"),
                 x=0.5,
                 xanchor='center',
                 y=0.98
             ),
-            font=dict(size=14, color="#000000"),
+            font=dict(size=16, color="#000000", weight="bold"),
             showlegend=True,
             legend=dict(
-                font=dict(size=14, color="#000000", family="Arial"),
+                title=dict(text="<b>Các tiêu chí:</b>", font=dict(size=18, color="#0052A3")),
+                font=dict(size=16, color="#000000", family="Arial", weight="bold"),
                 bgcolor="rgba(255,255,255,0.98)",
-                bordercolor="#CCCCCC",
-                borderwidth=1,
+                bordercolor="#0052A3",
+                borderwidth=2,
                 orientation="v",
                 yanchor="middle",
                 y=0.5,
@@ -576,8 +600,9 @@ class ChartFactory:
             ),
             plot_bgcolor="white",
             paper_bgcolor="white",
-            margin=dict(l=10, r=180, t=80, b=10),
-            height=500
+            margin=dict(l=20, r=280, t=80, b=20),
+            height=600,
+            uniformtext=dict(minsize=16, mode='hide')
         )
         
         return fig
@@ -893,6 +918,21 @@ class StreamlitUI:
         """Render weight adjustment UI with clear labels"""
         st.subheader("🎯 Phân bổ trọng số")
         
+        # Display explanation of criteria
+        st.markdown("""
+        <div style='background:#F0F7FF; padding:15px; border-radius:8px; border:2px solid #0052A3; margin-bottom:20px;'>
+            <h4 style='color:#0052A3; margin-bottom:10px;'>📋 Giải thích các tiêu chí:</h4>
+            <ul style='color:#000000; font-weight:600; line-height:1.8;'>
+                <li><b>C1 - Tỷ lệ phí:</b> Chi phí bảo hiểm (càng thấp càng tốt)</li>
+                <li><b>C2 - Thời gian xử lý:</b> Thời gian giải quyết hồ sơ (càng nhanh càng tốt)</li>
+                <li><b>C3 - Tỷ lệ tổn thất:</b> Xác suất xảy ra tổn thất (càng thấp càng tốt)</li>
+                <li><b>C4 - Hỗ trợ ICC:</b> Mức độ hỗ trợ điều khoản ICC (càng cao càng tốt)</li>
+                <li><b>C5 - Chăm sóc KH:</b> Chất lượng dịch vụ khách hàng (càng cao càng tốt)</li>
+                <li><b>C6 - Rủi ro khí hậu:</b> Rủi ro từ điều kiện thời tiết (càng thấp càng tốt)</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        
         cols = st.columns(len(CRITERIA))
         new_weights = st.session_state["weights"].copy()
         
@@ -903,14 +943,14 @@ class StreamlitUI:
                 criterion_full = criterion.split(':')[1].strip() if ':' in criterion else criterion
                 
                 st.markdown(
-                    f"<div style='text-align:center; padding:6px; margin-bottom:8px;'>"
-                    f"<b style='color:#0052A3; font-size:1.2rem;'>{criterion_short}</b><br>"
-                    f"<span style='color:#333; font-size:0.85rem;'>{criterion_full}</span>"
+                    f"<div style='text-align:center; padding:8px; margin-bottom:8px; background:#FFF9E6; border-radius:6px; border:2px solid #FFB800;'>"
+                    f"<b style='color:#0052A3; font-size:1.3rem;'>{criterion_short}</b><br>"
+                    f"<span style='color:#333; font-size:0.9rem; font-weight:700;'>{criterion_full}</span>"
                     f"</div>", 
                     unsafe_allow_html=True
                 )
                 
-                is_locked = st.checkbox("🔒", value=st.session_state["locked"][i], key=f"lock_{i}", label_visibility="collapsed")
+                is_locked = st.checkbox("🔒 Khóa", value=st.session_state["locked"][i], key=f"lock_{i}")
                 st.session_state["locked"][i] = is_locked
                 
                 weight_val = st.number_input(
@@ -921,21 +961,33 @@ class StreamlitUI:
                 
                 # Display percentage clearly with background
                 st.markdown(
-                    f"<div style='text-align:center; background:#F0F7FF; padding:8px; "
-                    f"border-radius:6px; border:2px solid #0052A3;'>"
-                    f"<span style='color:#0052A3; font-weight:900; font-size:1.3rem;'>{weight_val:.1%}</span>"
+                    f"<div style='text-align:center; background:#E3F2FD; padding:10px; "
+                    f"border-radius:8px; border:3px solid #0052A3;'>"
+                    f"<span style='color:#0052A3; font-weight:900; font-size:1.5rem;'>{weight_val:.1%}</span>"
                     f"</div>", 
                     unsafe_allow_html=True
                 )
         
-        if st.button("🔄 Reset về mặc định", use_container_width=True):
-            st.session_state["weights"] = DEFAULT_WEIGHTS.copy()
-            st.session_state["locked"] = [False] * len(CRITERIA)
-            st.rerun()
-        else:
-            st.session_state["weights"] = WeightManager.auto_balance(
-                new_weights, st.session_state["locked"]
-            )
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        col_reset, col_info = st.columns([1, 2])
+        
+        with col_reset:
+            if st.button("🔄 Reset về mặc định", use_container_width=True):
+                st.session_state["weights"] = DEFAULT_WEIGHTS.copy()
+                st.session_state["locked"] = [False] * len(CRITERIA)
+                st.rerun()
+        
+        with col_info:
+            total_weight = sum(new_weights)
+            if abs(total_weight - 1.0) > 0.001:
+                st.warning(f"⚠️ Tổng trọng số: {total_weight:.1%} (phải = 100%)")
+            else:
+                st.success(f"✅ Tổng trọng số: {total_weight:.1%}")
+        
+        st.session_state["weights"] = WeightManager.auto_balance(
+            new_weights, st.session_state["locked"]
+        )
     
     def display_results(self, result: AnalysisResult, params: AnalysisParams):
         """Display analysis results with detailed explanations"""
