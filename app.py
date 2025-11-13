@@ -1329,7 +1329,7 @@ class StreamlitUI:
                 🔍 <b>Tiêu chí dao động mạnh nhất (High - Low lớn nhất):</b><br>
                 <span style="color:#00FFAA; font-size:20px;"><b>{most_unc}</b></span><br><br>
                 💡 Điều này nghĩa là tiêu chí này <b>nhạy cảm nhất</b> khi thay đổi trọng số đầu vào (Fuzzy). 
-                Khi trình bày NCKH, Hoàng có thể nói: “Mô hình Fuzzy cho thấy tiêu chí này có độ bất định cao, 
+                 “Mô hình Fuzzy cho thấy tiêu chí này có độ bất định cao, 
                 nên cần được chuyên gia cân nhắc kỹ khi hiệu chỉnh trọng số.”
                 </div>
                 """, unsafe_allow_html=True
