@@ -122,20 +122,24 @@ def apply_custom_css() -> None:
     """CSS cho giao diện Premium Green ESG + Mobile Neon."""
     st.markdown("""
     <style>
-        * {
-            text-rendering: optimizeLegibility !important;
-            -webkit-font-smoothing: antialiased !important;
-        }
 
-        .stApp {
-            background: radial-gradient(circle at top, #00ff99 0%, #001a0f 35%, #000c08 100%) !important;
-            font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
-            color: #e6fff7 !important;
-        }
+    * {
+        text-rendering: optimizeLegibility !important;
+        -webkit-font-smoothing: antialiased !important;
+    }
 
+    /* NỀN 3D PREMIUM */
+    .stApp {
+        background: radial-gradient(circle at top, #00ff99 0%, #001a0f 35%, #000c08 100%) !important;
+        font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+        color: #e6fff7 !important;
+    }
+
+    /* MẨU MOBILE FIXED — KHẮC PHỤC LỖI HIỂN THỊ IPHONE/ANDROID */
+    @media (max-width: 768px) {
         .block-container {
-            padding: 1.8rem 2.4rem !important;
-            max-width: 1450px;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
         }
 
         h1 {
