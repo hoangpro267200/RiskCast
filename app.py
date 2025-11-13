@@ -203,21 +203,60 @@ def apply_custom_css() -> None:
             font-size: 1.05rem !important;
         }
         
-        /* Sidebar - High Contrast */
+        /* Sidebar - High Contrast with Light Text */
         section[data-testid="stSidebar"] {
-            background: #F5F5F5 !important;
+            background: linear-gradient(180deg, #1A1A1A 0%, #2D2D2D 100%) !important;
             border-right: 3px solid #0052A3;
+            padding: 1.5rem;
         }
         
         section[data-testid="stSidebar"] h2 {
-            color: #000000 !important;
+            color: #FFFFFF !important;
             font-weight: 900 !important;
+            font-size: 1.8rem !important;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            border-bottom: 3px solid #0052A3;
+            padding-bottom: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        section[data-testid="stSidebar"] h3 {
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
         }
         
         section[data-testid="stSidebar"] label {
-            color: #000000 !important;
+            color: #FFFFFF !important;
             font-weight: 700 !important;
-            font-size: 1rem !important;
+            font-size: 1.1rem !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        
+        section[data-testid="stSidebar"] p {
+            color: #E0E0E0 !important;
+            font-weight: 600 !important;
+        }
+        
+        /* Sidebar Inputs - Light on Dark */
+        section[data-testid="stSidebar"] .stNumberInput input,
+        section[data-testid="stSidebar"] .stSelectbox select {
+            background: #3D3D3D !important;
+            color: #FFFFFF !important;
+            border: 2px solid #0052A3 !important;
+            font-weight: 700 !important;
+        }
+        
+        section[data-testid="stSidebar"] .stCheckbox label {
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+        }
+        
+        section[data-testid="stSidebar"] .stCheckbox input:checked + div {
+            background-color: #0052A3 !important;
+        }
+        
+        section[data-testid="stSidebar"] .stSlider label {
+            color: #FFFFFF !important;
         }
         
         /* Metrics - Bold */
@@ -535,51 +574,77 @@ class ChartFactory:
     
     @staticmethod
     def create_weights_pie(weights: pd.Series, title: str) -> go.Figure:
-        """Create weight distribution pie chart with bold labels"""
-        colors = ['#0052A3', '#FF9800', '#00C853', '#FF5252', '#00BCD4', '#9C27B0']
+        """Create weight distribution pie chart with white background and bold labels"""
+        colors = ['#0052A3', '#00C853', '#FF5252', '#FF9800', '#9C27B0', '#00BCD4']
         
         fig = go.Figure(data=[go.Pie(
             labels=weights.index,
             values=weights.values,
-            marker=dict(colors=colors, line=dict(color='#000000', width=3)),
-            textfont=dict(size=18, color="#000000", family="Arial Black", weight="bold"),
+            marker=dict(colors=colors, line=dict(color='#FFFFFF', width=4)),
+            textfont=dict(size=20, color="#000000", family="Arial Black", weight="bold"),
             textposition='outside',
             textinfo='label+percent',
             insidetextorientation='radial',
-            pull=[0.05] * len(weights)  # Slight pull for better label visibility
+            pull=[0.08] * len(weights),  # Pull out for better visibility
+            hovertemplate='<b>%{label}</b><br>%{percent}<extra></extra>'
         )])
         
         fig.update_layout(
             title=dict(
                 text=f"<b>{title}</b>",
-                font=dict(size=22, color="#000000", family="Arial Black"),
-                x=0.5
+                font=dict(size=24, color="#000000", family="Arial Black"),
+                x=0.5,
+                xanchor='center'
             ),
-            font=dict(size=16, color="#000000", weight="bold"),
+            font=dict(size=18, color="#000000", weight="bold"),
             showlegend=True,
             legend=dict(
-                font=dict(size=16, color="#000000", weight="bold"),
-                bgcolor="white",
+                font=dict(size=18, color="#000000", family="Arial", weight="bold"),
+                bgcolor="rgba(255,255,255,0.95)",
                 bordercolor="#000000",
-                borderwidth=2
-            )
+                borderwidth=2,
+                orientation="v",
+                yanchor="middle",
+                y=0.5,
+                xanchor="left",
+                x=1.05
+            ),
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+            margin=dict(l=20, r=200, t=100, b=20)
         )
         
         return fig
     
     @staticmethod
     def create_topsis_bar(results: pd.DataFrame) -> go.Figure:
-        """Create TOPSIS score bar chart"""
-        fig = px.bar(
-            results.sort_values("score"),
-            x="score", y="company", orientation="h",
-            text="score", color="score",
-            color_continuous_scale=[[0, '#E3F2FD'], [0.5, '#0066CC'], [1, '#003D7A']]
+        """Create TOPSIS score bar chart with bold text"""
+        fig = go.Figure(data=[go.Bar(
+            x=results.sort_values("score")["score"],
+            y=results.sort_values("score")["company"],
+            orientation="h",
+            text=results.sort_values("score")["score"].apply(lambda x: f"<b>{x:.3f}</b>"),
+            textposition="outside",
+            textfont=dict(size=20, color="#000000", family="Arial Black", weight="bold"),
+            marker=dict(
+                color=results.sort_values("score")["score"],
+                colorscale=[[0, '#90CAF9'], [0.5, '#0052A3'], [1, '#003D7A']],
+                line=dict(color='#000000', width=2)
+            ),
+            hovertemplate='<b>%{y}</b><br>Score: %{x:.3f}<extra></extra>'
+        )])
+        
+        fig.update_xaxes(
+            title="<b>TOPSIS Score</b>", 
+            range=[0, 1],
+            tickfont=dict(size=18, color="#000000", weight="bold")
         )
-        fig.update_traces(texttemplate="<b>%{text:.3f}</b>", textposition="outside")
-        fig.update_xaxes(title="<b>TOPSIS Score</b>", range=[0, 1])
-        fig.update_yaxes(title="<b>Công ty</b>")
-        return ChartFactory._apply_theme(fig, "🏆 TOPSIS Score")
+        fig.update_yaxes(
+            title="<b>Công ty</b>",
+            tickfont=dict(size=18, color="#000000", weight="bold")
+        )
+        
+        return ChartFactory._apply_theme(fig, "🏆 TOPSIS Score (cao hơn = tốt hơn)")
     
     @staticmethod
     def create_forecast_chart(
@@ -587,26 +652,54 @@ class ChartFactory:
         forecast: np.ndarray,
         route: str
     ) -> go.Figure:
-        """Create forecast line chart"""
+        """Create forecast line chart with bold labels"""
         fig = go.Figure()
         
         months_hist = list(range(1, len(historical) + 1))
         months_fc = [min(m, 12) for m in range(len(historical) + 1, len(historical) + len(forecast) + 1)]
         
         fig.add_trace(go.Scatter(
-            x=months_hist, y=historical, mode="lines+markers", name="📈 Lịch sử",
-            line=dict(color="#0066CC", width=3), marker=dict(size=8)
+            x=months_hist, 
+            y=historical, 
+            mode="lines+markers+text", 
+            name="📈 Lịch sử",
+            line=dict(color="#0052A3", width=4),
+            marker=dict(size=12, color="#0052A3", line=dict(width=3, color='white')),
+            text=[f"{val:.1%}" for val in historical],
+            textposition="top center",
+            textfont=dict(size=14, color="#000000", weight="bold"),
+            hovertemplate='<b>Tháng %{x}</b><br>Rủi ro: %{y:.2%}<extra></extra>'
         ))
         
         fig.add_trace(go.Scatter(
-            x=months_fc, y=forecast, mode="lines+markers", name="🔮 Dự báo",
-            line=dict(color="#FF6B35", width=3, dash="dash"), marker=dict(size=10)
+            x=months_fc, 
+            y=forecast, 
+            mode="lines+markers+text", 
+            name="🔮 Dự báo",
+            line=dict(color="#FF5252", width=4, dash="dash"),
+            marker=dict(size=14, color="#FF5252", symbol="diamond", line=dict(width=3, color='white')),
+            text=[f"{val:.1%}" for val in forecast],
+            textposition="top center",
+            textfont=dict(size=14, color="#000000", weight="bold"),
+            hovertemplate='<b>Tháng %{x}</b><br>Dự báo: %{y:.2%}<extra></extra>'
         ))
         
-        fig.update_yaxes(title="<b>Mức rủi ro</b>", tickformat='.0%')
-        fig.update_xaxes(title="<b>Tháng</b>", tickvals=list(range(1, 13)))
+        fig = ChartFactory._apply_theme(fig, f"📊 Dự báo rủi ro khí hậu: {route}")
         
-        return ChartFactory._apply_theme(fig, f"📊 Dự báo: {route}")
+        fig.update_xaxes(
+            title="<b>Tháng</b>",
+            tickmode="linear",
+            tickvals=list(range(1, 13)),
+            dtick=1
+        )
+        
+        fig.update_yaxes(
+            title="<b>Mức rủi ro</b>",
+            range=[0, max(1, max(historical.max(), forecast.max()) * 1.15)],
+            tickformat='.0%'
+        )
+        
+        return fig
 
 # =============================================================================
 # EXPORT UTILITIES (OPTIMIZED)
@@ -835,7 +928,7 @@ class StreamlitUI:
             )
     
     def render_weight_controls(self):
-        """Render weight adjustment UI"""
+        """Render weight adjustment UI with clear labels"""
         st.subheader("🎯 Phân bổ trọng số")
         
         cols = st.columns(len(CRITERIA))
@@ -843,8 +936,10 @@ class StreamlitUI:
         
         for i, criterion in enumerate(CRITERIA):
             with cols[i]:
-                st.markdown(f"**{criterion.split(':')[0]}**")
-                is_locked = st.checkbox("🔒", value=st.session_state["locked"][i], key=f"lock_{i}")
+                # Bold, clear criterion name
+                st.markdown(f"<div style='background:#F0F7FF; padding:8px; border-radius:6px; border:2px solid #0052A3; margin-bottom:8px;'><b style='color:#000000; font-size:1.1rem;'>{criterion.split(':')[0]}</b></div>", unsafe_allow_html=True)
+                
+                is_locked = st.checkbox("🔒 Lock", value=st.session_state["locked"][i], key=f"lock_{i}")
                 st.session_state["locked"][i] = is_locked
                 
                 weight_val = st.number_input(
@@ -852,8 +947,11 @@ class StreamlitUI:
                     key=f"weight_{i}", label_visibility="collapsed"
                 )
                 new_weights[i] = weight_val
+                
+                # Display percentage clearly
+                st.markdown(f"<div style='text-align:center; color:#000000; font-weight:800; font-size:1.2rem;'>{weight_val:.1%}</div>", unsafe_allow_html=True)
         
-        if st.button("🔄 Reset"):
+        if st.button("🔄 Reset về mặc định", use_container_width=True):
             st.session_state["weights"] = DEFAULT_WEIGHTS.copy()
             st.session_state["locked"] = [False] * len(CRITERIA)
             st.rerun()
