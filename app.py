@@ -538,46 +538,41 @@ class ChartFactory:
         """Create weight distribution pie chart with white background and bold labels"""
         colors = ['#0052A3', '#00C853', '#FF5252', '#FF9800', '#9C27B0', '#00BCD4']
         
-        # Simplify labels to avoid overlap
-        short_labels = [c.split(':')[0] for c in weights.index]
-        
         fig = go.Figure(data=[go.Pie(
-            labels=short_labels,
+            labels=weights.index,
             values=weights.values,
-            marker=dict(colors=colors, line=dict(color='#FFFFFF', width=3)),
-            textfont=dict(size=16, color="#000000", family="Arial", weight="bold"),
-            textposition='auto',  # Changed from 'outside' to 'auto'
+            marker=dict(colors=colors, line=dict(color='#FFFFFF', width=4)),
+            textfont=dict(size=20, color="#000000", family="Arial Black", weight="bold"),
+            textposition='outside',
             textinfo='label+percent',
-            insidetextorientation='horizontal',  # Changed from 'radial'
-            pull=[0.05] * len(weights),  # Reduced pull
-            hovertemplate='<b>%{label}</b><br>%{value:.2%}<br>%{percent}<extra></extra>'
+            insidetextorientation='radial',
+            pull=[0.08] * len(weights),  # Pull out for better visibility
+            hovertemplate='<b>%{label}</b><br>%{percent}<extra></extra>'
         )])
         
         fig.update_layout(
             title=dict(
                 text=f"<b>{title}</b>",
-                font=dict(size=22, color="#000000", family="Arial"),
+                font=dict(size=24, color="#000000", family="Arial Black"),
                 x=0.5,
-                xanchor='center',
-                y=0.98
+                xanchor='center'
             ),
-            font=dict(size=14, color="#000000"),
+            font=dict(size=18, color="#000000", weight="bold"),
             showlegend=True,
             legend=dict(
-                font=dict(size=14, color="#000000", family="Arial"),
-                bgcolor="rgba(255,255,255,0.98)",
-                bordercolor="#CCCCCC",
-                borderwidth=1,
+                font=dict(size=18, color="#000000", family="Arial", weight="bold"),
+                bgcolor="rgba(255,255,255,0.95)",
+                bordercolor="#000000",
+                borderwidth=2,
                 orientation="v",
                 yanchor="middle",
                 y=0.5,
                 xanchor="left",
-                x=1.02
+                x=1.05
             ),
             plot_bgcolor="white",
             paper_bgcolor="white",
-            margin=dict(l=10, r=180, t=80, b=10),
-            height=500
+            margin=dict(l=20, r=200, t=100, b=20)
         )
         
         return fig
@@ -627,20 +622,26 @@ class ChartFactory:
         fig.add_trace(go.Scatter(
             x=months_hist, 
             y=historical, 
-            mode="lines+markers", 
+            mode="lines+markers+text", 
             name="📈 Lịch sử",
             line=dict(color="#0052A3", width=4),
-            marker=dict(size=10, color="#0052A3", line=dict(width=2, color='white')),
+            marker=dict(size=12, color="#0052A3", line=dict(width=3, color='white')),
+            text=[f"{val:.1%}" for val in historical],
+            textposition="top center",
+            textfont=dict(size=14, color="#000000", weight="bold"),
             hovertemplate='<b>Tháng %{x}</b><br>Rủi ro: %{y:.2%}<extra></extra>'
         ))
         
         fig.add_trace(go.Scatter(
             x=months_fc, 
             y=forecast, 
-            mode="lines+markers", 
+            mode="lines+markers+text", 
             name="🔮 Dự báo",
             line=dict(color="#FF5252", width=4, dash="dash"),
-            marker=dict(size=12, color="#FF5252", symbol="diamond", line=dict(width=2, color='white')),
+            marker=dict(size=14, color="#FF5252", symbol="diamond", line=dict(width=3, color='white')),
+            text=[f"{val:.1%}" for val in forecast],
+            textposition="top center",
+            textfont=dict(size=14, color="#000000", weight="bold"),
             hovertemplate='<b>Tháng %{x}</b><br>Dự báo: %{y:.2%}<extra></extra>'
         ))
         
@@ -658,8 +659,6 @@ class ChartFactory:
             range=[0, max(1, max(historical.max(), forecast.max()) * 1.15)],
             tickformat='.0%'
         )
-        
-        fig.update_layout(height=500)
         
         return fig
 
@@ -898,19 +897,10 @@ class StreamlitUI:
         
         for i, criterion in enumerate(CRITERIA):
             with cols[i]:
-                # Clear criterion name without background overlap
-                criterion_short = criterion.split(':')[0]
-                criterion_full = criterion.split(':')[1].strip() if ':' in criterion else criterion
+                # Bold, clear criterion name
+                st.markdown(f"<div style='background:#F0F7FF; padding:8px; border-radius:6px; border:2px solid #0052A3; margin-bottom:8px;'><b style='color:#000000; font-size:1.1rem;'>{criterion.split(':')[0]}</b></div>", unsafe_allow_html=True)
                 
-                st.markdown(
-                    f"<div style='text-align:center; padding:6px; margin-bottom:8px;'>"
-                    f"<b style='color:#0052A3; font-size:1.2rem;'>{criterion_short}</b><br>"
-                    f"<span style='color:#333; font-size:0.85rem;'>{criterion_full}</span>"
-                    f"</div>", 
-                    unsafe_allow_html=True
-                )
-                
-                is_locked = st.checkbox("🔒", value=st.session_state["locked"][i], key=f"lock_{i}", label_visibility="collapsed")
+                is_locked = st.checkbox("🔒 Lock", value=st.session_state["locked"][i], key=f"lock_{i}")
                 st.session_state["locked"][i] = is_locked
                 
                 weight_val = st.number_input(
@@ -919,14 +909,8 @@ class StreamlitUI:
                 )
                 new_weights[i] = weight_val
                 
-                # Display percentage clearly with background
-                st.markdown(
-                    f"<div style='text-align:center; background:#F0F7FF; padding:8px; "
-                    f"border-radius:6px; border:2px solid #0052A3;'>"
-                    f"<span style='color:#0052A3; font-weight:900; font-size:1.3rem;'>{weight_val:.1%}</span>"
-                    f"</div>", 
-                    unsafe_allow_html=True
-                )
+                # Display percentage clearly
+                st.markdown(f"<div style='text-align:center; color:#000000; font-weight:800; font-size:1.2rem;'>{weight_val:.1%}</div>", unsafe_allow_html=True)
         
         if st.button("🔄 Reset về mặc định", use_container_width=True):
             st.session_state["weights"] = DEFAULT_WEIGHTS.copy()
