@@ -1,0 +1,151 @@
+
+/* RISKCAST v5.2 — Enterprise Hybrid Theme
+   - Desktop + Mobile responsive
+   - Works with Streamlit main app.py by injecting via st.markdown(open('assets/enterprise.css').read(), unsafe_allow_html=True)
+*/
+
+* {
+    text-rendering: optimizeLegibility !important;
+    -webkit-font-smoothing: antialiased !important;
+}
+
+/* BACKGROUND + BASE FONT */
+.stApp {
+    background: radial-gradient(circle at top, #00ff99 0%, #001a0f 35%, #000c08 100%) !important;
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+    color: #e6fff7 !important;
+    font-size: 1.06rem !important;
+}
+
+/* BLOCK CONTAINER */
+.block-container {
+    padding: 1.6rem 2.4rem !important;
+    max-width: 1500px !important;
+}
+
+/* HEADERS */
+h1 {
+    font-size: 2.6rem !important;
+    font-weight: 900 !important;
+    color: #9cffc7 !important;
+    text-shadow: 0 0 14px rgba(0,255,153,0.55);
+}
+h2 {
+    font-size: 1.9rem !important;
+    font-weight: 800 !important;
+}
+h3 {
+    font-size: 1.4rem !important;
+    font-weight: 700 !important;
+}
+
+/* SIDEBAR ENTERPRISE */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg,#050c0a 0%, #001811 55%, #000b07 100%) !important;
+    border-right: 2px solid #00e676;
+    box-shadow: 8px 0 24px rgba(0,0,0,0.7);
+}
+section[data-testid="stSidebar"] h2 {
+    color: #a5ffdc !important;
+    font-weight: 900 !important;
+}
+section[data-testid="stSidebar"] label {
+    color: #e6fff7 !important;
+    font-weight: 600 !important;
+    font-size: 0.96rem !important;
+}
+section[data-testid="stSidebar"] .stNumberInput input,
+section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {
+    background-color: #000f0a !important;
+    color: #e6fff7 !important;
+    border: 1.4px solid #00e676 !important;
+    border-radius: 9px !important;
+}
+
+/* BUTTONS */
+.stButton > button {
+    background: linear-gradient(115deg,#00ff99,#00e676,#00bfa5) !important;
+    color: #00130d !important;
+    font-weight: 800 !important;
+    border-radius: 999px !important;
+    border: none !important;
+    padding: 0.7rem 2.4rem !important;
+    box-shadow: 0 0 18px rgba(0,255,153,0.85) !important;
+    transition: all 0.12s ease-out;
+    font-size: 1.02rem !important;
+}
+.stButton > button:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 0 24px rgba(0,255,153,1) !important;
+}
+
+/* RESULT / METRIC CARDS */
+.result-box {
+    background: radial-gradient(circle at top left,#00ff99,#00bfa5);
+    color: #00130d !important;
+    padding: 1.6rem 2rem;
+    border-radius: 18px;
+    font-weight: 800;
+    box-shadow: 0 0 22px rgba(0, 255, 153, 0.7);
+    border: 2px solid #b9f6ca;
+}
+.explanation-box {
+    background: rgba(0,40,28,0.96);
+    border-left: 4px solid #00e676;
+    padding: 1.2rem 1.4rem;
+    border-radius: 12px;
+    margin-top: 1rem;
+    box-shadow: 0 0 12px rgba(0,0,0,0.65);
+}
+
+/* DATAFRAME / TABLE ENTERPRISE */
+.dataframe tbody tr th {
+    border-right: 1px solid #00bfa5 !important;
+}
+.dataframe tbody td, .dataframe thead th {
+    border: 1px solid #005b4a !important;
+}
+.dataframe {
+    border-radius: 10px !important;
+    overflow: hidden !important;
+    border: 1.8px solid #00cc88 !important;
+    box-shadow: 0 0 14px rgba(0,0,0,0.65);
+}
+
+/* PLOTLY CHARTS */
+.stPlotlyChart {
+    border-radius: 14px !important;
+    box-shadow: 0 0 18px rgba(0,0,0,0.7);
+}
+
+/* MOBILE HYBRID RESPONSIVE */
+@media (max-width: 900px) {
+    .block-container {
+        padding: 0.9rem 0.9rem !important;
+        max-width: 100% !important;
+    }
+    h1 { font-size: 2.0rem !important; }
+    h2 { font-size: 1.6rem !important; }
+    h3 { font-size: 1.25rem !important; }
+
+    div[data-testid="column"] {
+        flex: 0 0 100% !important;
+        width: 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    .stButton > button {
+        width: 100% !important;
+    }
+    section[data-testid="stSidebar"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        position: relative !important;
+        box-shadow: none !important;
+        border-right: none !important;
+        border-bottom: 2px solid #00e676;
+    }
+    section[data-testid="stSidebar"] > div {
+        padding: 0.7rem 0.9rem !important;
+    }
+}
