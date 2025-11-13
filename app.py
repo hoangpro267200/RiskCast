@@ -119,7 +119,7 @@ SENSITIVITY_MAP = {
 # =============================================================================
 
 def apply_custom_css() -> None:
-    """CSS cho giao diện Enterprise Premium ESG."""
+    """CSS cho giao diện Premium Green ESG + Mobile Neon."""
     st.markdown("""
     <style>
         * {
@@ -128,64 +128,22 @@ def apply_custom_css() -> None:
         }
 
         .stApp {
-            background: radial-gradient(circle at top left, #00412e 0%, #001811 45%, #000f0a 100%) !important;
-            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+            background: radial-gradient(circle at top, #00ff99 0%, #001a0f 35%, #000c08 100%) !important;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
             color: #e6fff7 !important;
         }
 
         .block-container {
-            padding: 1.6rem 2.6rem 2.4rem 2.6rem !important;
-            max-width: 1500px;
+            padding: 1.8rem 2.4rem !important;
+            max-width: 1450px;
         }
 
-        /* Header Enterprise */
-        .app-header {
-            background: linear-gradient(120deg, rgba(0, 230, 118, 0.12), rgba(0, 184, 148, 0.08));
-            border: 1px solid rgba(0, 230, 118, 0.35);
-            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
-            border-radius: 18px;
-            padding: 18px 22px;
-            margin-bottom: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1.2rem;
-        }
-        .app-header-left {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-        .app-header-title {
-            font-size: 1.9rem;
-            font-weight: 900;
-            letter-spacing: 0.03em;
-            color: #eafffb;
-        }
-        .app-header-subtitle {
-            font-size: 0.95rem;
-            color: #c8fff0;
-        }
-        .app-header-badge {
-            background: rgba(0, 0, 0, 0.72);
-            border-radius: 999px;
-            padding: 6px 14px;
-            border: 1px solid rgba(185, 246, 202, 0.9);
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #b9f6ca;
-        }
-
-        .app-header-pill {
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 999px;
-            padding: 10px 16px;
-            border: 1px solid rgba(0, 230, 118, 0.8);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            color: #e0f2f1;
+        h1 {
+            color: #9cffc7 !important;
+            font-weight: 900 !important;
+            font-size: 2.6rem !important;
+            text-align: center;
+            text-shadow: 0 0 12px rgba(0, 255, 153, 0.55);
         }
 
         h2 {
@@ -200,8 +158,9 @@ def apply_custom_css() -> None:
 
         /* Sidebar */
         section[data-testid="stSidebar"] {
-            background: radial-gradient(circle at top, #003323 0%, #000f0a 55%) !important;
-            border-right: 1px solid #00bfa5;
+            background: linear-gradient(180deg,#000f0a 0%, #001811 60%, #000b07 100%) !important;
+            border-right: 2px solid #00e676;
+            box-shadow: 6px 0 18px rgba(0,0,0,0.7);
         }
 
         section[data-testid="stSidebar"] h2 {
@@ -211,30 +170,32 @@ def apply_custom_css() -> None:
 
         section[data-testid="stSidebar"] label {
             color: #e6fff7 !important;
-            font-weight: 600 !important;
+            font-weight: 700 !important;
         }
 
         section[data-testid="stSidebar"] .stNumberInput input,
         section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {
             background-color: #000f0a !important;
             color: #e6fff7 !important;
-            border: 1.2px solid #00e676 !important;
+            border: 1.5px solid #00e676 !important;
             border-radius: 8px !important;
         }
 
         /* Buttons */
         .stButton > button {
-            background: linear-gradient(90deg,#00e676,#00bfa5) !important;
+            background: linear-gradient(120deg,#00ff99,#00e676,#00bfa5) !important;
             color: #00130d !important;
             font-weight: 800 !important;
             border-radius: 999px !important;
             border: none !important;
             padding: 0.7rem 2.2rem !important;
-            box-shadow: 0 0 16px rgba(0,230,118,0.75) !important;
+            box-shadow: 0 0 16px rgba(0, 255, 153, 0.75) !important;
+            transition: all 0.12s ease-out;
         }
+
         .stButton > button:hover {
-            transform: translateY(-1px) scale(1.01);
-            box-shadow: 0 0 22px rgba(0,230,118,1) !important;
+            transform: translateY(-1px) scale(1.02);
+            box-shadow: 0 0 22px rgba(0, 255, 153, 0.95) !important;
         }
 
         /* Metrics */
@@ -248,21 +209,22 @@ def apply_custom_css() -> None:
         }
 
         .result-box {
-            background: radial-gradient(circle at top left,#00e676,#00bfa5);
+            background: radial-gradient(circle at top left,#00ff99,#00bfa5);
             color: #00130d !important;
             padding: 1.6rem 2rem;
-            border-radius: 16px;
+            border-radius: 18px;
             font-weight: 800;
-            box-shadow: 0 0 24px rgba(0, 230, 118, 0.7);
+            box-shadow: 0 0 22px rgba(0, 255, 153, 0.7);
             border: 2px solid #b9f6ca;
         }
 
         .explanation-box {
-            background: rgba(0,24,17,0.95);
+            background: rgba(0,40,28,0.95);
             border-left: 4px solid #00e676;
-            padding: 1.2rem 1.4rem;
-            border-radius: 11px;
-            margin-top: 0.8rem;
+            padding: 1.3rem 1.5rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            box-shadow: 0 0 12px rgba(0,0,0,0.6);
         }
 
         .explanation-box h4 {
@@ -272,27 +234,118 @@ def apply_custom_css() -> None:
 
         .explanation-box li {
             color: #e0f2f1 !important;
-            font-weight: 500;
-            margin: 0.3rem 0;
+            font-weight: 600;
+            margin: 0.4rem 0;
         }
 
         .stDataFrame {
             border-radius: 10px;
             overflow: hidden;
             border: 1px solid #004d40;
-            box-shadow: 0 0 12px rgba(0,0,0,0.5);
+            box-shadow: 0 0 10px rgba(0,0,0,0.35);
         }
 
-        /* Premium card */
-        .premium-card {
-            background: radial-gradient(circle at top,#00281b 0%, #00120c 55%);
+        /* Plotly container */
+        .stPlotlyChart {
             border-radius: 14px;
-            padding: 1rem 1.2rem;
-            border: 1px solid rgba(0, 230, 118, 0.4);
-            box-shadow: 0 10px 26px rgba(0,0,0,0.65);
+            box-shadow: 0 0 16px rgba(0,0,0,0.65);
         }
+
+        /* ---------------------------- */
+        /* 🔥 MOBILE NEON RESPONSIVE    */
+        /* ---------------------------- */
+
+        @media (max-width: 900px) {
+
+            .block-container {
+                padding: 0.8rem 0.9rem !important;
+                max-width: 100% !important;
+            }
+
+            h1 {
+                font-size: 1.8rem !important;
+                line-height: 1.2 !important;
+            }
+
+            h2 {
+                font-size: 1.3rem !important;
+            }
+
+            h3 {
+                font-size: 1.1rem !important;
+            }
+
+            /* Cột → xếp dọc trên mobile */
+            div[data-testid="column"] {
+                flex: 0 0 100% !important;
+                width: 100% !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+
+            /* Card kết quả thu gọn lại */
+            .result-box {
+                padding: 1.2rem 1.3rem;
+                font-size: 0.95rem;
+                border-radius: 14px;
+            }
+
+            .explanation-box {
+                padding: 0.9rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            /* Nút full width trên mobile */
+            .stButton > button {
+                width: 100% !important;
+                padding-top: 0.75rem !important;
+                padding-bottom: 0.75rem !important;
+                font-size: 0.95rem !important;
+            }
+
+            /* Metric xếp dọc, không bị vỡ */
+            [data-testid="stMetric"] {
+                padding-top: 0.4rem;
+                padding-bottom: 0.4rem;
+            }
+
+            /* Chart full width, không bị tràn */
+            .stPlotlyChart {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
+            /* Sidebar: thu gọn hơn, như panel */
+            section[data-testid="stSidebar"] {
+                width: 100% !important;
+                max-width: 100% !important;
+                position: relative !important;
+                box-shadow: none;
+                border-right: none;
+                border-bottom: 2px solid #00e676;
+            }
+
+            section[data-testid="stSidebar"] > div {
+                padding: 0.6rem 0.9rem !important;
+            }
+
+            /* Input trên mobile to hơn, dễ bấm */
+            section[data-testid="stSidebar"] .stNumberInput input,
+            section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {
+                font-size: 0.9rem !important;
+                padding-top: 0.25rem !important;
+                padding-bottom: 0.25rem !important;
+            }
+
+            /* DataFrame: giảm margin, full width */
+            .stDataFrame {
+                box-shadow: 0 0 8px rgba(0,0,0,0.45);
+            }
+        }
+
     </style>
     """, unsafe_allow_html=True)
+
 
 # =============================================================================
 # DATA LAYER — INDUSTRY STANDARD LEVEL 1
