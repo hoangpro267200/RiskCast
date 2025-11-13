@@ -1253,8 +1253,8 @@ class StreamlitUI:
 # =============================================================================
 
 def main():
-    app = StreamlitUI()
-    app.run()
+    st.set_page_config(...)
+    apply_custom_css()   # ← HOÀNG NHỚ ĐẶT DÒNG NÀY Ở ĐÂY
 
 if __name__ == "__main__":
     main()
