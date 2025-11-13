@@ -1,11 +1,17 @@
 # =============================================================================
-# RISKCAST v5.1.2 — ESG Logistics Risk Assessment Dashboard (PREMIUM)
-# Author: Bùi Xuân Hoàng (original)  |  Refactor: Kai assistant
-# Fixes in 5.1.2:
-#   - Forecast chỉ dự báo thêm 1 tháng dựa trên "Tháng" đang chọn
-#   - Nếu chọn tháng 12 => dự báo sang tháng 1 năm sau
-#   - Trục tháng hiển thị 1..12, không nhảy lẻ / không có tháng 13–14
-#   - Sửa lỗi nút "RESET MẶC ĐỊNH" dùng st.rerun (không còn experimental)
+# RISKCAST v5.1.4 — ESG Logistics Risk Assessment Dashboard (FUZZY PREMIUM GREEN)
+# Author: Bùi Xuân Hoàng (original idea)  |  Refactor + UI Enterprise: Kai assistant
+#
+# Nổi bật trong v5.1.4:
+#   - UI siêu premium kiểu hệ thống doanh nghiệp (ESG Green)
+#   - Forecast rủi ro khí hậu chỉ dự báo đúng 1 tháng tiếp theo
+#   - Không còn tháng 13–14, trục tháng luôn 1..12
+#   - Nút RESET dùng st.rerun (không còn experimental)
+#   - Fuzzy AHP PREMIUM:
+#       + Bảng Low – Mid – High – Centroid
+#       + Highlight tiêu chí dao động (High - Low) mạnh nhất
+#       + Heatmap Premium Green mức dao động Fuzzy
+#       + Biểu đồ Fuzzy Premium (Low / Mid / High cho từng tiêu chí)
 # =============================================================================
 
 import io
@@ -17,7 +23,7 @@ from enum import Enum
 import numpy as np
 import pandas as pd
 import streamlit as st
-import plotly.express as px  # (có thể không dùng nhưng để sẵn)
+import plotly.express as px
 import plotly.graph_objects as go
 from fpdf import FPDF
 
@@ -99,11 +105,11 @@ SENSITIVITY_MAP = {
 }
 
 # =============================================================================
-# UI STYLING (GREEN ESG THEME)
+# UI STYLING (ENTERPRISE ESG GREEN THEME)
 # =============================================================================
 
 def apply_custom_css() -> None:
-    """CSS cho giao diện Premium Green ESG."""
+    """CSS cho giao diện Enterprise Premium ESG."""
     st.markdown("""
     <style>
         * {
@@ -112,21 +118,64 @@ def apply_custom_css() -> None:
         }
 
         .stApp {
-            background: linear-gradient(180deg,#001a0f 0%, #003322 40%, #002218 100%) !important;
-            font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+            background: radial-gradient(circle at top left, #00412e 0%, #001811 45%, #000f0a 100%) !important;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
             color: #e6fff7 !important;
         }
 
         .block-container {
-            padding: 1.8rem 2.4rem !important;
-            max-width: 1450px;
+            padding: 1.6rem 2.6rem 2.4rem 2.6rem !important;
+            max-width: 1500px;
         }
 
-        h1 {
-            color: #9cffc7 !important;
-            font-weight: 900 !important;
-            font-size: 2.6rem !important;
-            text-align: center;
+        /* Header Enterprise */
+        .app-header {
+            background: linear-gradient(120deg, rgba(0, 230, 118, 0.12), rgba(0, 184, 148, 0.08));
+            border: 1px solid rgba(0, 230, 118, 0.35);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
+            border-radius: 18px;
+            padding: 18px 22px;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.2rem;
+        }
+        .app-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .app-header-title {
+            font-size: 1.9rem;
+            font-weight: 900;
+            letter-spacing: 0.03em;
+            color: #eafffb;
+        }
+        .app-header-subtitle {
+            font-size: 0.95rem;
+            color: #c8fff0;
+        }
+        .app-header-badge {
+            background: rgba(0, 0, 0, 0.72);
+            border-radius: 999px;
+            padding: 6px 14px;
+            border: 1px solid rgba(185, 246, 202, 0.9);
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #b9f6ca;
+        }
+
+        .app-header-pill {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 999px;
+            padding: 10px 16px;
+            border: 1px solid rgba(0, 230, 118, 0.8);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: #e0f2f1;
         }
 
         h2 {
@@ -141,8 +190,8 @@ def apply_custom_css() -> None:
 
         /* Sidebar */
         section[data-testid="stSidebar"] {
-            background: #001811 !important;
-            border-right: 2px solid #00e676;
+            background: radial-gradient(circle at top, #003323 0%, #000f0a 55%) !important;
+            border-right: 1px solid #00bfa5;
         }
 
         section[data-testid="stSidebar"] h2 {
@@ -152,15 +201,15 @@ def apply_custom_css() -> None:
 
         section[data-testid="stSidebar"] label {
             color: #e6fff7 !important;
-            font-weight: 700 !important;
+            font-weight: 600 !important;
         }
 
         section[data-testid="stSidebar"] .stNumberInput input,
         section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] > div {
             background-color: #000f0a !important;
             color: #e6fff7 !important;
-            border: 1.5px solid #00e676 !important;
-            border-radius: 6px !important;
+            border: 1.2px solid #00e676 !important;
+            border-radius: 8px !important;
         }
 
         /* Buttons */
@@ -171,11 +220,11 @@ def apply_custom_css() -> None:
             border-radius: 999px !important;
             border: none !important;
             padding: 0.7rem 2.2rem !important;
-            box-shadow: 0 0 12px rgba(0,230,118,0.55) !important;
+            box-shadow: 0 0 16px rgba(0,230,118,0.75) !important;
         }
         .stButton > button:hover {
             transform: translateY(-1px) scale(1.01);
-            box-shadow: 0 0 18px rgba(0,230,118,0.8) !important;
+            box-shadow: 0 0 22px rgba(0,230,118,1) !important;
         }
 
         /* Metrics */
@@ -189,21 +238,21 @@ def apply_custom_css() -> None:
         }
 
         .result-box {
-            background: linear-gradient(135deg,#00e676,#00bfa5);
+            background: radial-gradient(circle at top left,#00e676,#00bfa5);
             color: #00130d !important;
             padding: 1.6rem 2rem;
             border-radius: 16px;
             font-weight: 800;
-            box-shadow: 0 0 18px rgba(0, 230, 118, 0.6);
+            box-shadow: 0 0 24px rgba(0, 230, 118, 0.7);
             border: 2px solid #b9f6ca;
         }
 
         .explanation-box {
-            background: rgba(0,40,28,0.9);
+            background: rgba(0,24,17,0.95);
             border-left: 4px solid #00e676;
-            padding: 1.3rem 1.5rem;
-            border-radius: 10px;
-            margin-top: 1rem;
+            padding: 1.2rem 1.4rem;
+            border-radius: 11px;
+            margin-top: 0.8rem;
         }
 
         .explanation-box h4 {
@@ -213,15 +262,24 @@ def apply_custom_css() -> None:
 
         .explanation-box li {
             color: #e0f2f1 !important;
-            font-weight: 600;
-            margin: 0.4rem 0;
+            font-weight: 500;
+            margin: 0.3rem 0;
         }
 
         .stDataFrame {
             border-radius: 10px;
             overflow: hidden;
             border: 1px solid #004d40;
-            box-shadow: 0 0 10px rgba(0,0,0,0.35);
+            box-shadow: 0 0 12px rgba(0,0,0,0.5);
+        }
+
+        /* Premium card */
+        .premium-card {
+            background: radial-gradient(circle at top,#00281b 0%, #00120c 55%);
+            border-radius: 14px;
+            padding: 1rem 1.2rem;
+            border: 1px solid rgba(0, 230, 118, 0.4);
+            box-shadow: 0 10px 26px rgba(0,0,0,0.65);
         }
     </style>
     """, unsafe_allow_html=True)
@@ -403,7 +461,7 @@ class RiskCalculator:
 
         crit_cv = data.std(axis=1).values / (data.mean(axis=1).values + eps)
         conf_crit = 1.0 / (1.0 + crit_cv)
-        conf_crit = 0.3 + 0.7 * (conf_crit - conf_crit.min()) / (np.ptp(crit_cv) + eps)
+        conf_crit = 0.3 + 0.7 * (conf_crit - conf_crit.min()) / (np.ptp(conf_crit) + eps)
 
         return np.sqrt(conf_c6 * conf_crit)
 
@@ -424,25 +482,19 @@ class Forecaster:
         - Trục x luôn giới hạn 1..12 (chart xử lý).
         """
         if route not in historical.columns:
-            # fallback: cột đầu tiên sau "month"
             route = historical.columns[1]
 
         full_series = historical[route].values
         n_total = len(full_series)
 
-        # Giới hạn tháng hiện tại trong [1, n_total]
         if current_month < 1:
             current_month = 1
         if current_month > n_total:
             current_month = n_total
 
-        # Lịch sử chỉ đến tháng đang chọn
         hist_series = full_series[:current_month]
-
-        # Chuỗi dùng để train
         train_series = hist_series.copy()
 
-        # Cố gắng dùng ARIMA
         if use_arima and ARIMA_AVAILABLE and len(train_series) >= 6:
             try:
                 model = ARIMA(train_series, order=(1, 1, 1))
@@ -453,7 +505,6 @@ class Forecaster:
             except Exception:
                 pass
 
-        # Fallback: trend tuyến tính đơn giản dựa trên 3 điểm cuối
         if len(train_series) >= 3:
             trend = (train_series[-1] - train_series[-3]) / 2.0
         elif len(train_series) >= 2:
@@ -463,6 +514,162 @@ class Forecaster:
 
         next_val = np.clip(train_series[-1] + trend, 0.0, 1.0)
         return hist_series, np.array([next_val])
+
+# =============================================================================
+# FUZZY VISUAL UTILITIES (PREMIUM GREEN)
+# =============================================================================
+
+def build_fuzzy_table(weights: pd.Series, fuzzy_pct: float) -> pd.DataFrame:
+    """
+    Tạo bảng Fuzzy: Low – Mid – High – Centroid cho từng tiêu chí.
+    Phù hợp cho phần trình bày NCKH / phụ lục.
+    """
+    rows = []
+    factor = fuzzy_pct / 100.0
+    for crit in weights.index:
+        w = float(weights[crit])
+        low = max(w * (1 - factor), 0.0)
+        high = min(w * (1 + factor), 1.0)
+        centroid = (low + w + high) / 3.0
+        rows.append([crit, round(low, 4), round(w, 4), round(high, 4), round(centroid, 4)])
+
+    df = pd.DataFrame(rows, columns=["Tiêu chí", "Low", "Mid", "High", "Centroid"])
+    return df
+
+
+def most_uncertain_criterion(weights: pd.Series, fuzzy_pct: float) -> Tuple[str, Dict[str, float]]:
+    """
+    Độ dao động = High - Low. Tiêu chí nào chênh lệch lớn nhất = bất định mạnh nhất.
+    """
+    factor = fuzzy_pct / 100.0
+    diff_map: Dict[str, float] = {}
+    for crit in weights.index:
+        w = float(weights[crit])
+        low = w * (1 - factor)
+        high = w * (1 + factor)
+        diff_map[crit] = float(high - low)
+    most_unc = max(diff_map, key=diff_map.get)
+    return most_unc, diff_map
+
+
+def fuzzy_heatmap_premium(diff_map: Dict[str, float]) -> go.Figure:
+    """
+    Heatmap Premium Green thể hiện mức dao động Fuzzy (High - Low) theo từng tiêu chí.
+    Màu càng sáng → dao động càng mạnh → tiêu chí càng nhạy cảm.
+    """
+    values = list(diff_map.values())
+    labels = list(diff_map.keys())
+
+    fig = px.imshow(
+        [values],
+        labels=dict(color="Mức dao động"),
+        x=labels,
+        y=[""],
+        color_continuous_scale=[
+            [0.0, "#00331F"],
+            [0.2, "#006642"],
+            [0.4, "#00AA66"],
+            [0.6, "#00DD88"],
+            [1.0, "#00FFAA"]
+        ]
+    )
+
+    fig.update_layout(
+        title=dict(
+            text="<b>🌿 Heatmap mức dao động Fuzzy (Premium Green)</b>",
+            font=dict(size=22, color="#CCFFE6"),
+            x=0.5
+        ),
+        paper_bgcolor="#001a12",
+        plot_bgcolor="#001a12",
+        margin=dict(l=40, r=40, t=80, b=40),
+        coloraxis_colorbar=dict(
+            title="Dao động",
+            tickfont=dict(color="#CCFFE6")
+        )
+    )
+    fig.update_xaxes(tickangle=-35)
+    fig.update_yaxes(showticklabels=False)
+    return fig
+
+
+def fuzzy_chart_premium(weights: pd.Series, fuzzy_pct: float) -> go.Figure:
+    """
+    Biểu đồ Fuzzy Premium:
+    - Thể hiện Low / Mid / High cho từng tiêu chí
+    - Cho cảm giác “tam giác mờ” (Mid là đỉnh, Low/High là đáy)
+    """
+    factor = fuzzy_pct / 100.0
+    labels = list(weights.index)
+    low_vals, mid_vals, high_vals = [], [], []
+
+    for crit in labels:
+        w = float(weights[crit])
+        low = max(w * (1 - factor), 0.0)
+        high = min(w * (1 + factor), 1.0)
+        low_vals.append(low)
+        mid_vals.append(w)
+        high_vals.append(high)
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+        x=labels,
+        y=low_vals,
+        mode="lines+markers",
+        name="Low",
+        line=dict(width=2, color="#004d40", dash="dot"),
+        marker=dict(size=8),
+        hovertemplate="Tiêu chí: %{x}<br>Low: %{y:.2f}<extra></extra>"
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=labels,
+        y=mid_vals,
+        mode="lines+markers",
+        name="Mid (gốc)",
+        line=dict(width=3, color="#00e676"),
+        marker=dict(size=9, symbol="diamond"),
+        hovertemplate="Tiêu chí: %{x}<br>Mid: %{y:.2f}<extra></extra>"
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=labels,
+        y=high_vals,
+        mode="lines+markers",
+        name="High",
+        line=dict(width=2, color="#69f0ae", dash="dash"),
+        marker=dict(size=8),
+        hovertemplate="Tiêu chí: %{x}<br>High: %{y:.2f}<extra></extra>"
+    ))
+
+    fig.update_layout(
+        title=dict(
+            text=f"<b>🌿 Fuzzy AHP — Low / Mid / High (±{fuzzy_pct:.0f}%)</b>",
+            font=dict(size=22, color="#e6fff7"),
+            x=0.5
+        ),
+        paper_bgcolor="#001a12",
+        plot_bgcolor="#001a12",
+        legend=dict(
+            bgcolor="rgba(0,0,0,0.35)",
+            bordercolor="#00e676",
+            borderwidth=1
+        ),
+        margin=dict(l=40, r=40, t=80, b=80),
+        font=dict(size=13, color="#e6fff7")
+    )
+    fig.update_xaxes(
+        showgrid=False,
+        tickangle=-20
+    )
+    fig.update_yaxes(
+        title="Trọng số",
+        range=[0, max(0.4, max(high_vals) * 1.15)],
+        showgrid=True,
+        gridcolor="#004d40"
+    )
+    return fig
 
 # =============================================================================
 # VISUALIZATION
@@ -577,7 +784,6 @@ class ChartFactory:
         hist_len = len(historical)
         months_hist = list(range(1, hist_len + 1))
 
-        # tháng tiếp theo (ví dụ 9→10, 12→1)
         next_month = selected_month % 12 + 1
         months_fc = [next_month]
 
@@ -642,7 +848,7 @@ class ReportGenerator:
             pdf.add_page()
 
             pdf.set_font("Arial", "B", 16)
-            pdf.cell(0, 10, "RISKCAST v5.1.2 - Executive Summary", 0, 1, "C")
+            pdf.cell(0, 10, "RISKCAST v5.1.4 - Executive Summary", 0, 1, "C")
             pdf.ln(4)
 
             pdf.set_font("Arial", "", 11)
@@ -716,7 +922,7 @@ class AnalysisController:
         self.forecaster = Forecaster()
 
     def run_analysis(self, params: AnalysisParams, historical: pd.DataFrame) -> AnalysisResult:
-        # Trọng số hiện tại
+        # Trọng số hiện tại (đã auto-balance)
         weights = pd.Series(st.session_state["weights"], index=CRITERIA)
         if params.use_fuzzy:
             weights = self.fuzzy_ahp.apply(weights, params.fuzzy_uncertainty)
@@ -798,7 +1004,7 @@ class StreamlitUI:
 
     def initialize(self):
         st.set_page_config(
-            page_title="RISKCAST v5.1.2",
+            page_title="RISKCAST v5.1.4 — Fuzzy Premium Green",
             page_icon="🛡️",
             layout="wide"
         )
@@ -912,7 +1118,6 @@ class StreamlitUI:
             if st.button("🔄 RESET MẶC ĐỊNH", use_container_width=True):
                 st.session_state["weights"] = DEFAULT_WEIGHTS.copy()
                 st.session_state["locked"] = [False] * len(CRITERIA)
-                # ❗ Dùng st.rerun (không dùng experimental nữa)
                 st.rerun()
 
         with col_info:
@@ -929,7 +1134,8 @@ class StreamlitUI:
     def display_results(self, result: AnalysisResult, params: AnalysisParams):
         st.success("✅ Đã phân tích xong lô hàng, xem gợi ý bên dưới.")
 
-        left, right = st.columns([2, 1])
+        # LAYER 1: Bảng xếp hạng + metric + pie
+        left, right = st.columns([2.1, 1.1])
 
         with left:
             st.subheader("🏅 Bảng xếp hạng công ty bảo hiểm")
@@ -964,10 +1170,10 @@ class StreamlitUI:
                     help="Tổn thất trung bình trong vùng tail vượt VaR."
                 )
 
-            fig_weights = self.chart_factory.create_weights_pie(result.weights, "Cơ cấu trọng số")
+            fig_weights = self.chart_factory.create_weights_pie(result.weights, "Cơ cấu trọng số (sau Fuzzy)")
             st.plotly_chart(fig_weights, use_container_width=True)
 
-        # Giải thích chi tiết
+        # LAYER 2: Giải thích chi tiết
         st.markdown("---")
         st.subheader("📋 Giải thích kết quả")
 
@@ -1037,8 +1243,9 @@ class StreamlitUI:
                 unsafe_allow_html=True
             )
 
+        # LAYER 3: Biểu đồ TOPSIS + Forecast
         st.markdown("---")
-        st.subheader("📈 Biểu đồ")
+        st.subheader("📈 Biểu đồ chính")
 
         fig_topsis = self.chart_factory.create_topsis_bar(result.results)
         st.plotly_chart(fig_topsis, use_container_width=True)
@@ -1050,6 +1257,40 @@ class StreamlitUI:
             params.month
         )
         st.plotly_chart(fig_forecast, use_container_width=True)
+
+        # LAYER 4: Khu vực Fuzzy Premium
+        if params.use_fuzzy:
+            st.markdown("---")
+            st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số (Premium Green)")
+
+            # Biểu đồ Fuzzy
+            fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
+            st.plotly_chart(fig_fuzzy, use_container_width=True)
+
+            # Bảng Low – Mid – High – Centroid
+            st.subheader("📄 Bảng Low – Mid – High – Centroid")
+            fuzzy_table = build_fuzzy_table(result.weights, params.fuzzy_uncertainty)
+            st.dataframe(fuzzy_table, use_container_width=True)
+
+            # Highlight tiêu chí dao động mạnh nhất
+            most_unc, diff_map = most_uncertain_criterion(result.weights, params.fuzzy_uncertainty)
+            st.markdown(
+                f"""
+                <div style="background:#00331F; padding:15px; border-radius:10px;
+                border:2px solid #00FFAA; color:#CCFFE6; font-size:16px; margin-top:0.8rem;">
+                🔍 <b>Tiêu chí dao động mạnh nhất (High - Low lớn nhất):</b><br>
+                <span style="color:#00FFAA; font-size:20px;"><b>{most_unc}</b></span><br><br>
+                💡 Điều này nghĩa là tiêu chí này <b>nhạy cảm nhất</b> khi thay đổi trọng số đầu vào (Fuzzy). 
+                Khi trình bày NCKH, Hoàng có thể nói: “Mô hình Fuzzy cho thấy tiêu chí này có độ bất định cao, 
+                nên cần được chuyên gia cân nhắc kỹ khi hiệu chỉnh trọng số.”
+                </div>
+                """, unsafe_allow_html=True
+            )
+
+            # Heatmap Premium
+            st.subheader("🔥 Heatmap mức dao động Fuzzy (Premium Green)")
+            fig_heat = fuzzy_heatmap_premium(diff_map)
+            st.plotly_chart(fig_heat, use_container_width=True)
 
         # Xuất báo cáo
         st.markdown("---")
@@ -1084,17 +1325,40 @@ class StreamlitUI:
     def run(self):
         self.initialize()
 
-        st.title("🚢 RISKCAST v5.1.2 — ESG Risk Assessment Dashboard")
-        st.markdown("**Hệ hỗ trợ ra quyết định mua bảo hiểm vận tải quốc tế (Fuzzy AHP + TOPSIS + Monte Carlo + VaR/CVaR + Forecast).**")
-        st.markdown("---")
+        # Header Enterprise
+        st.markdown(
+            """
+            <div class="app-header">
+                <div class="app-header-left">
+                    <div class="app-header-title">🚢 RISKCAST v5.1.4 — ESG Fuzzy Premium Green</div>
+                    <div class="app-header-subtitle">
+                        Hệ hỗ trợ ra quyết định mua bảo hiểm vận tải quốc tế | Fuzzy AHP · TOPSIS · Monte Carlo · VaR/CVaR · Forecast
+                    </div>
+                </div>
+                <div>
+                    <div class="app-header-pill">
+                        <span>🧠 Fuzzy AHP Enterprise</span>
+                        <span>·</span>
+                        <span>Monte Carlo ESG</span>
+                        <span>·</span>
+                        <span>VaR / CVaR</span>
+                    </div>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
         historical = DataService.load_historical_data()
         params = self.render_sidebar()
+
+        st.markdown('<div class="premium-card">', unsafe_allow_html=True)
         self.render_weight_controls()
+        st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown("---")
         weights_series = pd.Series(st.session_state["weights"], index=CRITERIA)
-        fig_current = self.chart_factory.create_weights_pie(weights_series, "Trọng số hiện tại")
+        fig_current = self.chart_factory.create_weights_pie(weights_series, "Trọng số hiện tại (trước Fuzzy AHP)")
         st.plotly_chart(fig_current, use_container_width=True)
 
         st.markdown("---")
