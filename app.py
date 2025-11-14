@@ -1614,7 +1614,6 @@ class StreamlitUI:
         cols = st.columns(3)
         top3 = result.results.head(3)
         medals = ["🥇", "🥈", "🥉"]
-
         for i, col in enumerate(cols):
             r = top3.iloc[i]
 
