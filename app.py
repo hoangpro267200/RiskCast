@@ -1473,279 +1473,401 @@ class StreamlitUI:
         cols = st.columns(3)
         top3 = result.results.head(3)
         medals = ["🥇", "🥈", "🥉"]
-# ======================== PREMIUM VIEW 3.0 — INTERACTIVE EDITION ========================
 
-st.markdown("""
-<style>
+               # ===================== TOP 3 PREMIUM CARDS (FULL EFFECT) =====================
 
-/* Wrapper */
-.premium3-wrapper {
-    display: flex;
-    gap: 32px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 30px;
-}
+        # CSS cho card + hiệu ứng + tooltip
+        st.markdown("""
+        <style>
+        .top3-card {
+            position: relative;
+            background: radial-gradient(circle at top left, rgba(0,255,153,0.12), rgba(0,0,0,0.78));
+            border: 1px solid rgba(0,255,153,0.45);
+            padding: 20px 22px;
+            border-radius: 18px;
+            box-shadow: 0 0 18px rgba(0,255,153,0.18);
+            margin-bottom: 18px;
+            text-align: center;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out;
+        }
 
-/* FLIP CONTAINER */
-.flip-box {
-    background: transparent;
-    width: 340px;
-    height: 430px;
-    perspective: 1300px;
-}
+        /* Card #1 – Gold Edition */
+        .top1-card {
+            background: radial-gradient(circle at top left, rgba(255,215,0,0.20), rgba(0,0,0,0.82));
+            border: 1px solid rgba(255,215,0,0.7);
+            box-shadow: 0 0 26px rgba(255,215,0,0.45);
+            animation: gold-pulse 2.4s ease-in-out infinite alternate;
+        }
 
-.flip-box-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transition: transform 0.9s;
-    transform-style: preserve-3d;
-}
+        @keyframes gold-pulse {
+            0% {
+                box-shadow: 0 0 10px rgba(255,215,0,0.35);
+                border-color: rgba(255,215,0,0.6);
+            }
+            100% {
+                box-shadow: 0 0 26px rgba(255,215,0,0.75);
+                border-color: rgba(255,255,255,0.95);
+            }
+        }
 
-.flip-box:hover .flip-box-inner {
-    transform: rotateY(180deg);
-}
+        /* Hover zoom cho tất cả card */
+        .top3-card:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 0 26px rgba(0,255,153,0.35);
+            border-color: rgba(0,255,200,0.85);
+        }
 
-/* FRONT & BACK */
-.flip-box-front,
-.flip-box-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 22px;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    padding: 26px;
-}
+        .top3-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #a5ffdc;
+        }
 
-/* FRONT */
-.flip-box-front {
-    background: rgba(0,15,10,0.65);
-    border: 1px solid rgba(0,255,153,0.45);
-    box-shadow: 0 0 26px rgba(0,255,153,0.25);
-    backdrop-filter: blur(18px);
-}
+        .top1-title {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #ffe680;
+            text-shadow: 0 0 10px rgba(255,210,0,0.7);
+        }
 
-/* BACK */
-.flip-box-back {
-    background: rgba(0,0,0,0.65);
-    border: 1px solid rgba(255,215,0,0.45);
-    box-shadow: 0 0 36px rgba(255,215,0,0.25);
-    backdrop-filter: blur(20px);
-    transform: rotateY(180deg);
-}
+        .top3-sub {
+            font-size: 1rem;
+            margin-top: 6px;
+            color: #e0f2f1;
+        }
 
-/* HERO (TOP 1) */
-.hero-glow {
-    animation: heroPulse 2.8s ease-in-out infinite;
-    border-color: rgba(255,230,90,0.85) !important;
-    box-shadow: 0 0 40px rgba(255,210,0,0.55),
-                0 0 90px rgba(255,185,0,0.28);
-}
-@keyframes heroPulse {
-    0% { box-shadow: 0 0 30px rgba(255,200,0,0.35); }
-    100% { box-shadow: 0 0 70px rgba(255,230,130,0.9); }
-}
+        .badge-icc {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: linear-gradient(120deg, #00e676, #00bfa5);
+            color: #00130d;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
 
-/* Title */
-.card-title {
-    text-align: center;
-    font-size: 1.42rem;
-    font-weight: 900;
-    margin-bottom: 12px;
-    color: #aaffea;
-}
-.hero-title {
-    color: #ffe680;
-    text-shadow: 0 0 14px rgba(255,220,0,0.8);
-}
+        .pill-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(0,255,153,0.5);
+            font-size: 0.85rem;
+            margin-top: 4px;
+            color: #c8ffec;
+        }
 
-/* Avatar */
-.company-avatar {
-    width: 72px;
-    height: 72px;
-    margin: auto;
-    border-radius: 999px;
-    background-size: cover;
-    background-position: center;
-    box-shadow: 0 0 18px rgba(0,255,153,0.55),
-                inset 0 0 12px rgba(0,255,153,0.35);
-    margin-bottom: 12px;
-    animation: holoSpin 6s linear infinite;
-}
-@keyframes holoSpin {
-    0% { transform: rotateY(0); }
-    100% { transform: rotateY(360deg); }
-}
+        .top3-btn {
+            margin-top: 10px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(0,255,153,0.7);
+            background: rgba(0,0,0,0.65);
+            color: #c8ffec;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s ease-out, transform 0.15s ease-out, box-shadow 0.15s ease-out;
+        }
+        .top3-btn:hover {
+            background: linear-gradient(120deg, #00ff99, #00e676);
+            color: #00130d;
+            transform: translateY(-1px);
+            box-shadow: 0 0 12px rgba(0,255,153,0.7);
+        }
 
-/* Neon bar */
-.neon-bar {
-    height: 10px;
-    background: linear-gradient(90deg, #00ffc3, #00e676);
-    border-radius: 999px;
-    margin: 6px 0;
-    box-shadow: 0 0 14px rgba(0,255,153,0.65);
-}
+        /* Tooltip chung cho Điểm / ICC / Tiết kiệm / Tin cậy / Biến động */
+        .info-tt {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .info-tt .info-text {
+            opacity: 0;
+            visibility: hidden;
+            width: 250px;
+            background: rgba(0,0,0,0.9);
+            color: #e0f2f1;
+            text-align: left;
+            border-radius: 8px;
+            padding: 10px 12px;
+            border: 1px solid rgba(0,255,153,0.45);
+            position: absolute;
+            z-index: 999;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.85rem;
+            transition: opacity 0.18s ease-out;
+        }
+        .info-tt:hover .info-text {
+            opacity: 1;
+            visibility: visible;
+        }
 
-.drawer {
-    margin-top: 12px;
-    padding: 10px 14px;
-    border-radius: 14px;
-    background: rgba(0,0,0,0.45);
-    border: 1px solid rgba(0,255,153,0.45);
-    color: #e6fff6;
-    font-size: 0.92rem;
-}
+        </style>
+        """, unsafe_allow_html=True)
 
-</style>
-""", unsafe_allow_html=True)
+        st.markdown("## 🏅 Top 3 phương án (Premium View)")
+
+        cols = st.columns(3)
+        top3 = result.results.head(3)
+        medals = ["🥇", "🥈", "🥉"]
+
+        for i, col in enumerate(cols):
+            r = top3.iloc[i]
+
+            card_class = "top3-card"
+            title_class = "top3-title"
+            if i == 0:
+                card_class += " top1-card"
+                title_class = "top1-title"
+
+            with col:
+                st.markdown(f"""
+                <div class="{card_class}">
+                    <div class="{title_class}">{medals[i]} #{i+1}: {r['company']}</div>
+
+                    <!-- Loại ICC + tooltip -->
+                    <div class="top3-sub info-tt">
+                        <b class="badge-icc">{r['icc_package']}</b>
+                        <span class="info-text">
+                            <b>Loại điều khoản ICC</b><br><br>
+                            • <b>ICC A</b>: Bảo hiểm rộng nhất, gần như mọi rủi ro (All Risks).<br>
+                            • <b>ICC B</b>: Mức trung bình – bảo hiểm các rủi ro chính, loại trừ nhiều hơn A.<br>
+                            • <b>ICC C</b>: Cơ bản, chi phí thấp nhưng bảo vệ ít nhất.<br><br>
+                            Gói càng cao → phạm vi bảo vệ càng rộng, chi phí càng tăng.
+                        </span>
+                    </div>
+
+                    <!-- Hạng mục Tiết kiệm / Chi phí -->
+                    <div class="top3-sub info-tt" style="color:#7CFFA1; font-size:1.1rem;">
+                        💰 Chi phí kỳ vọng: <b>${r['estimated_cost']:,.0f}</b>
+                        <span class="info-text">
+                            <b>Ý nghĩa chi phí</b><br><br>
+                            Đây là mức chi phí bảo hiểm ước tính sau khi mô phỏng Monte Carlo.<br>
+                            Giúp doanh nghiệp so sánh:<br>
+                            • Gói nào <b>tiết kiệm</b> hơn về chi phí.<br>
+                            • Gói nào xứng đáng trả thêm để đổi lấy mức bảo vệ cao hơn.
+                        </span>
+                    </div>
+
+                    <!-- Điểm tổng hợp -->
+                    <div class="top3-sub info-tt">
+                        📊 Điểm: <b>{r['score']:.3f}</b> · <span class="pill-badge">{r['category']}</span>
+                        <span class="info-text">
+                            <b>Điểm tổng hợp TOPSIS</b><br><br>
+                            Điểm này tổng hợp từ:<br>
+                            • Tỷ lệ phí (C1)<br>
+                            • Thời gian xử lý (C2)<br>
+                            • Tỷ lệ tổn thất (C3)<br>
+                            • Chất lượng hỗ trợ ICC (C4)<br>
+                            • Chăm sóc khách hàng (C5)<br>
+                            • Rủi ro khí hậu tuyến đường (C6)<br><br>
+                            Điểm càng cao → phương án càng gần “phương án lý tưởng”.
+                        </span>
+                    </div>
+
+                    <!-- Tin cậy -->
+                    <div class="top3-sub info-tt">
+                        🎯 Tin cậy: <b>{r['confidence']:.2f}</b>
+                        <span class="info-text">
+                            <b>Tin cậy của phương án</b><br><br>
+                            Được tính từ độ ổn định kết quả sau hàng nghìn lần mô phỏng Monte Carlo.<br>
+                            • 0.70 – 1.00: Rất ổn định, ít bị ảnh hưởng khi điều kiện rủi ro thay đổi.<br>
+                            • 0.40 – 0.69: Ổn định trung bình.<br>
+                            • &lt; 0.40: Nhạy cảm, dễ biến động, cần xem xét kỹ.<br>
+                        </span>
+                    </div>
+
+                    <!-- Độ biến động rủi ro (dùng C6_std) -->
+                    <div class="top3-sub info-tt">
+                        🌪 Biến động rủi ro: <b>{r['C6_std']:.2f}</b>
+                        <span class="info-text">
+                            <b>Độ biến động rủi ro khí hậu (C6_std)</b><br><br>
+                            • Phản ánh mức dao động của rủi ro khí hậu trên tuyến đường vận chuyển.<br>
+                            • Giá trị càng cao → rủi ro khó dự đoán, biến động mạnh.<br>
+                            • Giá trị thấp → rủi ro ổn định, dễ kiểm soát hơn.<br><br>
+                            Chỉ số này giúp doanh nghiệp cân nhắc giữa <b>chi phí</b> và <b>mức độ an toàn</b>.
+                        </span>
+                    </div>
+
+                    <!-- Nút xem chi tiết (để bạn giải thích trong bảo vệ là có thể mở panel phân tích sâu) -->
+                    <button class="top3-btn">📘 Xem phân tích chi tiết</button>
+                </div>
+                """, unsafe_allow_html=True)
 
 
-st.markdown("## 🪩 Premium View 3.0 — Interactive Flip Edition")
-
-company_logo = {
-    "PVI": "https://i.imgur.com/SzK2e5v.png",
-    "Chubb": "https://i.imgur.com/xnPP9kq.png",
-    "MIC": "https://i.imgur.com/aCHaHWE.png",
-}
-
-# ONLY run when result exists
-if "result" in locals():
-
-    top3 = result.results.head(3)
-    medals = ["🥇", "🥈", "🥉"]
-
-    cols = st.columns(3)
-
-    for i, col in enumerate(cols):
-        r = top3.iloc[i]
-        avatar = company_logo.get(r["company"], "")
-
-        front_extra = "hero-glow" if i == 0 else ""
-        title_extra = "hero-title" if i == 0 else ""
-
-        with col:
+        # Weights & Metrics
+        col1, col2 = st.columns(2)
+        with col1:
+            fig_weights = self.chart_factory.create_weights_pie(
+                result.weights,
+                f"Trọng số áp dụng ({params.priority})"
+            )
+            st.plotly_chart(fig_weights, use_container_width=True)
+        
+        with col2:
+            if result.var is not None and result.cvar is not None:
+                st.metric("💰 VaR 95%", f"${result.var:,.0f}")
+                st.metric("🛡️ CVaR 95%", f"${result.cvar:,.0f}")
+                risk_pct = (result.var / params.cargo_value) * 100
+                st.metric("📊 Rủi ro / Giá trị", f"{risk_pct:.1f}%")
+        
+        # Forecast
+        st.markdown("---")
+        fig_forecast = self.chart_factory.create_forecast_chart(
+            result.historical, result.forecast, params.route, params.month
+        )
+        st.plotly_chart(fig_forecast, use_container_width=True)
+        
+        # FUZZY AHP MODULE (GIỮ NGUYÊN HOÀN TOÀN)
+        if params.use_fuzzy:
+            st.markdown("---")
+            st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số (Enterprise Module)")
+            
+            st.markdown("""
+            <div class="explanation-box">
+                <h4>📚 Giải thích về Fuzzy AHP:</h4>
+                <ul>
+                    <li><b>Mục đích:</b> Xử lý bất định trong đánh giá chuyên gia</li>
+                    <li><b>Phương pháp:</b> Chuyển trọng số crisp thành tam giác mờ (Low-Mid-High)</li>
+                    <li><b>Defuzzification:</b> Sử dụng phương pháp Centroid để chuyển về crisp</li>
+                    <li><b>Ứng dụng:</b> Tăng độ tin cậy kết quả khi chuyên gia không chắc chắn 100%</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Biểu đồ Fuzzy
+            fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
+            st.plotly_chart(fig_fuzzy, use_container_width=True)
+            
+            # Bảng Low – Mid – High – Centroid
+            st.subheader("📄 Bảng Low – Mid – High – Centroid (cho NCKH)")
+            fuzzy_table = build_fuzzy_table(result.weights, params.fuzzy_uncertainty)
+            st.dataframe(fuzzy_table, use_container_width=True)
+            
+            # Highlight tiêu chí dao động mạnh nhất
+            most_unc, diff_map = most_uncertain_criterion(result.weights, params.fuzzy_uncertainty)
             st.markdown(
                 f"""
-                <div class="flip-box">
-                    <div class="flip-box-inner">
-
-                        <div class="flip-box-front {front_extra}">
-                            <div class="company-avatar" style="background-image:url('{avatar}')"></div>
-                            <div class="card-title {title_extra}">
-                                {medals[i]} {r['company']}
-                            </div>
-                            <div>💰 <b>${r['estimated_cost']:,.0f}</b></div>
-                            <div class="neon-bar" style="width:{r['score']*100}%"></div>
-                            <div>📊 Điểm: <b>{r['score']:.3f}</b></div>
-                            <div class="neon-bar" style="width:{r['confidence']*100}%"></div>
-                            <div>🎯 Tin cậy: <b>{r['confidence']:.2f}</b></div>
+                <div style="background:#00331F; padding:15px; border-radius:10px;
+                border:2px solid #00FFAA; color:#CCFFE6; font-size:16px; margin-top:0.8rem;">
+                🔍 <b>Tiêu chí dao động mạnh nhất (High - Low lớn nhất):</b><br>
+                <span style="color:#00FFAA; font-size:20px;"><b>{most_unc}</b></span><br><br>
+                💡 <b>Ý nghĩa:</b> Tiêu chí này <b>nhạy cảm nhất</b> khi thay đổi trọng số đầu vào (Fuzzy).<br>
+                "Mô hình Fuzzy cho thấy tiêu chí này có độ bất định cao,
+                nên cần được chuyên gia cân nhắc kỹ khi hiệu chỉnh trọng số."<br><br>
+                <b>Giải pháp:</b> Thu thập thêm ý kiến chuyên gia hoặc dữ liệu thực tế để giảm bất định.
+                </div>
+                """, unsafe_allow_html=True
+            )
+            
+            # Heatmap Premium
+            st.subheader("🔥 Heatmap mức dao động Fuzzy (Premium Green)")
+            fig_heat = fuzzy_heatmap_premium(diff_map)
+            st.plotly_chart(fig_heat, use_container_width=True)
+        
+        # Export
+        st.markdown("---")
+        st.subheader("📥 Xuất báo cáo")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            excel_data = self.report_gen.generate_excel(result.results, result.weights)
+            st.download_button(
+                "📊 Tải Excel",
+                data=excel_data,
+                file_name=f"riskcast_v53_{params.route.replace(' - ', '_')}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True
+            )
+        
+        with col2:
+            pdf_data = self.report_gen.generate_pdf(result.results, params, result.var, result.cvar)
+            if pdf_data:
+                st.download_button(
+                    "📄 Tải PDF",
+                    data=pdf_data,
+                    file_name=f"riskcast_v53_{params.route.replace(' - ', '_')}.pdf",
+                    mime="application/pdf",
+                    use_container_width=True
+                )
+    
+    def run(self):
+        self.initialize()
+        
+        # Header
+        st.markdown(
+            """
+            <div class="app-header">
+                <div class="app-header-left">
+                    <div class="app-logo-circle">RC</div>
+                    <div>
+                        <div class="app-header-title">RISKCAST v5.3 — MULTI-PACKAGE ANALYSIS</div>
+                        <div class="app-header-subtitle">
+                            15 Phương án (5 Công ty × 3 Gói ICC) · Profile-Based Recommendation · Smart Ranking · Cost-Benefit Analysis · Fuzzy AHP · Full Explanations for Research
                         </div>
-
-                        <div class="flip-box-back">
-                            <div class="card-title">📘 Chi tiết</div>
-                            <div class="drawer">
-                                <b>ICC:</b> {r['icc_package']}<br><br>
-                                🌪 Rủi ro: <b>{r['C6_std']:.2f}</b><br><br>
-                                📌 Nhận định:<br>
-                                - Phù hợp tuyến<br>
-                                - Ổn định chi phí<br>
-                                - Cân bằng rủi ro – giá
-                            </div>
-                        </div>
-
                     </div>
                 </div>
-                """,
-                unsafe_allow_html=True,
-            )
-
-else:
-    st.info("🔍 Vui lòng nhập thông tin & chạy mô hình trước để xem Premium View 3.0.")
-
-
-# ======================== FUZZY AHP MODULE ========================
-if params.use_fuzzy:
-
-    st.markdown("---")
-    st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số (Enterprise Module)")
-
-    st.markdown("""
-    <div class="explanation-box">
-        <h4>📚 Giải thích về Fuzzy AHP:</h4>
-        <ul>
-            <li><b>Mục đích:</b> Xử lý bất định trong đánh giá chuyên gia</li>
-            <li><b>Phương pháp:</b> Chuyển trọng số crisp thành tam giác mờ (Low-Mid-High)</li>
-            <li><b>Defuzzification:</b> Sử dụng phương pháp Centroid để chuyển về crisp</li>
-            <li><b>Ứng dụng:</b> Tăng độ tin cậy kết quả khi chuyên gia không chắc chắn 100%</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
-
-    fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
-    st.plotly_chart(fig_fuzzy, use_container_width=True)
-
-    st.subheader("📄 Bảng Low – Mid – High – Centroid (cho NCKH)")
-    fuzzy_table = build_fuzzy_table(result.weights, params.fuzzy_uncertainty)
-    st.dataframe(fuzzy_table, use_container_width=True)
-
-    most_unc, diff_map = most_uncertain_criterion(result.weights, params.fuzzy_uncertainty)
-
-    st.markdown(
-        f"""
-        <div style="background:#00331F; padding:15px; border-radius:10px;
-        border:2px solid #00FFAA; color:#CCFFE6; font-size:16px; margin-top:0.8rem;">
-        🔍 <b>Tiêu chí dao động mạnh nhất (High - Low lớn nhất):</b><br>
-        <span style="color:#00FFAA; font-size:20px;"><b>{most_unc}</b></span><br><br>
-        💡 <b>Ý nghĩa:</b> Tiêu chí này <b>nhạy cảm nhất</b> khi thay đổi trọng số đầu vào (Fuzzy).<br>
-        Mô hình Fuzzy cho thấy tiêu chí này có độ bất định cao,
-        nên cần được chuyên gia cân nhắc kỹ khi hiệu chỉnh trọng số.<br><br>
-        <b>Giải pháp:</b> Thu thập thêm ý kiến chuyên gia hoặc dữ liệu thực tế để giảm bất định.
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.subheader("🔥 Heatmap mức dao động Fuzzy (Premium Green)")
-    fig_heat = fuzzy_heatmap_premium(diff_map)
-    st.plotly_chart(fig_heat, use_container_width=True)
-
-
-# ======================== EXPORT (LUÔN LUÔN OUTSIDE FUZZY) ========================
-
-st.markdown("---")
-st.subheader("📥 Xuất báo cáo")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    excel_data = app.report_gen.generate_excel(result.results, result.weights)
-    st.download_button(
-        "📊 Tải Excel",
-        data=excel_data,
-        file_name=f"riskcast_v53_{params.route.replace(' - ', '_')}.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        use_container_width=True
-    )
-
-with col2:
-    pdf_data = app.report_gen.generate_pdf(result.results, params, result.var, result.cvar)
-    if pdf_data:
-        st.download_button(
-            "📄 Tải PDF",
-            data=pdf_data,
-            file_name=f"riskcast_v53_{params.route.replace(' - ', '_')}.pdf",
-            mime="application/pdf",
-            use_container_width=True
+                <div class="app-header-badge">
+                    <span>🎯 Smart Recommendation</span>
+                    <span>·</span>
+                    <span>15 Phương án</span>
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
+        
+        historical = DataService.load_historical_data()
+        params = self.render_sidebar()
+        
+        # Show profile explanation
+        st.markdown('<div class="premium-card">', unsafe_allow_html=True)
+        st.subheader(f"📌 Đã chọn mục tiêu: {params.priority}")
+        
+        profile_weights = PRIORITY_PROFILES[params.priority]
+        st.markdown(
+            f"""
+            <div class="explanation-box">
+                <h4>⚙️ Trọng số tự động được điều chỉnh theo mục tiêu:</h4>
+                <ul>
+                    <li><b>C1 (Chi phí):</b> {profile_weights['C1: Tỷ lệ phí']:.0%} - {'Ưu tiên giảm chi phí' if profile_weights['C1: Tỷ lệ phí'] > 0.25 else 'Ít quan trọng hơn'}</li>
+                    <li><b>C2 (Thời gian):</b> {profile_weights['C2: Thời gian xử lý']:.0%}</li>
+                    <li><b>C3 (Tổn thất):</b> {profile_weights['C3: Tỷ lệ tổn thất']:.0%} - {'Ưu tiên an toàn' if profile_weights['C3: Tỷ lệ tổn thất'] > 0.20 else 'Trung bình'}</li>
+                    <li><b>C4 (Hỗ trợ ICC):</b> {profile_weights['C4: Hỗ trợ ICC']:.0%} - {'Ưu tiên bảo vệ' if profile_weights['C4: Hỗ trợ ICC'] > 0.20 else 'Trung bình'}</li>
+                    <li><b>C5 (Chăm sóc KH):</b> {profile_weights['C5: Chăm sóc KH']:.0%}</li>
+                    <li><b>C6 (Khí hậu):</b> {profile_weights['C6: Rủi ro khí hậu']:.0%}</li>
+                </ul>
+                <p><b>💡 Lưu ý:</b> Trọng số này được thiết kế dựa trên nghiên cứu hành vi người dùng và best practices trong ngành bảo hiểm.</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        if st.button("🚀 PHÂN TÍCH 15 PHƯƠNG ÁN", type="primary", use_container_width=True):
+            with st.spinner("🔄 Đang phân tích tất cả phương án..."):
+                try:
+                    result = self.analyzer.run_analysis(params, historical)
+                    self.display_results(result, params)
+                except Exception as e:
+                    st.error(f"❌ Lỗi: {e}")
+                    st.exception(e)
 
 
-# ======================== MAIN ========================
+# =============================================================================
+# MAIN
+# =============================================================================
 
 def main():
     app = StreamlitUI()
     app.run()
+
 
 if __name__ == "__main__":
     main()
