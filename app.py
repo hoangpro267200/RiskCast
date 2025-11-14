@@ -1664,9 +1664,8 @@ if "result" in locals():
 else:
     st.info("🔍 Vui lòng nhập thông tin & chạy mô hình trước để xem Premium View 3.0.")
 
-
-        # FUZZY AHP MODULE (GIỮ NGUYÊN HOÀN TOÀN)
-        if params.use_fuzzy:
+# FUZZY AHP MODULE (GIỮ NGUYÊN HOÀN TOÀN)
+if params.use_fuzzy:
             st.markdown("---")
             st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số (Enterprise Module)")
             
