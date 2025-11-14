@@ -1612,6 +1612,9 @@ class StreamlitUI:
     st.markdown("## 🏅 Top 3 phương án (Premium View)")
 
 cols = st.columns(3)
+st.markdown("## 🏅 Top 3 phương án (Premium View)")
+
+cols = st.columns(3)
 top3 = result.results.head(3)
 medals = ["🥇", "🥈", "🥉"]
 
@@ -1648,7 +1651,6 @@ for i, col in enumerate(cols):
         💰 Chi phí kỳ vọng: <b>${r['estimated_cost']:,.0f}</b>
         <span class="info-text">
             <b>Ý nghĩa chi phí</b><br><br>
-            Chi phí ước tính sau mô phỏng Monte Carlo giúp doanh nghiệp:<br>
             • So sánh mức tiết kiệm.<br>
             • Cân nhắc trả thêm để tăng bảo vệ.
         </span>
@@ -1659,7 +1661,7 @@ for i, col in enumerate(cols):
         <span class="info-text">
             <b>Điểm TOPSIS</b><br><br>
             Tổng hợp từ:<br>
-            • Tỷ lệ phí · Dịch vụ ICC · Tổn thất · Khí hậu tuyến đường (C6).<br>
+            • Tỷ lệ phí · Dịch vụ ICC · Tổn thất · C6.<br>
             Điểm cao → phương án tối ưu hơn.
         </span>
     </div>
@@ -1667,8 +1669,7 @@ for i, col in enumerate(cols):
     <div class="top3-sub info-tt">
         🎯 Tin cậy: <b>{r['confidence']:.2f}</b>
         <span class="info-text">
-            <b>Tin cậy</b><br><br>
-            Đo độ ổn định sau 2000+ mô phỏng.<br>
+            <b>Tin cậy (stability)</b><br><br>
             0.70+ → rất ổn định.<br>
             0.40–0.69 → trung bình.<br>
             < 0.40 → dễ biến động.
@@ -1678,10 +1679,9 @@ for i, col in enumerate(cols):
     <div class="top3-sub info-tt">
         🌪 Biến động rủi ro: <b>{r['C6_std']:.2f}</b>
         <span class="info-text">
-            <b>Độ biến động rủi ro (C6_std)</b><br><br>
+            <b>Độ biến động C6</b><br><br>
             Cao → rủi ro khó dự đoán.<br>
-            Thấp → ổn định.<br><br>
-            Quan trọng với hàng giá trị cao.
+            Thấp → ổn định.<br>
         </span>
     </div>
 
