@@ -1667,7 +1667,6 @@ else:
 # Render Top 3 Cards
 st.markdown("### 🏅 Top 3 phương án (Premium View)")
 
-top3 = result.results.head(3)
 medals = ["🥇", "🥈", "🥉"]
 
 cols = st.columns(3)
