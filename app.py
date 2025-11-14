@@ -1473,137 +1473,212 @@ class StreamlitUI:
         cols = st.columns(3)
         top3 = result.results.head(3)
         medals = ["🥇", "🥈", "🥉"]
-# ===================== TOP 3 PREMIUM CARDS (FULL FIXED BLOCK) =====================
+# ======================== PREMIUM VIEW 3.0 — INTERACTIVE EDITION ========================
 
 st.markdown("""
 <style>
 
-.top3-wrapper {
+/* Wrapper */
+.premium3-wrapper {
     display: flex;
-    gap: 22px;
-    width: 100%;
+    gap: 32px;
+    flex-wrap: wrap;
     justify-content: center;
-    margin-top: 20px;
+    margin-top: 30px;
 }
 
-/* Base card */
-.top3-card {
+/* FLIP CONTAINER */
+.flip-box {
+    background: transparent;
+    width: 340px;
+    height: 430px;
+    perspective: 1300px;
+}
+
+.flip-box-inner {
     position: relative;
     width: 100%;
-    background: radial-gradient(circle at top left, rgba(0,255,153,0.12), rgba(0,0,0,0.78));
-    border: 1px solid rgba(0,255,153,0.45);
-    padding: 22px 22px;
-    border-radius: 18px;
-    box-shadow: 0 0 18px rgba(0,255,153,0.18);
-    text-align: center;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    transition: transform 0.18s ease-out, box-shadow 0.18s ease-out;
+    height: 100%;
+    transition: transform 0.9s;
+    transform-style: preserve-3d;
 }
 
-/* Gold card for Top 1 */
-.top1-card {
-    background: radial-gradient(circle at top left, rgba(255,215,0,0.20), rgba(0,0,0,0.88));
-    border: 1px solid rgba(255,215,0,0.75);
-    box-shadow: 0 0 26px rgba(255,215,0,0.55);
-    animation: goldPulse 2.4s ease-in-out infinite alternate;
+.flip-box:hover .flip-box-inner {
+    transform: rotateY(180deg);
 }
 
-@keyframes goldPulse {
-    0% { box-shadow: 0 0 16px rgba(255,215,0,0.35); }
-    100% { box-shadow: 0 0 30px rgba(255,255,180,0.95); }
-}
-
-/* Hover */
-.top3-card:hover {
-    transform: translateY(-4px) scale(1.03);
-    box-shadow: 0 0 24px rgba(0,255,153,0.35);
-    border-color: rgba(0,255,200,0.85);
-}
-
-.top3-title {
-    font-size: 1.22rem;
-    font-weight: 800;
-    color: #a5ffdc;
-}
-.top1-title {
-    font-size: 1.28rem;
-    font-weight: 900;
-    color: #ffe680;
-    text-shadow: 0 0 14px rgba(255,210,0,0.75);
-}
-
-.top3-sub {
-    font-size: 1rem;
-    margin-top: 6px;
-    color: #e0f2f1;
-}
-
-/* Badge */
-.badge-icc {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 999px;
-    background: linear-gradient(120deg, #00e676, #00bfa5);
-    color: #00130d;
-    font-weight: 700;
-    font-size: 0.9rem;
-}
-
-/* Tooltip */
-.info-tt {
-    position: relative;
-    display: inline-block;
-    cursor: pointer;
-}
-.info-tt .info-text {
-    opacity: 0;
-    visibility: hidden;
-    width: 250px;
-    background: rgba(0,0,0,0.9);
-    color: #e0f2f1;
-    text-align: left;
-    border-radius: 8px;
-    padding: 10px 12px;
-    border: 1px solid rgba(0,255,153,0.45);
+/* FRONT & BACK */
+.flip-box-front,
+.flip-box-back {
     position: absolute;
-    z-index: 999;
-    bottom: 125%;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.85rem;
-    transition: opacity 0.18s ease-out;
-    white-space: normal;
-}
-.info-tt:hover .info-text {
-    opacity: 1;
-    visibility: visible;
+    width: 100%;
+    height: 100%;
+    border-radius: 22px;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    padding: 26px;
 }
 
-/* Button */
-.top3-btn {
-    margin-top: 12px;
-    padding: 7px 16px;
-    border-radius: 999px;
-    border: 1px solid rgba(0,255,153,0.7);
-    background: rgba(0,0,0,0.55);
-    color: #c8ffec;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s ease-out;
+/* FRONT (Summary view) */
+.flip-box-front {
+    background: rgba(0,15,10,0.65);
+    border: 1px solid rgba(0,255,153,0.45);
+    box-shadow: 0 0 26px rgba(0,255,153,0.25);
+    backdrop-filter: blur(18px);
 }
-.top3-btn:hover {
-    background: linear-gradient(120deg, #00ff99, #00e676);
+
+/* BACK (Detailed view) */
+.flip-box-back {
+    background: rgba(0,0,0,0.65);
+    border: 1px solid rgba(255,215,0,0.45);
+    box-shadow: 0 0 36px rgba(255,215,0,0.25);
+    backdrop-filter: blur(20px);
+    transform: rotateY(180deg);
+}
+
+/* HERO (Top 1) */
+.hero-glow {
+    animation: heroPulse 2.8s ease-in-out infinite;
+    border-color: rgba(255,230,90,0.85) !important;
+    box-shadow:
+        0 0 40px rgba(255,210,0,0.55),
+        0 0 90px rgba(255,185,0,0.28);
+}
+@keyframes heroPulse {
+    0% { box-shadow: 0 0 30px rgba(255,200,0,0.35); }
+    100% { box-shadow: 0 0 70px rgba(255,230,130,0.9); }
+}
+
+/* Title */
+.card-title {
+    text-align: center;
+    font-size: 1.42rem;
+    font-weight: 900;
+    margin-bottom: 12px;
+    color: #aaffea;
+}
+.hero-title {
+    color: #ffe680;
+    text-shadow: 0 0 14px rgba(255,220,0,0.8);
+}
+
+/* Avatar (Hologram) */
+.company-avatar {
+    width: 72px;
+    height: 72px;
+    margin: auto;
+    border-radius: 999px;
+    background-size: cover;
+    background-position: center;
+    box-shadow:
+        0 0 18px rgba(0,255,153,0.55),
+        inset 0 0 12px rgba(0,255,153,0.35);
+    margin-bottom: 12px;
+    animation: holoSpin 6s linear infinite;
+}
+@keyframes holoSpin {
+    0% { transform: rotateY(0); }
+    100% { transform: rotateY(360deg); }
+}
+
+/* Neon Bars */
+.neon-bar {
+    height: 10px;
+    background: linear-gradient(90deg, #00ffc3, #00e676);
+    border-radius: 999px;
+    margin: 6px 0;
+    box-shadow: 0 0 14px rgba(0,255,153,0.65);
+}
+
+/* Drawer */
+.drawer {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(0,0,0,0.45);
+    border: 1px solid rgba(0,255,153,0.45);
+    color: #e6fff6;
+    font-size: 0.92rem;
+}
+
+.drawer-btn {
+    margin-top: 12px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,255,153,0.75);
+    background: rgba(0,0,0,0.55);
+    color: #c8ffee;
+    cursor: pointer;
+    transition: 0.18s;
+    font-weight: 600;
+}
+.drawer-btn:hover {
+    background: linear-gradient(120deg, #00ffbb, #00e676);
     color: #00130d;
-    transform: translateY(-1px);
-    box-shadow: 0 0 12px rgba(0,255,153,0.7);
 }
 
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("## 🪩 Premium View 3.0 — Interactive Flip Edition")
 
+# Mapping logo
+company_logo = {
+    "PVI": "https://i.imgur.com/SzK2e5v.png",
+    "Chubb": "https://i.imgur.com/xnPP9kq.png",
+    "MIC": "https://i.imgur.com/aCHaHWE.png",
+}
+
+top3 = result.results.head(3)
+medals = ["🥇", "🥈", "🥉"]
+
+cols = st.columns(3)
+
+for i, col in enumerate(cols):
+    r = top3.iloc[i]
+
+    avatar = company_logo.get(r["company"], "")
+
+    front_extra = "hero-glow" if i == 0 else ""
+    title_extra = "hero-title" if i == 0 else ""
+
+    with col:
+        st.markdown(
+            f"""
+            <div class="flip-box">
+                <div class="flip-box-inner">
+
+                    <!-- FRONT -->
+                    <div class="flip-box-front {front_extra}">
+                        <div class="company-avatar" style="background-image:url('{avatar}')"></div>
+                        <div class="card-title {title_extra}">
+                            {medals[i]} {r['company']}
+                        </div>
+                        <div>💰 <b>${r['estimated_cost']:,.0f}</b></div>
+                        <div class="neon-bar" style="width:{r['score']*100}%"></div>
+                        <div>📊 Điểm: <b>{r['score']:.3f}</b></div>
+                        <div class="neon-bar" style="width:{r['confidence']*100}%"></div>
+                        <div>🎯 Tin cậy: <b>{r['confidence']:.2f}</b></div>
+                    </div>
+
+                    <!-- BACK -->
+                    <div class="flip-box-back">
+                        <div class="card-title">📘 Chi tiết</div>
+                        <div class="drawer">
+                            <b>ICC:</b> {r['icc_package']}<br><br>
+                            🌪 Biến động rủi ro: <b>{r['C6_std']:.2f}</b><br><br>
+                            📌 Thông tin thêm:<br>
+                            - Gói bảo hiểm phù hợp cho tuyến<br>
+                            - Thích hợp doanh nghiệp có yêu cầu ổn định<br>
+                            - Điểm cao nhờ cân bằng chi phí - rủi ro
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 # Render Top 3 Cards
 st.markdown("### 🏅 Top 3 phương án (Premium View)")
 
