@@ -948,7 +948,8 @@ class ChartFactory:
             title=dict(
                 text=f"<b>{title}</b>",
                 font=dict(size=20, color="#a5ffdc"),
-                x=0.5
+                x=0.5,
+                y=0.98  # Đẩy title xuống để không bị che
             ),
             showlegend=True,
             legend=dict(
@@ -957,8 +958,8 @@ class ChartFactory:
             ),
             paper_bgcolor="#001016",
             plot_bgcolor="#001016",
-            margin=dict(l=0, r=0, t=60, b=0),
-            height=430
+            margin=dict(l=0, r=0, t=80, b=0),  # Tăng margin top từ 60 → 80
+            height=480  # Tăng chiều cao từ 430 → 480
         )
         return fig
     
