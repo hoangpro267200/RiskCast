@@ -1429,22 +1429,24 @@ class StreamlitUI:
                 unsafe_allow_html=True
             )
         
-        # Charts
-    st.markdown("---")
-    st.subheader("📊 Biểu đồ phân tích")
+              # Charts
+        st.markdown("---")
+        st.subheader("📊 Biểu đồ phân tích")
 
-    # =============== SCATTER CHART ===============
-    st.markdown("## 📉 Biểu đồ Chi phí – Chất lượng")
-    fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
-    st.plotly_chart(fig_scatter, use_container_width=True)
+        # ==================== SCATTER CHART ====================
+        st.markdown("## 📉 Biểu đồ Chi phí – Chất lượng")
+        fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
+        st.plotly_chart(fig_scatter, use_container_width=True)
 
-    # =============== CATEGORY CHART ===============
-    st.markdown("## 📊 So sánh 3 Loại Phương án")
-    fig_category = self.chart_factory.create_category_comparison(result.results)
-    st.plotly_chart(fig_category, use_container_width=True)
+        # ==================== CATEGORY CHART ====================
+        st.markdown("## 📊 So sánh 3 Loại Phương án")
+        fig_category = self.chart_factory.create_category_comparison(result.results)
+        st.plotly_chart(fig_category, use_container_width=True)
 
-    fig_top = self.chart_factory.create_top_recommendations_bar(result.results)
-    st.plotly_chart(fig_top, use_container_width=True)
+        # ==================== TOP RECOMMENDATIONS ====================
+        fig_top = self.chart_factory.create_top_recommendations_bar(result.results)
+        st.plotly_chart(fig_top, use_container_width=True)
+
         # Weights & Metrics
         col1, col2 = st.columns(2)
         with col1:
