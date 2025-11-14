@@ -1628,7 +1628,6 @@ class StreamlitUI:
                 st.markdown(
                     f"""
 <div class="{card_class}">
-
     <div class="{title_class}">{medals[i]} #{i+1}: {r['company']}</div>
 
     <div class="top3-sub info-tt">
