@@ -909,16 +909,14 @@ class ChartFactory:
                 x=0.5
             ),
             yaxis=dict(
-                title="<b>Điểm TOPSIS</b>",
+                title=dict(text="<b>Điểm TOPSIS</b>", font=dict(color="#00e676")),
                 range=[0, 1],
-                titlefont=dict(color="#00e676"),
                 tickfont=dict(color="#00e676")
             ),
             yaxis2=dict(
-                title="<b>Chi phí ($)</b>",
+                title=dict(text="<b>Chi phí ($)</b>", font=dict(color="#ffeb3b")),
                 overlaying="y",
                 side="right",
-                titlefont=dict(color="#ffeb3b"),
                 tickfont=dict(color="#ffeb3b")
             ),
             paper_bgcolor="#000c11",
