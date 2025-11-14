@@ -1609,16 +1609,20 @@ class StreamlitUI:
         </style>
         """, unsafe_allow_html=True)
 
- # ==================== TOP 3 PREMIUM VIEW ====================
+# ==================== TOP 3 PREMIUM VIEW ====================
 st.markdown("## 🏅 Top 3 phương án (Premium View)")
 
-cols = st.columns(3)
-top3 = result.results.head(3)
+# CORRECTION: Vérifier nombre de résultats disponibles
+n_results = min(3, len(result.results))
+top3 = result.results.head(n_results)
 medals = ["🥇", "🥈", "🥉"]
 
-for i, col in enumerate(cols):
-    r = top3.iloc[i]
+cols = st.columns(n_results)
 
+for i, col in enumerate(cols):
+    if i >= len(top3):
+        break
+    r = top3.iloc[i]
     card_class = "top3-card"
     title_class = "top3-title"
 
