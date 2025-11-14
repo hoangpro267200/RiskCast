@@ -1615,23 +1615,22 @@ class StreamlitUI:
         top3 = result.results.head(3)
         medals = ["🥇", "🥈", "🥉"]
 
-        for i, col in enumerate(cols):
-    r = top3.iloc[i]
+             for i, col in enumerate(cols):
+            r = top3.iloc[i]
 
-    card_class = "top3-card"
-    title_class = "top3-title"
-    if i == 0:
-        card_class += " top1-card"
-        title_class = "top1-title"
+            card_class = "top3-card"
+            title_class = "top3-title"
+            if i == 0:
+                card_class += " top1-card"
+                title_class = "top1-title"
 
-    with col:
-        st.markdown(
-            f"""
+            with col:
+                st.markdown(
+                    f"""
 <div class="{card_class}">
 
     <div class="{title_class}">{medals[i]} #{i+1}: {r['company']}</div>
 
-    <!-- Loại ICC + tooltip -->
     <div class="top3-sub info-tt">
         <b class="badge-icc">{r['icc_package']}</b>
         <span class="info-text">
@@ -1643,55 +1642,44 @@ class StreamlitUI:
         </span>
     </div>
 
-    <!-- Chi phí kỳ vọng -->
     <div class="top3-sub info-tt" style="color:#7CFFA1; font-size:1.1rem;">
         💰 Chi phí kỳ vọng: <b>${r['estimated_cost']:,.0f}</b>
         <span class="info-text">
             <b>Ý nghĩa chi phí</b><br><br>
-            Đây là mức chi phí bảo hiểm ước tính sau mô phỏng Monte Carlo.<br>
-            Giúp doanh nghiệp so sánh:<br>
-            • Gói nào tiết kiệm hơn.<br>
-            • Gói nào trả thêm để đổi bảo vệ cao hơn.
+            Chi phí ước tính sau mô phỏng Monte Carlo giúp doanh nghiệp:
+            • So sánh mức tiết kiệm.<br>
+            • Cân nhắc trả thêm để tăng bảo vệ.
         </span>
     </div>
 
-    <!-- Điểm tổng hợp -->
     <div class="top3-sub info-tt">
         📊 Điểm: <b>{r['score']:.3f}</b> · <span class="pill-badge">{r['category']}</span>
         <span class="info-text">
             <b>Điểm TOPSIS</b><br><br>
-            Điểm gồm:<br>
-            • Phí bảo hiểm<br>
-            • Dịch vụ ICC<br>
-            • Tổn thất quá khứ<br>
-            • Thời gian xử lý<br>
-            • Uy tín doanh nghiệp<br>
-            • Rủi ro tuyến đường (C6)<br><br>
+            Tổng hợp từ:<br>
+            • Tỷ lệ phí · Dịch vụ ICC · Tổn thất · Khí hậu tuyến đường (C6).<br>
             Điểm cao → phương án tối ưu hơn.
         </span>
     </div>
 
-    <!-- Tin cậy -->
     <div class="top3-sub info-tt">
         🎯 Tin cậy: <b>{r['confidence']:.2f}</b>
         <span class="info-text">
             <b>Tin cậy</b><br><br>
-            Đo độ ổn định kết quả qua 2000+ lần mô phỏng Monte Carlo.<br>
-            • 0.70–1.00: rất ổn định<br>
-            • 0.40–0.69: trung bình<br>
-            • &lt; 0.40: dễ biến động<br>
+            Đo độ ổn định sau 2000+ mô phỏng.<br>
+            0.70+ → rất ổn định.<br>
+            0.40–0.69 → trung bình.<br>
+            < 0.40 → dễ biến động.
         </span>
     </div>
 
-    <!-- Độ biến động rủi ro -->
     <div class="top3-sub info-tt">
         🌪 Biến động rủi ro: <b>{r['C6_std']:.2f}</b>
         <span class="info-text">
-            <b>Độ biến động rủi ro khí hậu</b><br><br>
-            C6_std phản ánh mức dao động rủi ro thời tiết tuyến đường.<br>
-            Cao → khó dự đoán.<br>
+            <b>Độ biến động rủi ro (C6_std)</b><br><br>
+            Cao → rủi ro khó dự đoán.<br>
             Thấp → ổn định.<br><br>
-            Rất quan trọng với hàng giá trị cao.
+            Quan trọng với hàng giá trị cao.
         </span>
     </div>
 
@@ -1699,9 +1687,8 @@ class StreamlitUI:
 
 </div>
 """,
-            unsafe_allow_html=True,
-        )
-
+                    unsafe_allow_html=True,
+                )
 
 
         # Weights & Metrics
