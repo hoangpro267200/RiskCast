@@ -1473,141 +1473,211 @@ class StreamlitUI:
         cols = st.columns(3)
         top3 = result.results.head(3)
         medals = ["🥇", "🥈", "🥉"]
+# ===================== TOP 3 PREMIUM CARDS (FULL FIXED BLOCK) =====================
 
-               # ===================== TOP 3 PREMIUM CARDS (FULL EFFECT) =====================
+st.markdown("""
+<style>
 
-        # CSS cho card + hiệu ứng + tooltip
-        st.markdown("""
-        <style>
-        .top3-card {
-            position: relative;
-            background: radial-gradient(circle at top left, rgba(0,255,153,0.12), rgba(0,0,0,0.78));
-            border: 1px solid rgba(0,255,153,0.45);
-            padding: 20px 22px;
-            border-radius: 18px;
-            box-shadow: 0 0 18px rgba(0,255,153,0.18);
-            margin-bottom: 18px;
-            text-align: center;
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out;
-        }
+.top3-wrapper {
+    display: flex;
+    gap: 22px;
+    width: 100%;
+    justify-content: center;
+    margin-top: 20px;
+}
 
-        /* Card #1 – Gold Edition */
-        .top1-card {
-            background: radial-gradient(circle at top left, rgba(255,215,0,0.20), rgba(0,0,0,0.82));
-            border: 1px solid rgba(255,215,0,0.7);
-            box-shadow: 0 0 26px rgba(255,215,0,0.45);
-            animation: gold-pulse 2.4s ease-in-out infinite alternate;
-        }
+/* Base card */
+.top3-card {
+    position: relative;
+    width: 100%;
+    background: radial-gradient(circle at top left, rgba(0,255,153,0.12), rgba(0,0,0,0.78));
+    border: 1px solid rgba(0,255,153,0.45);
+    padding: 22px 22px;
+    border-radius: 18px;
+    box-shadow: 0 0 18px rgba(0,255,153,0.18);
+    text-align: center;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transition: transform 0.18s ease-out, box-shadow 0.18s ease-out;
+}
 
-        @keyframes gold-pulse {
-            0% {
-                box-shadow: 0 0 10px rgba(255,215,0,0.35);
-                border-color: rgba(255,215,0,0.6);
-            }
-            100% {
-                box-shadow: 0 0 26px rgba(255,215,0,0.75);
-                border-color: rgba(255,255,255,0.95);
-            }
-        }
+/* Gold card for Top 1 */
+.top1-card {
+    background: radial-gradient(circle at top left, rgba(255,215,0,0.20), rgba(0,0,0,0.88));
+    border: 1px solid rgba(255,215,0,0.75);
+    box-shadow: 0 0 26px rgba(255,215,0,0.55);
+    animation: goldPulse 2.4s ease-in-out infinite alternate;
+}
 
-        /* Hover zoom cho tất cả card */
-        .top3-card:hover {
-            transform: translateY(-4px) scale(1.03);
-            box-shadow: 0 0 26px rgba(0,255,153,0.35);
-            border-color: rgba(0,255,200,0.85);
-        }
+@keyframes goldPulse {
+    0% { box-shadow: 0 0 16px rgba(255,215,0,0.35); }
+    100% { box-shadow: 0 0 30px rgba(255,255,180,0.95); }
+}
 
-        .top3-title {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: #a5ffdc;
-        }
+/* Hover */
+.top3-card:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 0 24px rgba(0,255,153,0.35);
+    border-color: rgba(0,255,200,0.85);
+}
 
-        .top1-title {
-            font-size: 1.3rem;
-            font-weight: 900;
-            color: #ffe680;
-            text-shadow: 0 0 10px rgba(255,210,0,0.7);
-        }
+.top3-title {
+    font-size: 1.22rem;
+    font-weight: 800;
+    color: #a5ffdc;
+}
+.top1-title {
+    font-size: 1.28rem;
+    font-weight: 900;
+    color: #ffe680;
+    text-shadow: 0 0 14px rgba(255,210,0,0.75);
+}
 
-        .top3-sub {
-            font-size: 1rem;
-            margin-top: 6px;
-            color: #e0f2f1;
-        }
+.top3-sub {
+    font-size: 1rem;
+    margin-top: 6px;
+    color: #e0f2f1;
+}
 
-        .badge-icc {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 999px;
-            background: linear-gradient(120deg, #00e676, #00bfa5);
-            color: #00130d;
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
+/* Badge */
+.badge-icc {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: linear-gradient(120deg, #00e676, #00bfa5);
+    color: #00130d;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
 
-        .pill-badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(0,255,153,0.5);
-            font-size: 0.85rem;
-            margin-top: 4px;
-            color: #c8ffec;
-        }
+/* Tooltip */
+.info-tt {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+.info-tt .info-text {
+    opacity: 0;
+    visibility: hidden;
+    width: 250px;
+    background: rgba(0,0,0,0.9);
+    color: #e0f2f1;
+    text-align: left;
+    border-radius: 8px;
+    padding: 10px 12px;
+    border: 1px solid rgba(0,255,153,0.45);
+    position: absolute;
+    z-index: 999;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.85rem;
+    transition: opacity 0.18s ease-out;
+    white-space: normal;
+}
+.info-tt:hover .info-text {
+    opacity: 1;
+    visibility: visible;
+}
 
-        .top3-btn {
-            margin-top: 10px;
-            padding: 6px 14px;
-            border-radius: 999px;
-            border: 1px solid rgba(0,255,153,0.7);
-            background: rgba(0,0,0,0.65);
-            color: #c8ffec;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.15s ease-out, transform 0.15s ease-out, box-shadow 0.15s ease-out;
-        }
-        .top3-btn:hover {
-            background: linear-gradient(120deg, #00ff99, #00e676);
-            color: #00130d;
-            transform: translateY(-1px);
-            box-shadow: 0 0 12px rgba(0,255,153,0.7);
-        }
+/* Button */
+.top3-btn {
+    margin-top: 12px;
+    padding: 7px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,255,153,0.7);
+    background: rgba(0,0,0,0.55);
+    color: #c8ffec;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease-out;
+}
+.top3-btn:hover {
+    background: linear-gradient(120deg, #00ff99, #00e676);
+    color: #00130d;
+    transform: translateY(-1px);
+    box-shadow: 0 0 12px rgba(0,255,153,0.7);
+}
 
-        /* Tooltip chung cho Điểm / ICC / Tiết kiệm / Tin cậy / Biến động */
-        .info-tt {
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
-        }
-        .info-tt .info-text {
-            opacity: 0;
-            visibility: hidden;
-            width: 250px;
-            background: rgba(0,0,0,0.9);
-            color: #e0f2f1;
-            text-align: left;
-            border-radius: 8px;
-            padding: 10px 12px;
-            border: 1px solid rgba(0,255,153,0.45);
-            position: absolute;
-            z-index: 999;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.85rem;
-            transition: opacity 0.18s ease-out;
-        }
-        .info-tt:hover .info-text {
-            opacity: 1;
-            visibility: visible;
-        }
+</style>
+""", unsafe_allow_html=True)
 
-        </style>
-        """, unsafe_allow_html=True)
+
+# Render Top 3 Cards
+st.markdown("### 🏅 Top 3 phương án (Premium View)")
+
+top3 = result.results.head(3)
+medals = ["🥇", "🥈", "🥉"]
+
+cols = st.columns(3)
+
+for i, col in enumerate(cols):
+    r = top3.iloc[i]
+
+    card_class = "top3-card"
+    title_class = "top3-title"
+
+    if i == 0:
+        card_class += " top1-card"
+        title_class = "top1-title"
+
+    with col:
+        st.markdown(
+            f"""
+            <div class="{card_class}">
+                <div class="{title_class}">
+                    {medals[i]} #{i+1}: {r['company']}
+                </div>
+
+                <!-- ICC -->
+                <div class="top3-sub info-tt">
+                    <b class="badge-icc">{r['icc_package']}</b>
+                    <span class="info-text">
+                        <b>Loại ICC:</b><br><br>
+                        • ICC A: Rộng nhất (All Risks).<br>
+                        • ICC B: Trung bình.<br>
+                        • ICC C: Cơ bản nhất.<br>
+                    </span>
+                </div>
+
+                <!-- Chi phí -->
+                <div class="top3-sub info-tt" style="color:#7CFFA1; font-size:1.1rem;">
+                    💰 Chi phí: <b>${r['estimated_cost']:,.0f}</b>
+                    <span class="info-text">
+                        Chi phí bảo hiểm ước tính dựa trên tỷ lệ phí từng gói.
+                    </span>
+                </div>
+
+                <!-- Điểm TOPSIS -->
+                <div class="top3-sub info-tt">
+                    📊 Điểm: <b>{r['score']:.3f}</b>
+                    <span class="info-text">
+                        Điểm tổng hợp TOPSIS: càng cao → càng gần phương án lý tưởng.
+                    </span>
+                </div>
+
+                <!-- Tin cậy -->
+                <div class="top3-sub info-tt">
+                    🎯 Tin cậy: <b>{r['confidence']:.2f}</b>
+                    <span class="info-text">
+                        Độ ổn định sau mô phỏng Monte Carlo.
+                    </span>
+                </div>
+
+                <!-- Biến động rủi ro -->
+                <div class="top3-sub info-tt">
+                    🌪 Biến động C6: <b>{r['C6_std']:.2f}</b>
+                    <span class="info-text">
+                        Std.dev của rủi ro khí hậu từng công ty.
+                    </span>
+                </div>
+
+                <button class="top3-btn">📘 Xem chi tiết</button>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
         st.markdown("## 🏅 Top 3 phương án (Premium View)")
 
