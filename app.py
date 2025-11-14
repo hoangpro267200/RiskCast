@@ -1443,7 +1443,7 @@ class StreamlitUI:
         fig_category = self.chart_factory.create_category_comparison(result.results)
         st.plotly_chart(fig_category, use_container_width=True)
 
-           # ===================== TOP 3 RECOMMENDATION CARDS =====================
+            # ===================== TOP 3 RECOMMENDATION CARDS =====================
         st.markdown("""
         <style>
         .top3-card {
@@ -1486,7 +1486,6 @@ class StreamlitUI:
                     <div class="top3-sub">Tin cậy: {r['confidence']:.2f}</div>
                 </div>
                 """, unsafe_allow_html=True)
-
 
         # Weights & Metrics
         col1, col2 = st.columns(2)
