@@ -1615,7 +1615,7 @@ class StreamlitUI:
         top3 = result.results.head(3)
         medals = ["🥇", "🥈", "🥉"]
 
-             for i, col in enumerate(cols):
+        for i, col in enumerate(cols):
             r = top3.iloc[i]
 
             card_class = "top3-card"
@@ -1689,7 +1689,6 @@ class StreamlitUI:
 """,
                     unsafe_allow_html=True,
                 )
-
 
         # Weights & Metrics
         col1, col2 = st.columns(2)
