@@ -1664,7 +1664,7 @@ if "result" in locals():
 else:
     st.info("🔍 Vui lòng nhập thông tin & chạy mô hình trước để xem Premium View 3.0.")
 
-# FUZZY AHP MODULE (GIỮ NGUYÊN HOÀN TOÀN)
+# ======================== FUZZY AHP MODULE ========================
 if params.use_fuzzy:
     st.markdown("---")
     st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số (Enterprise Module)")
@@ -1681,17 +1681,15 @@ if params.use_fuzzy:
     </div>
     """, unsafe_allow_html=True)
 
-    # Biểu đồ Fuzzy
     fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
     st.plotly_chart(fig_fuzzy, use_container_width=True)
 
-    # Bảng Low – Mid – High – Centroid
     st.subheader("📄 Bảng Low – Mid – High – Centroid (cho NCKH)")
     fuzzy_table = build_fuzzy_table(result.weights, params.fuzzy_uncertainty)
     st.dataframe(fuzzy_table, use_container_width=True)
 
-    # Highlight tiêu chí dao động mạnh nhất
     most_unc, diff_map = most_uncertain_criterion(result.weights, params.fuzzy_uncertainty)
+
     st.markdown(
         f"""
         <div style="background:#00331F; padding:15px; border-radius:10px;
