@@ -1519,7 +1519,7 @@ st.markdown("""
     padding: 26px;
 }
 
-/* FRONT (Summary view) */
+/* FRONT */
 .flip-box-front {
     background: rgba(0,15,10,0.65);
     border: 1px solid rgba(0,255,153,0.45);
@@ -1527,7 +1527,7 @@ st.markdown("""
     backdrop-filter: blur(18px);
 }
 
-/* BACK (Detailed view) */
+/* BACK */
 .flip-box-back {
     background: rgba(0,0,0,0.65);
     border: 1px solid rgba(255,215,0,0.45);
@@ -1536,13 +1536,12 @@ st.markdown("""
     transform: rotateY(180deg);
 }
 
-/* HERO (Top 1) */
+/* HERO (TOP 1) */
 .hero-glow {
     animation: heroPulse 2.8s ease-in-out infinite;
     border-color: rgba(255,230,90,0.85) !important;
-    box-shadow:
-        0 0 40px rgba(255,210,0,0.55),
-        0 0 90px rgba(255,185,0,0.28);
+    box-shadow: 0 0 40px rgba(255,210,0,0.55),
+                0 0 90px rgba(255,185,0,0.28);
 }
 @keyframes heroPulse {
     0% { box-shadow: 0 0 30px rgba(255,200,0,0.35); }
@@ -1562,7 +1561,7 @@ st.markdown("""
     text-shadow: 0 0 14px rgba(255,220,0,0.8);
 }
 
-/* Avatar (Hologram) */
+/* Avatar */
 .company-avatar {
     width: 72px;
     height: 72px;
@@ -1570,9 +1569,8 @@ st.markdown("""
     border-radius: 999px;
     background-size: cover;
     background-position: center;
-    box-shadow:
-        0 0 18px rgba(0,255,153,0.55),
-        inset 0 0 12px rgba(0,255,153,0.35);
+    box-shadow: 0 0 18px rgba(0,255,153,0.55),
+                inset 0 0 12px rgba(0,255,153,0.35);
     margin-bottom: 12px;
     animation: holoSpin 6s linear infinite;
 }
@@ -1581,7 +1579,7 @@ st.markdown("""
     100% { transform: rotateY(360deg); }
 }
 
-/* Neon Bars */
+/* Neon bar */
 .neon-bar {
     height: 10px;
     background: linear-gradient(90deg, #00ffc3, #00e676);
@@ -1590,7 +1588,6 @@ st.markdown("""
     box-shadow: 0 0 14px rgba(0,255,153,0.65);
 }
 
-/* Drawer */
 .drawer {
     margin-top: 12px;
     padding: 10px 14px;
@@ -1601,88 +1598,72 @@ st.markdown("""
     font-size: 0.92rem;
 }
 
-.drawer-btn {
-    margin-top: 12px;
-    padding: 6px 14px;
-    border-radius: 999px;
-    border: 1px solid rgba(0,255,153,0.75);
-    background: rgba(0,0,0,0.55);
-    color: #c8ffee;
-    cursor: pointer;
-    transition: 0.18s;
-    font-weight: 600;
-}
-.drawer-btn:hover {
-    background: linear-gradient(120deg, #00ffbb, #00e676);
-    color: #00130d;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
+
 st.markdown("## 🪩 Premium View 3.0 — Interactive Flip Edition")
 
-# Mapping logo
 company_logo = {
     "PVI": "https://i.imgur.com/SzK2e5v.png",
     "Chubb": "https://i.imgur.com/xnPP9kq.png",
     "MIC": "https://i.imgur.com/aCHaHWE.png",
 }
 
-if 'result' in locals():
-    # block Premium View 3.0 ở đây
+# ONLY run when result exists
+if "result" in locals():
+
+    top3 = result.results.head(3)
+    medals = ["🥇", "🥈", "🥉"]
+
+    cols = st.columns(3)
+
+    for i, col in enumerate(cols):
+        r = top3.iloc[i]
+        avatar = company_logo.get(r["company"], "")
+
+        front_extra = "hero-glow" if i == 0 else ""
+        title_extra = "hero-title" if i == 0 else ""
+
+        with col:
+            st.markdown(
+                f"""
+                <div class="flip-box">
+                    <div class="flip-box-inner">
+
+                        <div class="flip-box-front {front_extra}">
+                            <div class="company-avatar" style="background-image:url('{avatar}')"></div>
+                            <div class="card-title {title_extra}">
+                                {medals[i]} {r['company']}
+                            </div>
+                            <div>💰 <b>${r['estimated_cost']:,.0f}</b></div>
+                            <div class="neon-bar" style="width:{r['score']*100}%"></div>
+                            <div>📊 Điểm: <b>{r['score']:.3f}</b></div>
+                            <div class="neon-bar" style="width:{r['confidence']*100}%"></div>
+                            <div>🎯 Tin cậy: <b>{r['confidence']:.2f}</b></div>
+                        </div>
+
+                        <div class="flip-box-back">
+                            <div class="card-title">📘 Chi tiết</div>
+                            <div class="drawer">
+                                <b>ICC:</b> {r['icc_package']}<br><br>
+                                🌪 Rủi ro: <b>{r['C6_std']:.2f}</b><br><br>
+                                📌 Nhận định:<br>
+                                - Phù hợp tuyến<br>
+                                - Ổn định chi phí<br>
+                                - Cân bằng rủi ro – giá
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
 else:
     st.info("🔍 Vui lòng nhập thông tin & chạy mô hình trước để xem Premium View 3.0.")
 
-medals = ["🥇", "🥈", "🥉"]
-
-cols = st.columns(3)
-
-for i, col in enumerate(cols):
-    r = top3.iloc[i]
-
-    avatar = company_logo.get(r["company"], "")
-
-    front_extra = "hero-glow" if i == 0 else ""
-    title_extra = "hero-title" if i == 0 else ""
-
-    with col:
-        st.markdown(
-            f"""
-            <div class="flip-box">
-                <div class="flip-box-inner">
-
-                    <!-- FRONT -->
-                    <div class="flip-box-front {front_extra}">
-                        <div class="company-avatar" style="background-image:url('{avatar}')"></div>
-                        <div class="card-title {title_extra}">
-                            {medals[i]} {r['company']}
-                        </div>
-                        <div>💰 <b>${r['estimated_cost']:,.0f}</b></div>
-                        <div class="neon-bar" style="width:{r['score']*100}%"></div>
-                        <div>📊 Điểm: <b>{r['score']:.3f}</b></div>
-                        <div class="neon-bar" style="width:{r['confidence']*100}%"></div>
-                        <div>🎯 Tin cậy: <b>{r['confidence']:.2f}</b></div>
-                    </div>
-
-                    <!-- BACK -->
-                    <div class="flip-box-back">
-                        <div class="card-title">📘 Chi tiết</div>
-                        <div class="drawer">
-                            <b>ICC:</b> {r['icc_package']}<br><br>
-                            🌪 Biến động rủi ro: <b>{r['C6_std']:.2f}</b><br><br>
-                            📌 Thông tin thêm:<br>
-                            - Gói bảo hiểm phù hợp cho tuyến<br>
-                            - Thích hợp doanh nghiệp có yêu cầu ổn định<br>
-                            - Điểm cao nhờ cân bằng chi phí - rủi ro
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
 # Render Top 3 Cards
 st.markdown("### 🏅 Top 3 phương án (Premium View)")
 
