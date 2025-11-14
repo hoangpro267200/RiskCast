@@ -1629,7 +1629,11 @@ company_logo = {
     "MIC": "https://i.imgur.com/aCHaHWE.png",
 }
 
-top3 = result.results.head(3)
+if 'result' in locals():
+    # block Premium View 3.0 ở đây
+else:
+    st.info("🔍 Vui lòng nhập thông tin & chạy mô hình trước để xem Premium View 3.0.")
+
 medals = ["🥇", "🥈", "🥉"]
 
 cols = st.columns(3)
