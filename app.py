@@ -1609,26 +1609,29 @@ class StreamlitUI:
         </style>
         """, unsafe_allow_html=True)
 
-        st.markdown("## 🏅 Top 3 phương án (Premium View)")
+    st.markdown("## 🏅 Top 3 phương án (Premium View)")
 
-        cols = st.columns(3)
-        top3 = result.results.head(3)
-        medals = ["🥇", "🥈", "🥉"]
+cols = st.columns(3)
+top3 = result.results.head(3)
+medals = ["🥇", "🥈", "🥉"]
 
-        for i, col in enumerate(cols):
-            r = top3.iloc[i]
+for i, col in enumerate(cols):
+    r = top3.iloc[i]
 
-            card_class = "top3-card"
-            title_class = "top3-title"
-            if i == 0:
-                card_class += " top1-card"
-                title_class = "top1-title"
+    card_class = "top3-card"
+    title_class = "top3-title"
+    if i == 0:
+        card_class += " top1-card"
+        title_class = "top1-title"
 
-            with col:
-                st.markdown(
-                    f"""
+    with col:
+        st.markdown(
+            f"""
 <div class="{card_class}">
-    <div class="{title_class}">{medals[i]} #{i+1}: {r['company']}</div>
+
+    <div class="{title_class}">
+        {medals[i]} #{i+1}: {r['company']}
+    </div>
 
     <div class="top3-sub info-tt">
         <b class="badge-icc">{r['icc_package']}</b>
@@ -1645,7 +1648,7 @@ class StreamlitUI:
         💰 Chi phí kỳ vọng: <b>${r['estimated_cost']:,.0f}</b>
         <span class="info-text">
             <b>Ý nghĩa chi phí</b><br><br>
-            Chi phí ước tính sau mô phỏng Monte Carlo giúp doanh nghiệp:
+            Chi phí ước tính sau mô phỏng Monte Carlo giúp doanh nghiệp:<br>
             • So sánh mức tiết kiệm.<br>
             • Cân nhắc trả thêm để tăng bảo vệ.
         </span>
@@ -1685,10 +1688,10 @@ class StreamlitUI:
     <button class="top3-btn">📘 Xem phân tích chi tiết</button>
 
 </div>
-""",
-                    unsafe_allow_html=True,
-                )
-    
+            """,
+            unsafe_allow_html=True,
+        )
+
         # Weights & Metrics
         col1, col2 = st.columns(2)
         with col1:
