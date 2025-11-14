@@ -1611,7 +1611,7 @@ class StreamlitUI:
 
         st.markdown("## 🏅 Top 3 phương án (Premium View)")
 
-               cols = st.columns(3)
+        cols = st.columns(3)
         top3 = result.results.head(3)
         medals = ["🥇", "🥈", "🥉"]
 
@@ -1689,8 +1689,7 @@ class StreamlitUI:
 """,
                     unsafe_allow_html=True,
                 )
-
-        
+    
         # Weights & Metrics
         col1, col2 = st.columns(2)
         with col1:
