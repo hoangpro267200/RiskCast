@@ -1664,8 +1664,10 @@ if "result" in locals():
 else:
     st.info("🔍 Vui lòng nhập thông tin & chạy mô hình trước để xem Premium View 3.0.")
 
+
 # ======================== FUZZY AHP MODULE ========================
 if params.use_fuzzy:
+
     st.markdown("---")
     st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số (Enterprise Module)")
 
@@ -1697,118 +1699,53 @@ if params.use_fuzzy:
         🔍 <b>Tiêu chí dao động mạnh nhất (High - Low lớn nhất):</b><br>
         <span style="color:#00FFAA; font-size:20px;"><b>{most_unc}</b></span><br><br>
         💡 <b>Ý nghĩa:</b> Tiêu chí này <b>nhạy cảm nhất</b> khi thay đổi trọng số đầu vào (Fuzzy).<br>
-        "Mô hình Fuzzy cho thấy tiêu chí này có độ bất định cao,
-        nên cần được chuyên gia cân nhắc kỹ khi hiệu chỉnh trọng số."<br><br>
+        Mô hình Fuzzy cho thấy tiêu chí này có độ bất định cao,
+        nên cần được chuyên gia cân nhắc kỹ khi hiệu chỉnh trọng số.<br><br>
         <b>Giải pháp:</b> Thu thập thêm ý kiến chuyên gia hoặc dữ liệu thực tế để giảm bất định.
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    # Heatmap Premium
     st.subheader("🔥 Heatmap mức dao động Fuzzy (Premium Green)")
     fig_heat = fuzzy_heatmap_premium(diff_map)
     st.plotly_chart(fig_heat, use_container_width=True)
 
-        # Export
-        st.markdown("---")
-        st.subheader("📥 Xuất báo cáo")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            excel_data = self.report_gen.generate_excel(result.results, result.weights)
-            st.download_button(
-                "📊 Tải Excel",
-                data=excel_data,
-                file_name=f"riskcast_v53_{params.route.replace(' - ', '_')}.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True
-            )
-        
-        with col2:
-            pdf_data = self.report_gen.generate_pdf(result.results, params, result.var, result.cvar)
-            if pdf_data:
-                st.download_button(
-                    "📄 Tải PDF",
-                    data=pdf_data,
-                    file_name=f"riskcast_v53_{params.route.replace(' - ', '_')}.pdf",
-                    mime="application/pdf",
-                    use_container_width=True
-                )
-    
-    def run(self):
-        self.initialize()
-        
-        # Header
-        st.markdown(
-            """
-            <div class="app-header">
-                <div class="app-header-left">
-                    <div class="app-logo-circle">RC</div>
-                    <div>
-                        <div class="app-header-title">RISKCAST v5.3 — MULTI-PACKAGE ANALYSIS</div>
-                        <div class="app-header-subtitle">
-                            15 Phương án (5 Công ty × 3 Gói ICC) · Profile-Based Recommendation · Smart Ranking · Cost-Benefit Analysis · Fuzzy AHP · Full Explanations for Research
-                        </div>
-                    </div>
-                </div>
-                <div class="app-header-badge">
-                    <span>🎯 Smart Recommendation</span>
-                    <span>·</span>
-                    <span>15 Phương án</span>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
+
+# ======================== EXPORT (LUÔN LUÔN OUTSIDE FUZZY) ========================
+
+st.markdown("---")
+st.subheader("📥 Xuất báo cáo")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    excel_data = app.report_gen.generate_excel(result.results, result.weights)
+    st.download_button(
+        "📊 Tải Excel",
+        data=excel_data,
+        file_name=f"riskcast_v53_{params.route.replace(' - ', '_')}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        use_container_width=True
+    )
+
+with col2:
+    pdf_data = app.report_gen.generate_pdf(result.results, params, result.var, result.cvar)
+    if pdf_data:
+        st.download_button(
+            "📄 Tải PDF",
+            data=pdf_data,
+            file_name=f"riskcast_v53_{params.route.replace(' - ', '_')}.pdf",
+            mime="application/pdf",
+            use_container_width=True
         )
-        
-        historical = DataService.load_historical_data()
-        params = self.render_sidebar()
-        
-        # Show profile explanation
-        st.markdown('<div class="premium-card">', unsafe_allow_html=True)
-        st.subheader(f"📌 Đã chọn mục tiêu: {params.priority}")
-        
-        profile_weights = PRIORITY_PROFILES[params.priority]
-        st.markdown(
-            f"""
-            <div class="explanation-box">
-                <h4>⚙️ Trọng số tự động được điều chỉnh theo mục tiêu:</h4>
-                <ul>
-                    <li><b>C1 (Chi phí):</b> {profile_weights['C1: Tỷ lệ phí']:.0%} - {'Ưu tiên giảm chi phí' if profile_weights['C1: Tỷ lệ phí'] > 0.25 else 'Ít quan trọng hơn'}</li>
-                    <li><b>C2 (Thời gian):</b> {profile_weights['C2: Thời gian xử lý']:.0%}</li>
-                    <li><b>C3 (Tổn thất):</b> {profile_weights['C3: Tỷ lệ tổn thất']:.0%} - {'Ưu tiên an toàn' if profile_weights['C3: Tỷ lệ tổn thất'] > 0.20 else 'Trung bình'}</li>
-                    <li><b>C4 (Hỗ trợ ICC):</b> {profile_weights['C4: Hỗ trợ ICC']:.0%} - {'Ưu tiên bảo vệ' if profile_weights['C4: Hỗ trợ ICC'] > 0.20 else 'Trung bình'}</li>
-                    <li><b>C5 (Chăm sóc KH):</b> {profile_weights['C5: Chăm sóc KH']:.0%}</li>
-                    <li><b>C6 (Khí hậu):</b> {profile_weights['C6: Rủi ro khí hậu']:.0%}</li>
-                </ul>
-                <p><b>💡 Lưu ý:</b> Trọng số này được thiết kế dựa trên nghiên cứu hành vi người dùng và best practices trong ngành bảo hiểm.</p>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown("---")
-        
-        if st.button("🚀 PHÂN TÍCH 15 PHƯƠNG ÁN", type="primary", use_container_width=True):
-            with st.spinner("🔄 Đang phân tích tất cả phương án..."):
-                try:
-                    result = self.analyzer.run_analysis(params, historical)
-                    self.display_results(result, params)
-                except Exception as e:
-                    st.error(f"❌ Lỗi: {e}")
-                    st.exception(e)
 
 
-# =============================================================================
-# MAIN
-# =============================================================================
+# ======================== MAIN ========================
 
 def main():
     app = StreamlitUI()
     app.run()
-
 
 if __name__ == "__main__":
     main()
