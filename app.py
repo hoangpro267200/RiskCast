@@ -1443,51 +1443,49 @@ class StreamlitUI:
         fig_category = self.chart_factory.create_category_comparison(result.results)
         st.plotly_chart(fig_category, use_container_width=True)
 
-    
-       # ===================== TOP 3 RECOMMENDATION CARDS =====================
-st.markdown("""
-<style>
-.top3-card {
-    background: radial-gradient(circle at top left, rgba(0,255,153,0.12), rgba(0,0,0,0.72));
-    border: 1px solid rgba(0,255,153,0.45);
-    padding: 20px 22px;
-    border-radius: 16px;
-    box-shadow: 0 0 18px rgba(0,255,153,0.15);
-    margin-bottom: 16px;
-    text-align: center;
-}
-.top3-title {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: #a5ffdc;
-}
-.top3-sub {
-    font-size: 1rem;
-    margin-top: 6px;
-    color: #e0f2f1;
-}
-</style>
-""", unsafe_allow_html=True)
-
-st.markdown("## 🏅 So sánh Top 3 phương án (giải thích chi tiết):")
-
-cols = st.columns(3)
-
-top3 = result.results.head(3)
-medals = ["🥇", "🥈", "🥉"]
-
-for i, col in enumerate(cols):
-    r = top3.iloc[i]
-    with col:
-        st.markdown(f"""
-        <div class="top3-card">
-            <div class="top3-title">{medals[i]} #{i+1}: {r['company']}</div>
-            <div class="top3-sub"><b style="color:#7CFFA1">{r['icc_package']}</b></div>
-            <div class="top3-sub" style="color:#7CFFA1; font-size:1.2rem">⬆ ${r['estimated_cost']:,.0f}</div>
-            <div class="top3-sub">Điểm: {r['score']:.3f} | 🎯 {r['category']}</div>
-            <div class="top3-sub">Tin cậy: {r['confidence']:.2f}</div>
-        </div>
+           # ===================== TOP 3 RECOMMENDATION CARDS =====================
+        st.markdown("""
+        <style>
+        .top3-card {
+            background: radial-gradient(circle at top left, rgba(0,255,153,0.12), rgba(0,0,0,0.72));
+            border: 1px solid rgba(0,255,153,0.45);
+            padding: 20px 22px;
+            border-radius: 16px;
+            box-shadow: 0 0 18px rgba(0,255,153,0.15);
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .top3-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #a5ffdc;
+        }
+        .top3-sub {
+            font-size: 1rem;
+            margin-top: 6px;
+            color: #e0f2f1;
+        }
+        </style>
         """, unsafe_allow_html=True)
+
+        st.markdown("## 🏅 So sánh Top 3 phương án (giải thích chi tiết):")
+
+        cols = st.columns(3)
+        top3 = result.results.head(3)
+        medals = ["🥇", "🥈", "🥉"]
+
+        for i, col in enumerate(cols):
+            r = top3.iloc[i]
+            with col:
+                st.markdown(f"""
+                <div class="top3-card">
+                    <div class="top3-title">{medals[i]} #{i+1}: {r['company']}</div>
+                    <div class="top3-sub"><b style="color:#7CFFA1">{r['icc_package']}</b></div>
+                    <div class="top3-sub" style="color:#7CFFA1; font-size:1.2rem;">⬆ ${r['estimated_cost']:,.0f}</div>
+                    <div class="top3-sub">Điểm: {r['score']:.3f} | 🎯 {r['category']}</div>
+                    <div class="top3-sub">Tin cậy: {r['confidence']:.2f}</div>
+                </div>
+                """, unsafe_allow_html=True)
 
 
         # Weights & Metrics
