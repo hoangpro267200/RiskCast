@@ -6,14 +6,14 @@
 # Refactor + Multi-Package + Full Explanations + Enterprise UX: Kai assistant
 #
 # Nổi bật trong v5.3 Enterprise:
-# - Profile-Based Recommendation (3 mục tiêu: Tiết kiệm / Cân bằng / An toàn)
-# - Multi-Package Analysis (5 công ty × 3 gói ICC = 15 phương án)
-# - Smart Ranking Table với badges
-# - Cost-Benefit Scatter Plot
-# - Trade-off Analysis
-# - Fuzzy AHP Enterprise module (heatmap + radar-style line)
-# - Forecast chart nền tối + line neon
-# - TẤT CẢ EXPLANATION BOXES cho NCKH
+#   - Profile-Based Recommendation (3 mục tiêu: Tiết kiệm / Cân bằng / An toàn)
+#   - Multi-Package Analysis (5 công ty × 3 gói ICC = 15 phương án)
+#   - Smart Ranking Table với badges
+#   - Cost-Benefit Scatter Plot
+#   - Trade-off Analysis
+#   - Fuzzy AHP Enterprise module (heatmap + radar-style line) - GIỮ NGUYÊN
+#   - Forecast chart nền tối + line neon
+#   - TẤT CẢ EXPLANATION BOXES cho NCKH
 # =============================================================================
 
 import io
@@ -91,7 +91,7 @@ CRITERIA = [
 # Profile weights - Trọng số theo mục tiêu (GIỮ NGUYÊN GIẢI THÍCH)
 PRIORITY_PROFILES = {
     "💰 Tiết kiệm chi phí": {
-        "C1: Tỷ lệ phí": 0.35,  # Tăng mạnh trọng số chi phí
+        "C1: Tỷ lệ phí": 0.35,        # Tăng mạnh trọng số chi phí
         "C2: Thời gian xử lý": 0.10,
         "C3: Tỷ lệ tổn thất": 0.15,
         "C4: Hỗ trợ ICC": 0.15,
@@ -107,9 +107,9 @@ PRIORITY_PROFILES = {
         "C6: Rủi ro khí hậu": 0.15
     },
     "🛡️ An toàn tối đa": {
-        "C1: Tỷ lệ phí": 0.10,  # Giảm trọng số chi phí
+        "C1: Tỷ lệ phí": 0.10,        # Giảm trọng số chi phí
         "C2: Thời gian xử lý": 0.10,
-        "C3: Tỷ lệ tổn thất": 0.25,  # Tăng mạnh rủi ro
+        "C3: Tỷ lệ tổn thất": 0.25,    # Tăng mạnh rủi ro
         "C4: Hỗ trợ ICC": 0.25,
         "C5: Chăm sóc KH": 0.10,
         "C6: Rủi ro khí hậu": 0.20
@@ -119,44 +119,44 @@ PRIORITY_PROFILES = {
 # ICC Package definitions (GIỮ NGUYÊN GIẢI THÍCH CHI TIẾT)
 ICC_PACKAGES = {
     "ICC A": {
-        "coverage": 1.0,  # Bảo vệ toàn diện 100%
-        "premium_multiplier": 1.5,  # Phí cao nhất (+50%)
+        "coverage": 1.0,              # Bảo vệ toàn diện 100%
+        "premium_multiplier": 1.5,    # Phí cao nhất (+50%)
         "description": "Bảo vệ toàn diện mọi rủi ro trừ điều khoản loại trừ (All Risks)"
     },
     "ICC B": {
-        "coverage": 0.75,  # Bảo vệ vừa phải 75%
-        "premium_multiplier": 1.0,  # Phí trung bình (baseline)
+        "coverage": 0.75,             # Bảo vệ vừa phải 75%
+        "premium_multiplier": 1.0,    # Phí trung bình (baseline)
         "description": "Bảo vệ các rủi ro chính (hỏa hoạn, va chạm, chìm đắm, Named Perils)"
     },
     "ICC C": {
-        "coverage": 0.5,  # Bảo vệ cơ bản 50%
-        "premium_multiplier": 0.65,  # Phí thấp nhất (-35%)
+        "coverage": 0.5,              # Bảo vệ cơ bản 50%
+        "premium_multiplier": 0.65,   # Phí thấp nhất (-35%)
         "description": "Bảo vệ cơ bản (chỉ các rủi ro lớn như chìm, cháy, va chạm nghiêm trọng)"
     }
 }
 
 # Map loại tiêu chí (GIỮ NGUYÊN GIẢI THÍCH)
 COST_BENEFIT_MAP = {
-    "C1: Tỷ lệ phí": CriterionType.COST,      # Chi phí - càng thấp càng tốt
-    "C2: Thời gian xử lý": CriterionType.COST,  # Chi phí - càng nhanh càng tốt
-    "C3: Tỷ lệ tổn thất": CriterionType.COST,  # Chi phí - càng thấp càng tốt
-    "C4: Hỗ trợ ICC": CriterionType.BENEFIT,  # Lợi ích - càng cao càng tốt
-    "C5: Chăm sóc KH": CriterionType.BENEFIT,  # Lợi ích - càng cao càng tốt
-    "C6: Rủi ro khí hậu": CriterionType.COST   # Chi phí - càng thấp càng tốt
+    "C1: Tỷ lệ phí": CriterionType.COST,          # Chi phí - càng thấp càng tốt
+    "C2: Thời gian xử lý": CriterionType.COST,    # Chi phí - càng nhanh càng tốt
+    "C3: Tỷ lệ tổn thất": CriterionType.COST,     # Chi phí - càng thấp càng tốt
+    "C4: Hỗ trợ ICC": CriterionType.BENEFIT,      # Lợi ích - càng cao càng tốt
+    "C5: Chăm sóc KH": CriterionType.BENEFIT,     # Lợi ích - càng cao càng tốt
+    "C6: Rủi ro khí hậu": CriterionType.COST      # Chi phí - càng thấp càng tốt
 }
 
 # Độ nhạy rủi ro khí hậu theo công ty (Industry Standard – mô phỏng hợp lý)
 SENSITIVITY_MAP = {
-    "Chubb": 0.95,    # Quản trị rủi ro khí hậu tốt hơn trung bình
-    "PVI": 1.05,      # Chịu tác động hơi cao hơn chút
-    "BaoViet": 1.00,  # Trung bình
-    "BaoMinh": 1.02,  # Hơi cao
-    "MIC": 1.03       # Hơi cao
+    "Chubb": 0.95,      # Quản trị rủi ro khí hậu tốt hơn trung bình
+    "PVI": 1.05,        # Chịu tác động hơi cao hơn chút
+    "BaoViet": 1.00,    # Trung bình
+    "BaoMinh": 1.02,    # Hơi cao
+    "MIC": 1.03         # Hơi cao
 }
 
 
 # =============================================================================
-# UI STYLING — ENTERPRISE ESG PREMIUM GREEN
+# UI STYLING — ENTERPRISE ESG PREMIUM GREEN (GIỮ NGUYÊN)
 # =============================================================================
 
 def apply_custom_css() -> None:
@@ -167,17 +167,20 @@ def apply_custom_css() -> None:
         text-rendering: optimizeLegibility !important;
         -webkit-font-smoothing: antialiased !important;
     }
+
     .stApp {
         background: radial-gradient(circle at top, #00ff99 0%, #001a0f 35%, #000c08 100%) !important;
         font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
         color: #e6fff7 !important;
         font-size: 1.05rem !important;
     }
+
     .block-container {
         padding-top: 1rem !important;
         padding-bottom: 2rem !important;
         max-width: 1400px !important;
     }
+
     h1 { font-size: 2.8rem !important; font-weight: 900 !important; letter-spacing: 0.03em; }
     h2 { font-size: 2.1rem !important; font-weight: 800 !important; }
     h3 { font-size: 1.5rem !important; font-weight: 700 !important; }
@@ -194,7 +197,9 @@ def apply_custom_css() -> None:
         margin-bottom: 1.2rem;
         gap: 1.5rem;
     }
+
     .app-header-left { display: flex; align-items: center; gap: 0.9rem; }
+
     .app-logo-circle {
         width: 64px; height: 64px; border-radius: 18px;
         background: radial-gradient(circle at 30% 30%, #b9f6ca 0%, #00c853 38%, #00381f 100%);
@@ -203,12 +208,14 @@ def apply_custom_css() -> None:
         box-shadow: 0 0 14px rgba(0, 255, 153, 0.65), 0 0 36px rgba(0, 0, 0, 0.75);
         border: 2px solid #e8f5e9;
     }
+
     .app-header-title {
         font-size: 1.5rem; font-weight: 800;
         background: linear-gradient(90deg, #e8fffb, #b9f6ca, #e8fffb);
         -webkit-background-clip: text; color: transparent;
         letter-spacing: 0.05em; text-transform: uppercase;
     }
+
     .app-header-subtitle { font-size: 0.9rem; color: #ccffec; opacity: 0.9; }
 
     .app-header-badge {
@@ -223,12 +230,15 @@ def apply_custom_css() -> None:
         border-right: 1px solid rgba(0, 230, 118, 0.55);
         box-shadow: 8px 0 22px rgba(0, 0, 0, 0.85);
     }
+
     section[data-testid="stSidebar"] > div { padding-top: 1.1rem; }
+
     section[data-testid="stSidebar"] h1,
     section[data-testid="stSidebar"] h2,
     section[data-testid="stSidebar"] h3 {
         color: #a5ffdc !important; font-weight: 800 !important;
     }
+
     section[data-testid="stSidebar"] label {
         color: #e0f2f1 !important; font-weight: 600 !important; font-size: 0.92rem !important;
     }
@@ -241,6 +251,7 @@ def apply_custom_css() -> None:
         box-shadow: 0 0 14px rgba(0, 255, 153, 0.7), 0 10px 22px rgba(0, 0, 0, 0.85) !important;
         transition: all 0.12s ease-out; font-size: 0.98rem !important;
     }
+
     .stButton > button:hover {
         transform: translateY(-1px) scale(1.02);
         box-shadow: 0 0 20px rgba(0, 255, 153, 0.95), 0 14px 30px rgba(0, 0, 0, 0.9) !important;
@@ -266,6 +277,7 @@ def apply_custom_css() -> None:
         padding: 1.2rem 1.5rem; border-radius: 12px; margin-top: 0.7rem;
         box-shadow: 0 0 16px rgba(0,0,0,0.7);
     }
+
     .explanation-box h4 { color: #a5ffdc !important; font-weight: 800; }
     .explanation-box li { color: #e0f2f1 !important; font-weight: 500; margin: 0.25rem 0; }
 
@@ -278,6 +290,7 @@ def apply_custom_css() -> None:
     [data-testid="stMetricValue"] {
         color: #76ff03 !important; font-weight: 900 !important; font-size: 1.1rem !important;
     }
+
     [data-testid="stMetricLabel"] {
         color: #e0f2f1 !important; font-weight: 600 !important;
     }
@@ -291,7 +304,7 @@ def apply_custom_css() -> None:
 
 
 # =============================================================================
-# DATA LAYER — INDUSTRY STANDARD LEVEL 1
+# DATA LAYER — INDUSTRY STANDARD LEVEL 1 (GIỮ NGUYÊN TẤT CẢ GIẢI THÍCH)
 # =============================================================================
 
 class DataService:
@@ -303,13 +316,19 @@ class DataService:
         """
         Dữ liệu rủi ro khí hậu theo tuyến (12 tháng), chuẩn hóa 0–1.
         Mô phỏng theo mức độ bão, sóng, mưa, chậm trễ năm 2023 (Industry Standard Level 1).
+        
+        VN - EU: Rủi ro tăng mạnh mùa hè–thu do bão Địa Trung Hải, sóng lớn Ấn Độ Dương
+        VN - US: Tuyến dài, chịu bão Đại Tây Dương/Mỹ nhiều hơn
+        VN - Singapore: Tuyến ngắn, rủi ro thấp hơn (ASEAN)
+        VN - China: Trung bình, bị ảnh hưởng monsoon + bão khu vực
+        Domestic: Rủi ro thấp nhất, chủ yếu mưa lũ nội địa
         """
         climate_base = {
-            "VN - EU":        [0.28, 0.30, 0.35, 0.40, 0.52, 0.60, 0.67, 0.70, 0.75, 0.72, 0.60, 0.48],
-            "VN - US":        [0.33, 0.36, 0.40, 0.46, 0.55, 0.63, 0.72, 0.78, 0.80, 0.74, 0.62, 0.50],
+            "VN - EU": [0.28, 0.30, 0.35, 0.40, 0.52, 0.60, 0.67, 0.70, 0.75, 0.72, 0.60, 0.48],
+            "VN - US": [0.33, 0.36, 0.40, 0.46, 0.55, 0.63, 0.72, 0.78, 0.80, 0.74, 0.62, 0.50],
             "VN - Singapore": [0.18, 0.20, 0.24, 0.27, 0.32, 0.36, 0.40, 0.43, 0.45, 0.42, 0.35, 0.30],
-            "VN - China":     [0.20, 0.23, 0.27, 0.31, 0.38, 0.42, 0.48, 0.50, 0.53, 0.49, 0.40, 0.34],
-            "Domestic":       [0.12, 0.13, 0.14, 0.16, 0.20, 0.22, 0.23, 0.25, 0.27, 0.24, 0.20, 0.18]
+            "VN - China": [0.20, 0.23, 0.27, 0.31, 0.38, 0.42, 0.48, 0.50, 0.53, 0.49, 0.40, 0.34],
+            "Domestic": [0.12, 0.13, 0.14, 0.16, 0.20, 0.22, 0.23, 0.25, 0.27, 0.24, 0.20, 0.18]
         }
         df = pd.DataFrame({"month": list(range(1, 13))})
         for route, values in climate_base.items():
@@ -321,6 +340,14 @@ class DataService:
     def get_company_data() -> pd.DataFrame:
         """
         Thông số cơ bản của từng công ty bảo hiểm (Industry Standard Level 1).
+        
+        C1: Tỷ lệ phí bảo hiểm (premium rate, %, dạng thập phân 0.34–0.42)
+        C2: Thời gian xử lý claim (ngày, 10–15 ngày)
+        C3: Tỷ lệ tổn thất (loss ratio, %, dạng thập phân 0.07–0.11)
+        C4: Hỗ trợ ICC (điểm 1–10, đánh giá chất lượng hỗ trợ)
+        C5: Chăm sóc khách hàng (điểm 1–10, đánh giá dịch vụ)
+        
+        Nguồn dữ liệu: Mô phỏng dựa trên industry benchmark 2023-2024
         """
         return (
             pd.DataFrame({
@@ -330,17 +357,25 @@ class DataService:
                 "C3: Tỷ lệ tổn thất": [0.07, 0.09, 0.11, 0.10, 0.08],
                 "C4: Hỗ trợ ICC": [9, 8, 7, 8, 7],
                 "C5: Chăm sóc KH": [9, 8, 7, 7, 6],
-            }).set_index("Company")
+            })
+            .set_index("Company")
         )
 
 
 # =============================================================================
-# CORE ALGORITHMS
+# CORE ALGORITHMS (GIỮ NGUYÊN TẤT CẢ GIẢI THÍCH)
 # =============================================================================
 
 class FuzzyAHP:
     """
     Áp dụng Fuzzy AHP (tam giác) trên trọng số.
+    
+    Fuzzy AHP xử lý bất định trong đánh giá chuyên gia bằng cách:
+    - Chuyển trọng số crisp (w) thành tam giác (low, mid, high)
+    - Defuzzify bằng phương pháp centroid: (low + mid + high) / 3
+    - Chuẩn hóa lại để tổng = 1
+    
+    Tham số uncertainty_pct điều chỉnh độ rộng tam giác (±%).
     """
 
     @staticmethod
@@ -357,6 +392,16 @@ class FuzzyAHP:
 class MonteCarloSimulator:
     """
     Mô phỏng Monte Carlo cho rủi ro khí hậu (C6).
+    
+    Mục đích:
+    - Mô phỏng biến động ngẫu nhiên của rủi ro khí hậu theo từng công ty
+    - Tính toán mean (kỳ vọng) và std (độ biến động) để đánh giá độ tin cậy
+    
+    Phương pháp:
+    - Sử dụng phân phối chuẩn N(μ, σ²)
+    - μ = base_risk × sensitivity (theo công ty)
+    - σ = 12% của μ (biến động lịch sử)
+    - Chạy n_simulations lần để ổn định kết quả
     """
 
     @staticmethod
@@ -377,7 +422,18 @@ class MonteCarloSimulator:
 
 class TOPSISAnalyzer:
     """
-    Phân tích TOPSIS.
+    Phân tích TOPSIS (Technique for Order of Preference by Similarity to Ideal Solution).
+    
+    Các bước:
+    1. Chuẩn hóa ma trận quyết định (vector normalization)
+    2. Tính ma trận trọng số (weighted normalized matrix)
+    3. Xác định điểm lý tưởng (ideal best/worst)
+       - Best: Min cho cost, Max cho benefit
+       - Worst: Max cho cost, Min cho benefit
+    4. Tính khoảng cách Euclidean đến ideal best (d+) và ideal worst (d-)
+    5. Tính điểm TOPSIS: C = d- / (d+ + d-)
+    
+    Điểm càng cao → phương án càng gần ideal best → càng tốt
     """
 
     @staticmethod
@@ -387,27 +443,36 @@ class TOPSISAnalyzer:
         cost_benefit: Dict[str, CriterionType]
     ) -> np.ndarray:
         M = data[list(weights.index)].values.astype(float)
-
+        
         # Bước 1: Chuẩn hóa vector
         denom = np.sqrt((M ** 2).sum(axis=0))
         denom[denom == 0] = 1.0
         R = M / denom
-
+        
         # Bước 2: Áp trọng số
         V = R * weights.values
-
+        
         # Bước 3: Xác định điểm lý tưởng
         is_cost = np.array([cost_benefit[c] == CriterionType.COST for c in weights.index])
         ideal_best = np.where(is_cost, V.min(axis=0), V.max(axis=0))
         ideal_worst = np.where(is_cost, V.max(axis=0), V.min(axis=0))
-
+        
         # Bước 4-5: Khoảng cách & điểm TOPSIS
         d_plus = np.sqrt(((V - ideal_best) ** 2).sum(axis=1))
         d_minus = np.sqrt(((V - ideal_worst) ** 2).sum(axis=1))
         return d_minus / (d_plus + d_minus + 1e-12)
+
+
 class RiskCalculator:
     """
     Tính toán VaR, CVaR & độ tin cậy.
+    
+    VaR (Value at Risk): Tổn thất tối đa ở mức tin cậy α (thường 95%)
+    CVaR (Conditional VaR): Tổn thất trung bình trong vùng tail (vượt VaR)
+    
+    Độ tin cậy dựa trên:
+    - Coefficient of Variation của C6 (biến động rủi ro khí hậu)
+    - Coefficient of Variation của tất cả tiêu chí (tính ổn định chung)
     """
 
     @staticmethod
@@ -434,17 +499,27 @@ class RiskCalculator:
         cv_c6 = results["C6_std"].values / (results["C6_mean"].values + eps)
         conf_c6 = 1.0 / (1.0 + cv_c6)
         conf_c6 = 0.3 + 0.7 * (conf_c6 - conf_c6.min()) / (np.ptp(conf_c6) + eps)
-
         crit_cv = data.std(axis=1).values / (data.mean(axis=1).values + eps)
         conf_crit = 1.0 / (1.0 + crit_cv)
         conf_crit = 0.3 + 0.7 * (conf_crit - conf_crit.min()) / (np.ptp(crit_cv) + eps)
-
         return np.sqrt(conf_c6 * conf_crit)
 
 
 class Forecaster:
     """
     Dự báo rủi ro khí hậu 1 tháng tiếp theo.
+    
+    Phương pháp:
+    1. ARIMA(1,1,1): Autoregressive Integrated Moving Average
+       - AR(1): Phụ thuộc vào 1 giá trị quá khứ
+       - I(1): Sai phân bậc 1 để loại bỏ trend
+       - MA(1): Trung bình trượt để làm mượt nhiễu
+    
+    2. Fallback: Linear trend nếu ARIMA không khả dụng
+       - Tính độ dốc từ 2-3 điểm gần nhất
+       - Ngoại suy 1 tháng tiếp theo
+    
+    Output: Lịch sử (tháng 1 → tháng chọn) + Dự báo (1 tháng)
     """
 
     @staticmethod
@@ -456,18 +531,18 @@ class Forecaster:
     ) -> Tuple[np.ndarray, np.ndarray]:
         if route not in historical.columns:
             route = historical.columns[1]
-
+        
         full_series = historical[route].values
         n_total = len(full_series)
-
+        
         if current_month < 1:
             current_month = 1
         if current_month > n_total:
             current_month = n_total
-
+        
         hist_series = full_series[:current_month]
         train_series = hist_series.copy()
-
+        
         # Thử ARIMA nếu đủ dữ liệu (ít nhất 6 tháng)
         if use_arima and ARIMA_AVAILABLE and len(train_series) >= 6:
             try:
@@ -478,7 +553,7 @@ class Forecaster:
                 return hist_series, np.array([fc_val])
             except Exception:
                 pass
-
+        
         # Fallback: Linear trend
         if len(train_series) >= 3:
             trend = (train_series[-1] - train_series[-3]) / 2.0
@@ -486,18 +561,26 @@ class Forecaster:
             trend = train_series[-1] - train_series[-2]
         else:
             trend = 0.0
-
+        
         next_val = np.clip(train_series[-1] + trend, 0.0, 1.0)
         return hist_series, np.array([next_val])
 
 
 # =============================================================================
-# FUZZY VISUAL UTILITIES (PREMIUM GREEN)
+# FUZZY VISUAL UTILITIES (PREMIUM GREEN) - GIỮ NGUYÊN TẤT CẢ
 # =============================================================================
 
 def build_fuzzy_table(weights: pd.Series, fuzzy_pct: float) -> pd.DataFrame:
     """
     Tạo bảng Fuzzy: Low – Mid – High – Centroid cho từng tiêu chí.
+    
+    Ý nghĩa các cột:
+    - Low: Trọng số thấp nhất trong tam giác (w × (1 - factor))
+    - Mid: Trọng số gốc (w)
+    - High: Trọng số cao nhất trong tam giác (w × (1 + factor))
+    - Centroid: Giá trị defuzzified = (Low + Mid + High) / 3
+    
+    Phù hợp cho phần trình bày NCKH / phụ lục.
     """
     rows = []
     factor = fuzzy_pct / 100.0
@@ -507,7 +590,7 @@ def build_fuzzy_table(weights: pd.Series, fuzzy_pct: float) -> pd.DataFrame:
         high = min(w * (1 + factor), 1.0)
         centroid = (low + w + high) / 3.0
         rows.append([crit, round(low, 4), round(w, 4), round(high, 4), round(centroid, 4)])
-
+    
     df = pd.DataFrame(rows, columns=["Tiêu chí", "Low", "Mid", "High", "Centroid"])
     return df
 
@@ -515,6 +598,12 @@ def build_fuzzy_table(weights: pd.Series, fuzzy_pct: float) -> pd.DataFrame:
 def most_uncertain_criterion(weights: pd.Series, fuzzy_pct: float) -> Tuple[str, Dict[str, float]]:
     """
     Xác định tiêu chí có độ dao động mạnh nhất (High - Low lớn nhất).
+    
+    Ý nghĩa:
+    - Dao động lớn = Độ bất định cao = Nhạy cảm với thay đổi trọng số
+    - Tiêu chí này cần được chuyên gia cân nhắc kỹ khi hiệu chỉnh
+    
+    Return: (tên tiêu chí nhạy nhất, dict{tiêu chí: độ dao động})
     """
     factor = fuzzy_pct / 100.0
     diff_map: Dict[str, float] = {}
@@ -530,10 +619,16 @@ def most_uncertain_criterion(weights: pd.Series, fuzzy_pct: float) -> Tuple[str,
 def fuzzy_heatmap_premium(diff_map: Dict[str, float]) -> go.Figure:
     """
     Heatmap Premium Green thể hiện mức dao động Fuzzy (High - Low).
+    
+    Màu sắc:
+    - Tối (#00331F) → Dao động thấp → Ổn định
+    - Sáng (#00FFAA) → Dao động cao → Nhạy cảm
+    
+    Ứng dụng: Xác định nhanh tiêu chí nào cần chú ý khi điều chỉnh trọng số.
     """
     values = list(diff_map.values())
     labels = list(diff_map.keys())
-
+    
     fig = px.imshow(
         [values],
         labels=dict(color="Mức dao động"),
@@ -547,7 +642,7 @@ def fuzzy_heatmap_premium(diff_map: Dict[str, float]) -> go.Figure:
             [1.0, "#00FFAA"]
         ]
     )
-
+    
     fig.update_layout(
         title=dict(
             text="<b>🌿 Heatmap mức dao động Fuzzy (Premium Green)</b>",
@@ -570,11 +665,19 @@ def fuzzy_heatmap_premium(diff_map: Dict[str, float]) -> go.Figure:
 def fuzzy_chart_premium(weights: pd.Series, fuzzy_pct: float) -> go.Figure:
     """
     Biểu đồ Fuzzy Premium: Low / Mid / High cho từng tiêu chí.
+    
+    Visualize tam giác mờ:
+    - Low (đường chấm): Giới hạn dưới
+    - Mid (đường liền, kim cương): Trọng số gốc
+    - High (đường gạch): Giới hạn trên
+    
+    Cho cảm giác "tam giác mờ" (Mid là đỉnh, Low/High là đáy).
+    Khoảng cách giữa Low-High thể hiện độ bất định của chuyên gia.
     """
     factor = fuzzy_pct / 100.0
     labels = list(weights.index)
     low_vals, mid_vals, high_vals = [], [], []
-
+    
     for crit in labels:
         w = float(weights[crit])
         low = max(w * (1 - factor), 0.0)
@@ -582,9 +685,9 @@ def fuzzy_chart_premium(weights: pd.Series, fuzzy_pct: float) -> go.Figure:
         low_vals.append(low)
         mid_vals.append(w)
         high_vals.append(high)
-
+    
     fig = go.Figure()
-
+    
     fig.add_trace(go.Scatter(
         x=labels, y=low_vals,
         mode="lines+markers", name="Low",
@@ -592,7 +695,7 @@ def fuzzy_chart_premium(weights: pd.Series, fuzzy_pct: float) -> go.Figure:
         marker=dict(size=8),
         hovertemplate="Tiêu chí: %{x}<br>Low: %{y:.2f}<extra></extra>"
     ))
-
+    
     fig.add_trace(go.Scatter(
         x=labels, y=mid_vals,
         mode="lines+markers", name="Mid (gốc)",
@@ -600,7 +703,7 @@ def fuzzy_chart_premium(weights: pd.Series, fuzzy_pct: float) -> go.Figure:
         marker=dict(size=9, symbol="diamond"),
         hovertemplate="Tiêu chí: %{x}<br>Mid: %{y:.2f}<extra></extra>"
     ))
-
+    
     fig.add_trace(go.Scatter(
         x=labels, y=high_vals,
         mode="lines+markers", name="High",
@@ -608,7 +711,7 @@ def fuzzy_chart_premium(weights: pd.Series, fuzzy_pct: float) -> go.Figure:
         marker=dict(size=8),
         hovertemplate="Tiêu chí: %{x}<br>High: %{y:.2f}<extra></extra>"
     ))
-
+    
     fig.update_layout(
         title=dict(
             text=f"<b>🌿 Fuzzy AHP — Low / Mid / High (±{fuzzy_pct:.0f}%)</b>",
@@ -633,15 +736,27 @@ def fuzzy_chart_premium(weights: pd.Series, fuzzy_pct: float) -> go.Figure:
         gridcolor="#004d40"
     )
     return fig
+
+
 # =============================================================================
-# MULTI-PACKAGE ANALYZER
+# MULTI-PACKAGE ANALYZER (GIỮ NGUYÊN GIẢI THÍCH)
 # =============================================================================
 
 class MultiPackageAnalyzer:
     """
     Phân tích tất cả các phương án (Công ty × Gói ICC).
+    
+    Chiến lược Multi-Package:
+    1. Tạo 15 phương án (5 công ty × 3 gói ICC)
+    2. Điều chỉnh C1 (phí) theo multiplier của gói ICC
+    3. Điều chỉnh C4 (hỗ trợ ICC) theo coverage của gói ICC
+    4. Giữ nguyên C2, C3, C5, C6 (không thay đổi theo gói)
+    5. Chạy TOPSIS trên 15 phương án
+    6. Xếp hạng theo score
+    
+    Kết quả: Bảng xếp hạng phương án thay vì công ty đơn thuần.
     """
-
+    
     def __init__(self):
         self.data_service = DataService()
         self.fuzzy_ahp = FuzzyAHP()
@@ -649,17 +764,17 @@ class MultiPackageAnalyzer:
         self.topsis = TOPSISAnalyzer()
         self.risk_calc = RiskCalculator()
         self.forecaster = Forecaster()
-
+    
     def run_analysis(self, params: AnalysisParams, historical: pd.DataFrame) -> AnalysisResult:
         # Lấy trọng số theo profile đã chọn
         profile_weights = PRIORITY_PROFILES[params.priority]
         weights = pd.Series(profile_weights, index=CRITERIA)
-
+        
         if params.use_fuzzy:
             weights = self.fuzzy_ahp.apply(weights, params.fuzzy_uncertainty)
-
+        
         company_data = self.data_service.get_company_data()
-
+        
         # Rủi ro khí hậu cơ bản theo tuyến & tháng
         if params.month in historical["month"].values:
             base_risk = float(
@@ -667,7 +782,7 @@ class MultiPackageAnalyzer:
             )
         else:
             base_risk = 0.4
-
+        
         # Monte Carlo cho C6
         if params.use_mc:
             companies, mc_mean, mc_std = self.mc_simulator.simulate(
@@ -677,24 +792,24 @@ class MultiPackageAnalyzer:
             mc_mean, mc_std = mc_mean[order], mc_std[order]
         else:
             mc_mean = mc_std = np.zeros(len(company_data))
-
+        
         # Tạo tất cả phương án (Company × ICC Package)
         all_options = []
         for company in company_data.index:
             for icc_name, icc_data in ICC_PACKAGES.items():
                 option = company_data.loc[company].copy()
-
+                
                 # Điều chỉnh phí theo gói ICC
                 base_premium = option["C1: Tỷ lệ phí"]
                 option["C1: Tỷ lệ phí"] = base_premium * icc_data["premium_multiplier"]
-
+                
                 # Điều chỉnh hỗ trợ ICC theo gói
                 option["C4: Hỗ trợ ICC"] = option["C4: Hỗ trợ ICC"] * icc_data["coverage"]
-
+                
                 # Rủi ro khí hậu
                 idx = list(company_data.index).index(company)
                 option["C6: Rủi ro khí hậu"] = mc_mean[idx]
-
+                
                 all_options.append({
                     "company": company,
                     "icc_package": icc_name,
@@ -709,31 +824,29 @@ class MultiPackageAnalyzer:
                     "C6: Rủi ro khí hậu": option["C6: Rủi ro khí hậu"],
                     "C6_std": mc_std[idx]
                 })
-
+        
         data_adjusted = pd.DataFrame(all_options)
-
+        
         # Phụ phí nếu lô hàng lớn (>$50k)
         if params.cargo_value > 50_000:
             data_adjusted["C1: Tỷ lệ phí"] *= 1.1
             data_adjusted["estimated_cost"] *= 1.1
-
+        
         # Tính TOPSIS score
         scores = self.topsis.analyze(
-            data_adjusted[[
-                "C1: Tỷ lệ phí", "C2: Thời gian xử lý", "C3: Tỷ lệ tổn thất",
-                "C4: Hỗ trợ ICC", "C5: Chăm sóc KH", "C6: Rủi ro khí hậu"
-            ]],
+            data_adjusted[["C1: Tỷ lệ phí", "C2: Thời gian xử lý", "C3: Tỷ lệ tổn thất",
+                          "C4: Hỗ trợ ICC", "C5: Chăm sóc KH", "C6: Rủi ro khí hậu"]],
             weights,
             COST_BENEFIT_MAP
         )
-
+        
         data_adjusted["score"] = scores
         data_adjusted["C6_mean"] = data_adjusted["C6: Rủi ro khí hậu"]
-
+        
         # Sắp xếp theo score
         data_adjusted = data_adjusted.sort_values("score", ascending=False).reset_index(drop=True)
         data_adjusted["rank"] = data_adjusted.index + 1
-
+        
         # Phân loại phương án
         def categorize_option(row):
             if row["icc_package"] == "ICC C":
@@ -742,28 +855,28 @@ class MultiPackageAnalyzer:
                 return "⚖️ Cân bằng"
             else:
                 return "🛡️ An toàn"
-
+        
         data_adjusted["category"] = data_adjusted.apply(categorize_option, axis=1)
-
-        # Tính confidence dựa trên C6_std
+        
+        # Tính confidence
         eps = 1e-9
         cv_c6 = data_adjusted["C6_std"].values / (data_adjusted["C6_mean"].values + eps)
         conf = 1.0 / (1.0 + cv_c6)
         conf = 0.3 + 0.7 * (conf - conf.min()) / (np.ptp(conf) + eps)
         data_adjusted["confidence"] = conf
-
+        
         # VaR/CVaR
         var = cvar = None
         if params.use_var:
             var, cvar = self.risk_calc.calculate_var_cvar(
                 data_adjusted["C6_mean"].values, params.cargo_value
             )
-
+        
         # Forecast
         hist_series, forecast = self.forecaster.forecast(
             historical, params.route, params.month, use_arima=params.use_arima
         )
-
+        
         return AnalysisResult(
             results=data_adjusted,
             weights=weights,
@@ -773,13 +886,15 @@ class MultiPackageAnalyzer:
             historical=hist_series,
             forecast=forecast
         )
+
+
 # =============================================================================
-# VISUALIZATION (ĐÃ FIX LỖI PIE & CATEGORY CHART)
+# VISUALIZATION (SỬA LỖI TITLEFONT)
 # =============================================================================
 
 class ChartFactory:
     """Tạo các biểu đồ Plotly."""
-
+    
     @staticmethod
     def _apply_theme(fig: go.Figure, title: str) -> go.Figure:
         fig.update_layout(
@@ -810,51 +925,44 @@ class ChartFactory:
             tickfont=dict(size=14, color="#e6fff7")
         )
         return fig
-
-    # ✅ FIX 2 — Pie chart Premium (không che label, border rõ, màu chuẩn)
+    
     @staticmethod
     def create_weights_pie(weights: pd.Series, title: str) -> go.Figure:
-        colors = ['#00e676', '#1de9b6', '#64ffda', '#00bfa5', '#69f0ae', '#b9f6ca']
+        colors = ['#00e676', '#69f0ae', '#b9f6ca', '#00bfa5', '#1de9b6', '#64ffda']
         labels_full = list(weights.index)
         labels_short = [c.split(':')[0] for c in labels_full]
-
+        
         fig = go.Figure(data=[go.Pie(
             labels=labels_full,
             values=weights.values,
             text=labels_short,
-            textinfo='percent+label',
-            textfont=dict(size=14, color='#00130d', family="Inter"),
+            textinfo='text+percent',
             textposition='inside',
-            hole=0.25,
-            marker=dict(
-                colors=colors,
-                line=dict(color='#00130d', width=3)
-            ),
-            pull=[0.06] * len(weights),
+            hole=0.18,
+            marker=dict(colors=colors, line=dict(color='#00130d', width=2)),
+            pull=[0.04] * len(weights),
             hovertemplate="<b>%{label}</b><br>Tỉ trọng: %{percent}<extra></extra>"
         )])
-
+        
         fig.update_layout(
             title=dict(
                 text=f"<b>{title}</b>",
-                font=dict(size=22, color="#a5ffdc"),
-                x=0.5
+                font=dict(size=20, color="#a5ffdc"),
+                x=0.5,
+                y=0.98  # Đẩy title xuống để không bị che
             ),
             showlegend=True,
             legend=dict(
-                title="<b>Tiêu chí</b>",
-                font=dict(size=13, color="#e6fff7"),
-                bgcolor="rgba(0,0,0,0.3)",
-                bordercolor="#00e676",
-                borderwidth=1
+                title="<b>Các tiêu chí</b>",
+                font=dict(size=13, color="#e6fff7")
             ),
             paper_bgcolor="#001016",
             plot_bgcolor="#001016",
-            margin=dict(l=0, r=0, t=70, b=0),
-            height=450
+            margin=dict(l=0, r=0, t=80, b=0),  # Tăng margin top từ 60 → 80
+            height=480  # Tăng chiều cao từ 430 → 480
         )
         return fig
-
+    
     @staticmethod
     def create_cost_benefit_scatter(results: pd.DataFrame) -> go.Figure:
         """Biểu đồ scatter: Chi phí vs Điểm số (màu theo gói ICC)."""
@@ -863,9 +971,9 @@ class ChartFactory:
             "ICC B": "#ffd93d",
             "ICC C": "#6bcf7f"
         }
-
+        
         fig = go.Figure()
-
+        
         for icc in ["ICC C", "ICC B", "ICC A"]:
             df_icc = results[results["icc_package"] == icc]
             fig.add_trace(go.Scatter(
@@ -881,24 +989,24 @@ class ChartFactory:
                     line=dict(width=2, color="#000")
                 ),
                 hovertemplate=(
-                    "<b>%{text}</b><br>"
-                    f"Gói: {icc}<br>"
-                    "Chi phí: $%{x:,.0f}<br>"
+                    "<b>%{text}</b><br>" +
+                    f"Gói: {icc}<br>" +
+                    "Chi phí: $%{x:,.0f}<br>" +
                     "Điểm: %{y:.3f}<extra></extra>"
                 )
             ))
-
+        
         fig.update_xaxes(title="<b>Chi phí ước tính ($)</b>")
         fig.update_yaxes(title="<b>Điểm TOPSIS</b>", range=[0, 1])
-
+        
         return ChartFactory._apply_theme(fig, "💰 Chi phí vs Chất lượng (Cost-Benefit Analysis)")
-
+    
     @staticmethod
     def create_top_recommendations_bar(results: pd.DataFrame) -> go.Figure:
         """Top 5 phương án tốt nhất."""
         df = results.head(5).copy()
         df["label"] = df["company"] + " - " + df["icc_package"]
-
+        
         fig = go.Figure(data=[go.Bar(
             x=df["score"],
             y=df["label"],
@@ -913,12 +1021,12 @@ class ChartFactory:
             hovertemplate="<b>%{y}</b><br>Score: %{x:.3f}<br>Chi phí: $%{customdata:,.0f}<extra></extra>",
             customdata=df["estimated_cost"]
         )])
-
+        
         fig.update_xaxes(title="<b>Điểm TOPSIS</b>", range=[0, 1])
         fig.update_yaxes(title="<b>Phương án</b>")
-
+        
         return ChartFactory._apply_theme(fig, "🏆 Top 5 Phương án Tốt nhất")
-
+    
     @staticmethod
     def create_forecast_chart(
         historical: np.ndarray,
@@ -931,9 +1039,9 @@ class ChartFactory:
         months_hist = list(range(1, hist_len + 1))
         next_month = selected_month % 12 + 1
         months_fc = [next_month]
-
+        
         fig = go.Figure()
-
+        
         fig.add_trace(go.Scatter(
             x=months_hist,
             y=historical,
@@ -943,7 +1051,7 @@ class ChartFactory:
             marker=dict(size=9),
             hovertemplate="Tháng %{x}<br>Rủi ro: %{y:.1%}<extra></extra>"
         ))
-
+        
         fig.add_trace(go.Scatter(
             x=months_fc,
             y=forecast,
@@ -953,9 +1061,9 @@ class ChartFactory:
             marker=dict(size=11, symbol="diamond"),
             hovertemplate="Tháng %{x}<br>Dự báo: %{y:.1%}<extra></extra>"
         ))
-
+        
         fig = ChartFactory._apply_theme(fig, f"Dự báo rủi ro khí hậu — {route}")
-
+        
         fig.update_xaxes(
             title="<b>Tháng</b>",
             tickmode="linear",
@@ -964,24 +1072,23 @@ class ChartFactory:
             range=[1, 12],
             tickvals=list(range(1, 13))
         )
-
+        
         max_val = max(float(historical.max()), float(forecast.max()))
         fig.update_yaxes(
             title="<b>Mức rủi ro (0–1)</b>",
             range=[0, max(1.0, max_val * 1.15)],
             tickformat=".0%"
         )
-
+        
         return fig
-
-    # ✅ FIX 1 — Category Comparison (Y2 trục chuẩn, màu chuẩn, range chuẩn)
+    
     @staticmethod
     def create_category_comparison(results: pd.DataFrame) -> go.Figure:
         """So sánh 3 loại phương án: Tiết kiệm / Cân bằng / An toàn."""
         categories = ["💰 Tiết kiệm", "⚖️ Cân bằng", "🛡️ An toàn"]
         avg_scores = []
         avg_costs = []
-
+        
         for cat in categories:
             df_cat = results[results["category"] == cat]
             if len(df_cat) > 0:
@@ -990,18 +1097,18 @@ class ChartFactory:
             else:
                 avg_scores.append(0)
                 avg_costs.append(0)
-
+        
         fig = go.Figure()
-
+        
         fig.add_trace(go.Bar(
             name="Điểm trung bình",
             x=categories,
             y=avg_scores,
             marker=dict(color='#00e676'),
-            yaxis="y1",
+            yaxis="y",
             hovertemplate="<b>%{x}</b><br>Điểm TB: %{y:.3f}<extra></extra>"
         ))
-
+        
         fig.add_trace(go.Scatter(
             name="Chi phí trung bình",
             x=categories,
@@ -1012,10 +1119,8 @@ class ChartFactory:
             yaxis="y2",
             hovertemplate="<b>%{x}</b><br>Chi phí TB: $%{y:,.0f}<extra></extra>"
         ))
-
-        min_cost = min(avg_costs) if any(c > 0 for c in avg_costs) else 0
-        max_cost = max(avg_costs) if any(c > 0 for c in avg_costs) else 1
-
+        
+        # SỬA: Dùng title dict thay vì titlefont
         fig.update_layout(
             title=dict(
                 text="<b>📊 So sánh 3 loại phương án</b>",
@@ -1031,8 +1136,7 @@ class ChartFactory:
                 title=dict(text="<b>Chi phí ($)</b>", font=dict(color="#ffeb3b")),
                 overlaying="y",
                 side="right",
-                tickfont=dict(color="#ffeb3b"),
-                range=[min_cost * 0.8, max_cost * 1.1 if max_cost > 0 else 1]
+                tickfont=dict(color="#ffeb3b")
             ),
             paper_bgcolor="#000c11",
             plot_bgcolor="#001016",
@@ -1043,7 +1147,7 @@ class ChartFactory:
                 borderwidth=1
             )
         )
-
+        
         return fig
 
 
@@ -1053,7 +1157,7 @@ class ChartFactory:
 
 class ReportGenerator:
     """Xuất Excel & PDF."""
-
+    
     @staticmethod
     def generate_pdf(
         results: pd.DataFrame,
@@ -1064,16 +1168,16 @@ class ReportGenerator:
         try:
             pdf = FPDF()
             pdf.add_page()
-
+            
             pdf.set_font("Arial", "B", 16)
             pdf.cell(0, 10, "RISKCAST v5.3 - Multi-Package Analysis", 0, 1, "C")
             pdf.ln(4)
-
+            
             pdf.set_font("Arial", "", 11)
             pdf.cell(0, 6, f"Route: {params.route} | Month: {params.month} | Priority: {params.priority}", 0, 1)
             pdf.cell(0, 6, f"Cargo Value: ${params.cargo_value:,.0f}", 0, 1)
             pdf.ln(4)
-
+            
             top = results.iloc[0]
             pdf.set_font("Arial", "B", 12)
             pdf.cell(0, 7, f"Top Recommendation: {top['company']} - {top['icc_package']}", 0, 1)
@@ -1081,7 +1185,7 @@ class ReportGenerator:
             pdf.cell(0, 6, f"Score: {top['score']:.3f} | Cost: ${top['estimated_cost']:,.0f}", 0, 1)
             pdf.cell(0, 6, f"Confidence: {top['confidence']:.2f}", 0, 1)
             pdf.ln(4)
-
+            
             pdf.set_font("Arial", "B", 10)
             pdf.cell(15, 6, "Rank", 1)
             pdf.cell(40, 6, "Company", 1)
@@ -1089,7 +1193,7 @@ class ReportGenerator:
             pdf.cell(30, 6, "Cost", 1)
             pdf.cell(25, 6, "Score", 1)
             pdf.cell(25, 6, "Conf.", 1, 1)
-
+            
             pdf.set_font("Arial", "", 9)
             for _, row in results.head(10).iterrows():
                 pdf.cell(15, 6, str(int(row["rank"])), 1)
@@ -1098,30 +1202,32 @@ class ReportGenerator:
                 pdf.cell(30, 6, f"${row['estimated_cost']:,.0f}", 1)
                 pdf.cell(25, 6, f"{row['score']:.3f}", 1)
                 pdf.cell(25, 6, f"{row['confidence']:.2f}", 1, 1)
-
+            
             if var is not None and cvar is not None:
                 pdf.ln(4)
                 pdf.set_font("Arial", "B", 11)
-                pdf.cell(0, 6, f"VaR 95%: ${var:,.0f} | CVaR 95%: ${cvar:,.0f}", 0, 1)
-
+                pdf.cell(0, 6, f"VaR 95%: ${var:,.0f}   |   CVaR 95%: ${cvar:,.0f}", 0, 1)
+            
             return pdf.output(dest="S").encode("latin1")
         except Exception as e:
             st.error(f"Lỗi tạo PDF: {e}")
             return b""
-
+    
     @staticmethod
     def generate_excel(results: pd.DataFrame, weights: pd.Series) -> bytes:
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
             results[["rank", "company", "icc_package", "estimated_cost", "score",
-                     "confidence", "category"]].to_excel(writer, sheet_name="Results", index=False)
+                    "confidence", "category"]].to_excel(writer, sheet_name="Results", index=False)
             pd.DataFrame({"weight": weights.values}, index=weights.index).to_excel(
                 writer, sheet_name="Weights"
             )
         buffer.seek(0)
         return buffer.getvalue()
+
+
 # =============================================================================
-# STREAMLIT UI
+# STREAMLIT UI (GIỮ NGUYÊN TẤT CẢ EXPLANATION)
 # =============================================================================
 
 class StreamlitUI:
@@ -1129,7 +1235,7 @@ class StreamlitUI:
         self.analyzer = MultiPackageAnalyzer()
         self.chart_factory = ChartFactory()
         self.report_gen = ReportGenerator()
-
+    
     def initialize(self):
         st.set_page_config(
             page_title="RISKCAST v5.3 — Multi-Package Analysis",
@@ -1137,11 +1243,11 @@ class StreamlitUI:
             layout="wide"
         )
         apply_custom_css()
-
+    
     def render_sidebar(self) -> AnalysisParams:
         with st.sidebar:
             st.header("📊 Thông tin lô hàng")
-
+            
             cargo_value = st.number_input("Giá trị (USD)", 1000, value=39_000, step=1_000)
             good_type = st.selectbox(
                 "Loại hàng",
@@ -1153,7 +1259,7 @@ class StreamlitUI:
             )
             method = st.selectbox("Phương thức", ["Sea", "Air", "Truck"])
             month = st.selectbox("Tháng", list(range(1, 13)), index=8)
-
+            
             st.markdown("---")
             st.header("🎯 Mục tiêu của bạn")
             priority = st.selectbox(
@@ -1161,26 +1267,26 @@ class StreamlitUI:
                 list(PRIORITY_PROFILES.keys()),
                 help="Hệ thống sẽ tự động điều chỉnh trọng số theo mục tiêu bạn chọn"
             )
-
+            
             st.markdown("---")
             st.header("⚙️ Cấu hình mô hình")
-
+            
             use_fuzzy = st.checkbox("Bật Fuzzy AHP", True)
             use_arima = st.checkbox("Dùng ARIMA dự báo", True)
             use_mc = st.checkbox("Monte Carlo (C6)", True)
             use_var = st.checkbox("Tính VaR/CVaR", True)
-
+            
             mc_runs = st.number_input("Số lần Monte Carlo", 500, 10_000, 2_000, 500)
             fuzzy_uncertainty = st.slider("Mức bất định Fuzzy (%)", 0, 50, 15) if use_fuzzy else 15
-
+            
             return AnalysisParams(
                 cargo_value, good_type, route, method, month, priority,
                 use_fuzzy, use_arima, use_mc, use_var, mc_runs, fuzzy_uncertainty
             )
-
+    
     def display_results(self, result: AnalysisResult, params: AnalysisParams):
         st.success("✅ Đã phân tích xong 15 phương án (5 công ty × 3 gói ICC)")
-
+        
         # Top recommendation
         top = result.results.iloc[0]
         st.markdown(
@@ -1189,18 +1295,18 @@ class StreamlitUI:
                 🏆 <b>GỢI Ý TỐT NHẤT CHO MỤC TIÊU: {params.priority}</b><br><br>
                 <span style="font-size:1.6rem;">{top['company']} - {top['icc_package']}</span><br><br>
                 💰 Chi phí: <b>${top['estimated_cost']:,.0f}</b> ({top['premium_rate']:.2%} giá trị hàng)<br>
-                📊 Điểm TOPSIS: <b>{top['score']:.3f}</b> |
+                📊 Điểm TOPSIS: <b>{top['score']:.3f}</b> | 
                 🎯 Độ tin cậy: <b>{top['confidence']:.2f}</b><br>
                 📦 Loại: <b>{top['category']}</b>
             </div>
             """,
             unsafe_allow_html=True
         )
-
-        # GIẢI THÍCH CHI TIẾT
+        
+        # GIẢI THÍCH CHI TIẾT (GIỮ NGUYÊN)
         st.markdown("---")
         st.subheader("📋 Giải thích kết quả chi tiết")
-
+        
         st.markdown(
             f"""
             <div class="explanation-box">
@@ -1216,7 +1322,7 @@ class StreamlitUI:
             """,
             unsafe_allow_html=True
         )
-
+        
         # Top 3 comparison
         st.markdown(
             """
@@ -1226,7 +1332,7 @@ class StreamlitUI:
             """,
             unsafe_allow_html=True
         )
-
+        
         cols = st.columns(3)
         for idx, col in enumerate(cols):
             if idx < len(result.results):
@@ -1240,7 +1346,7 @@ class StreamlitUI:
                     )
                     st.caption(f"Điểm: {row['score']:.3f} | {row['category']}")
                     st.caption(f"Tin cậy: {row['confidence']:.2f}")
-
+        
         # So sánh chi tiết Top 3
         top3 = result.results.head(3)
         st.markdown(
@@ -1265,21 +1371,19 @@ class StreamlitUI:
             """,
             unsafe_allow_html=True
         )
-
+        
         # Bảng so sánh 15 phương án
         st.markdown("---")
         st.subheader("📋 Bảng so sánh 15 phương án (đầy đủ)")
-
-        df_display = result.results[[
-            "rank", "company", "icc_package", "category",
-            "estimated_cost", "score", "confidence"
-        ]].copy()
+        
+        df_display = result.results[["rank", "company", "icc_package", "category",
+                                     "estimated_cost", "score", "confidence"]].copy()
         df_display.columns = ["Hạng", "Công ty", "Gói ICC", "Loại", "Chi phí", "Điểm", "Tin cậy"]
         df_display["Chi phí"] = df_display["Chi phí"].apply(lambda x: f"${x:,.0f}")
         df_display = df_display.set_index("Hạng")
-
+        
         st.dataframe(df_display, use_container_width=True)
-
+        
         # Giải thích về 3 loại phương án
         st.markdown(
             f"""
@@ -1303,7 +1407,7 @@ class StreamlitUI:
             """,
             unsafe_allow_html=True
         )
-
+        
         # VaR/CVaR explanation
         if result.var is not None and result.cvar is not None:
             risk_pct = (result.var / params.cargo_value) * 100
@@ -1324,23 +1428,23 @@ class StreamlitUI:
                 """,
                 unsafe_allow_html=True
             )
+        
         # Charts
-        st.markdown("---")
-        st.subheader("📊 Biểu đồ phân tích")
+    st.markdown("---")
+    st.subheader("📊 Biểu đồ phân tích")
 
-        col1, col2 = st.columns(2)
+    # =============== SCATTER CHART ===============
+    st.markdown("## 📉 Biểu đồ Chi phí – Chất lượng")
+    fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
+    st.plotly_chart(fig_scatter, use_container_width=True)
 
-        with col1:
-            fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
-            st.plotly_chart(fig_scatter, use_container_width=True)
+    # =============== CATEGORY CHART ===============
+    st.markdown("## 📊 So sánh 3 Loại Phương án")
+    fig_category = self.chart_factory.create_category_comparison(result.results)
+    st.plotly_chart(fig_category, use_container_width=True)
 
-        with col2:
-            fig_category = self.chart_factory.create_category_comparison(result.results)
-            st.plotly_chart(fig_category, use_container_width=True)
-
-        fig_top = self.chart_factory.create_top_recommendations_bar(result.results)
-        st.plotly_chart(fig_top, use_container_width=True)
-
+    fig_top = self.chart_factory.create_top_recommendations_bar(result.results)
+    st.plotly_chart(fig_top, use_container_width=True)
         # Weights & Metrics
         col1, col2 = st.columns(2)
         with col1:
@@ -1349,26 +1453,26 @@ class StreamlitUI:
                 f"Trọng số áp dụng ({params.priority})"
             )
             st.plotly_chart(fig_weights, use_container_width=True)
-
+        
         with col2:
             if result.var is not None and result.cvar is not None:
                 st.metric("💰 VaR 95%", f"${result.var:,.0f}")
                 st.metric("🛡️ CVaR 95%", f"${result.cvar:,.0f}")
                 risk_pct = (result.var / params.cargo_value) * 100
                 st.metric("📊 Rủi ro / Giá trị", f"{risk_pct:.1f}%")
-
+        
         # Forecast
         st.markdown("---")
         fig_forecast = self.chart_factory.create_forecast_chart(
             result.historical, result.forecast, params.route, params.month
         )
         st.plotly_chart(fig_forecast, use_container_width=True)
-
-        # FUZZY AHP MODULE
+        
+        # FUZZY AHP MODULE (GIỮ NGUYÊN HOÀN TOÀN)
         if params.use_fuzzy:
             st.markdown("---")
             st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số (Enterprise Module)")
-
+            
             st.markdown("""
             <div class="explanation-box">
                 <h4>📚 Giải thích về Fuzzy AHP:</h4>
@@ -1380,16 +1484,16 @@ class StreamlitUI:
                 </ul>
             </div>
             """, unsafe_allow_html=True)
-
+            
             # Biểu đồ Fuzzy
             fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
             st.plotly_chart(fig_fuzzy, use_container_width=True)
-
+            
             # Bảng Low – Mid – High – Centroid
             st.subheader("📄 Bảng Low – Mid – High – Centroid (cho NCKH)")
             fuzzy_table = build_fuzzy_table(result.weights, params.fuzzy_uncertainty)
             st.dataframe(fuzzy_table, use_container_width=True)
-
+            
             # Highlight tiêu chí dao động mạnh nhất
             most_unc, diff_map = most_uncertain_criterion(result.weights, params.fuzzy_uncertainty)
             st.markdown(
@@ -1405,16 +1509,16 @@ class StreamlitUI:
                 </div>
                 """, unsafe_allow_html=True
             )
-
+            
             # Heatmap Premium
             st.subheader("🔥 Heatmap mức dao động Fuzzy (Premium Green)")
             fig_heat = fuzzy_heatmap_premium(diff_map)
             st.plotly_chart(fig_heat, use_container_width=True)
-
+        
         # Export
         st.markdown("---")
         st.subheader("📥 Xuất báo cáo")
-
+        
         col1, col2 = st.columns(2)
         with col1:
             excel_data = self.report_gen.generate_excel(result.results, result.weights)
@@ -1425,7 +1529,7 @@ class StreamlitUI:
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True
             )
-
+        
         with col2:
             pdf_data = self.report_gen.generate_pdf(result.results, params, result.var, result.cvar)
             if pdf_data:
@@ -1436,10 +1540,10 @@ class StreamlitUI:
                     mime="application/pdf",
                     use_container_width=True
                 )
-
+    
     def run(self):
         self.initialize()
-
+        
         # Header
         st.markdown(
             """
@@ -1462,14 +1566,14 @@ class StreamlitUI:
             """,
             unsafe_allow_html=True
         )
-
+        
         historical = DataService.load_historical_data()
         params = self.render_sidebar()
-
+        
         # Show profile explanation
         st.markdown('<div class="premium-card">', unsafe_allow_html=True)
         st.subheader(f"📌 Đã chọn mục tiêu: {params.priority}")
-
+        
         profile_weights = PRIORITY_PROFILES[params.priority]
         st.markdown(
             f"""
@@ -1489,9 +1593,9 @@ class StreamlitUI:
             unsafe_allow_html=True
         )
         st.markdown('</div>', unsafe_allow_html=True)
-
+        
         st.markdown("---")
-
+        
         if st.button("🚀 PHÂN TÍCH 15 PHƯƠNG ÁN", type="primary", use_container_width=True):
             with st.spinner("🔄 Đang phân tích tất cả phương án..."):
                 try:
