@@ -1609,9 +1609,7 @@ class StreamlitUI:
         </style>
         """, unsafe_allow_html=True)
 
-    st.markdown("## 🏅 Top 3 phương án (Premium View)")
-
-cols = st.columns(3)
+ # ==================== TOP 3 PREMIUM VIEW ====================
 st.markdown("## 🏅 Top 3 phương án (Premium View)")
 
 cols = st.columns(3)
@@ -1623,6 +1621,7 @@ for i, col in enumerate(cols):
 
     card_class = "top3-card"
     title_class = "top3-title"
+
     if i == 0:
         card_class += " top1-card"
         title_class = "top1-title"
@@ -1631,11 +1630,7 @@ for i, col in enumerate(cols):
         st.markdown(
             f"""
 <div class="{card_class}">
-
-    <div class="{title_class}">
-        {medals[i]} #{i+1}: {r['company']}
-    </div>
-
+    <div class="{title_class}">{medals[i]} #{i+1}: {r['company']}</div>
     <div class="top3-sub info-tt">
         <b class="badge-icc">{r['icc_package']}</b>
         <span class="info-text">
@@ -1651,6 +1646,7 @@ for i, col in enumerate(cols):
         💰 Chi phí kỳ vọng: <b>${r['estimated_cost']:,.0f}</b>
         <span class="info-text">
             <b>Ý nghĩa chi phí</b><br><br>
+            Chi phí ước tính sau mô phỏng Monte Carlo giúp doanh nghiệp:
             • So sánh mức tiết kiệm.<br>
             • Cân nhắc trả thêm để tăng bảo vệ.
         </span>
@@ -1661,7 +1657,7 @@ for i, col in enumerate(cols):
         <span class="info-text">
             <b>Điểm TOPSIS</b><br><br>
             Tổng hợp từ:<br>
-            • Tỷ lệ phí · Dịch vụ ICC · Tổn thất · C6.<br>
+            • Tỷ lệ phí · Dịch vụ ICC · Tổn thất · Khí hậu tuyến đường (C6).<br>
             Điểm cao → phương án tối ưu hơn.
         </span>
     </div>
@@ -1669,7 +1665,8 @@ for i, col in enumerate(cols):
     <div class="top3-sub info-tt">
         🎯 Tin cậy: <b>{r['confidence']:.2f}</b>
         <span class="info-text">
-            <b>Tin cậy (stability)</b><br><br>
+            <b>Tin cậy</b><br><br>
+            Đo độ ổn định sau 2000+ mô phỏng.<br>
             0.70+ → rất ổn định.<br>
             0.40–0.69 → trung bình.<br>
             < 0.40 → dễ biến động.
@@ -1679,16 +1676,16 @@ for i, col in enumerate(cols):
     <div class="top3-sub info-tt">
         🌪 Biến động rủi ro: <b>{r['C6_std']:.2f}</b>
         <span class="info-text">
-            <b>Độ biến động C6</b><br><br>
+            <b>Độ biến động rủi ro (C6_std)</b><br><br>
             Cao → rủi ro khó dự đoán.<br>
-            Thấp → ổn định.<br>
+            Thấp → ổn định.<br><br>
+            Quan trọng với hàng giá trị cao.
         </span>
     </div>
 
     <button class="top3-btn">📘 Xem phân tích chi tiết</button>
-
 </div>
-            """,
+""",
             unsafe_allow_html=True,
         )
 
