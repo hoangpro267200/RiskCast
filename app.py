@@ -1412,3 +1412,85 @@ def main():
 
 if __name__ == "__main__":
     main()
+# =============================================================================
+# PART 5 — REPORT GENERATOR (Excel + PDF)
+# =============================================================================
+
+from io import BytesIO
+from fpdf import FPDF
+import pandas as pd
+
+class ReportGenerator:
+    """Xuất Excel + PDF cho RISKCAST."""
+
+    # =========================
+    # 1) EXPORT EXCEL
+    # =========================
+    def generate_excel(self, results: pd.DataFrame, weights: pd.Series):
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+            results.to_excel(writer, index=False, sheet_name="Results")
+            weights.to_frame("Weight").to_excel(writer, sheet_name="Weights")
+
+            workbook = writer.book
+            fmt = workbook.add_format({"num_format": "0.000"})
+            ws = writer.sheets["Results"]
+            ws.set_column("A:Z", 18, fmt)
+
+        return output.getvalue()
+
+    # =========================
+    # 2) EXPORT PDF
+    # =========================
+    def generate_pdf(self, results: pd.DataFrame, params, var, cvar):
+        try:
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_auto_page_break(auto=True, margin=15)
+
+            pdf.set_font("Arial", "B", 16)
+            pdf.cell(0, 10, "RISKCAST Report v5.3", ln=True)
+
+            pdf.set_font("Arial", "", 12)
+            pdf.multi_cell(
+                0, 8,
+                f"Tuyến: {params.route}\n"
+                f"Giá trị hàng: ${params.cargo_value:,.0f}\n"
+                f"Mục tiêu: {params.priority}\n"
+            )
+
+            # ====== TOP 5 ======
+            pdf.set_font("Arial", "B", 13)
+            pdf.cell(0, 10, "Top 5 Phương Án", ln=True)
+
+            pdf.set_font("Arial", "", 11)
+            top5 = results.head(5)
+            for _, row in top5.iterrows():
+                pdf.multi_cell(
+                    0, 7,
+                    f"- {row['company']} - {row['icc_package']}:  "
+                    f"Score {row['score']:.3f},  "
+                    f"Cost ${row['estimated_cost']:,.0f},  "
+                    f"Tin cậy {row['confidence']:.2f}"
+                )
+
+            # ====== VAR / CVAR ======
+            if var is not None and cvar is not None:
+                pdf.ln(5)
+                pdf.set_font("Arial", "B", 13)
+                pdf.cell(0, 10, "Rủi ro tài chính (VaR/CVaR)", ln=True)
+
+                pdf.set_font("Arial", "", 11)
+                pdf.multi_cell(
+                    0, 7,
+                    f"VaR 95%: ${var:,.0f}\n"
+                    f"CVaR 95%: ${cvar:,.0f}\n"
+                )
+
+            buffer = BytesIO()
+            pdf.output(buffer)
+            return buffer.getvalue()
+
+        except Exception as e:
+            print("PDF ERROR:", e)
+            return None
