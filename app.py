@@ -1627,22 +1627,24 @@ fig_forecast = chart_factory.create_forecast_chart(
 
 st.plotly_chart(fig_forecast, use_container_width=True)
 
-        # FUZZY AHP MODULE (GIỮ NGUYÊN HOÀN TOÀN)
-        if params.use_fuzzy:
-            st.markdown("---")
-            st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số (Enterprise Module)")
-            
-            st.markdown("""
-            <div class="explanation-box">
-                <h4>📚 Giải thích về Fuzzy AHP:</h4>
-                <ul>
-                    <li><b>Mục đích:</b> Xử lý bất định trong đánh giá chuyên gia</li>
-                    <li><b>Phương pháp:</b> Chuyển trọng số crisp thành tam giác mờ (Low-Mid-High)</li>
-                    <li><b>Defuzzification:</b> Sử dụng phương pháp Centroid để chuyển về crisp</li>
-                    <li><b>Ứng dụng:</b> Tăng độ tin cậy kết quả khi chuyên gia không chắc chắn 100%</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
+# ===================== FUZZY AHP MODULE =====================
+
+if params.use_fuzzy:
+    st.markdown("---")
+    st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số (Enterprise Module)")
+
+    st.markdown("""
+    <div class="explanation-box">
+        <h4>📚 Giải thích về Fuzzy AHP:</h4>
+        <ul>
+            <li><b>Mục đích:</b> Xử lý bất định trong đánh giá chuyên gia</li>
+            <li><b>Phương pháp:</b> Chuyển trọng số crisp thành tam giác mờ (Low-Mid-High)</li>
+            <li><b>Defuzzification:</b> Dùng phương pháp Centroid</li>
+            <li><b>Ứng dụng:</b> Tăng độ tin cậy khi chuyên gia không chắc chắn</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+
             
             # Biểu đồ Fuzzy
             fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
