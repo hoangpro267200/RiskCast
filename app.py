@@ -1467,139 +1467,134 @@ class StreamlitUI:
         st.markdown("---")
         st.subheader("📊 Biểu đồ phân tích")
 
-# === FIX LAYOUT HÀNG 1 (TÁCH 2 BIỂU ĐỒ + CĂN ĐỀU CHIỀU CAO) ===
-col_scatter, col_cat = st.columns([1, 1], gap="large")
+        col_scatter, col_cat = st.columns(2)
+        with col_scatter:
+            st.markdown("#### 📉 Chi phí – Chất lượng (Cost–Benefit)")
+            fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
+            st.plotly_chart(fig_scatter, use_container_width=True)
 
-with col_scatter:
-    st.markdown("<div style='padding-right:12px;'>", unsafe_allow_html=True)
-    st.markdown("#### 📉 Chi phí – Chất lượng (Cost–Benefit)")
-    fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
-    st.plotly_chart(fig_scatter, use_container_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+        with col_cat:
+            st.markdown("#### 📊 So sánh 3 loại phương án")
+            fig_category = self.chart_factory.create_category_comparison(result.results)
+            st.plotly_chart(fig_category, use_container_width=True)
 
-with col_cat:
-    st.markdown("<div style='padding-left:12px;'>", unsafe_allow_html=True)
-    st.markdown("#### 📊 So sánh 3 loại phương án")
-    fig_category = self.chart_factory.create_category_comparison(result.results)
-    st.plotly_chart(fig_category, use_container_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("#### 🏆 Top 5 phương án tốt nhất")
+        fig_top5 = self.chart_factory.create_top_recommendations_bar(result.results)
+        st.plotly_chart(fig_top5, use_container_width=True)
 
-# === PHẦN TOP 5 — PHẢI ĐỂ NGOÀI CÁC "with col_*" ===
-st.markdown("#### 🏆 Top 5 phương án tốt nhất")
-fig_top5 = self.chart_factory.create_top_recommendations_bar(result.results)
-st.plotly_chart(fig_top5, use_container_width=True)
+        # Weights + Forecast + Risk metrics
+        st.markdown("---")
+        col_w1, col_w2 = st.columns(2)
 
-# === Weights + Forecast + Risk metrics ===
-st.markdown("---")
-col_w1, col_w2 = st.columns(2)
+        with col_w1:
+            fig_weights = self.chart_factory.create_weights_pie(
+                result.weights,
+                "Trọng số tiêu chí (sau khi áp dụng Fuzzy AHP)" if params.use_fuzzy else "Trọng số tiêu chí"
+            )
+            st.plotly_chart(fig_weights, use_container_width=True)
 
-with col_w1:
-    fig_weights = self.chart_factory.create_weights_pie(
-        result.weights,
-        "Trọng số tiêu chí (sau khi áp dụng Fuzzy AHP)" if params.use_fuzzy else "Trọng số tiêu chí"
-    )
-    st.plotly_chart(fig_weights, use_container_width=True)
+        with col_w2:
+            st.markdown("#### 📉 Dự báo rủi ro khí hậu theo tháng")
+            fig_forecast = self.chart_factory.create_forecast_chart(
+                result.historical, result.forecast, params.route, params.month
+            )
+            st.plotly_chart(fig_forecast, use_container_width=True)
 
-with col_w2:
-    st.markdown("#### 📉 Dự báo rủi ro khí hậu theo tháng")
-    fig_forecast = self.chart_factory.create_forecast_chart(
-        result.historical, result.forecast, params.route, params.month
-    )
-    st.plotly_chart(fig_forecast, use_container_width=True)
-
-# === Risk metrics card full-width ===
-if result.var is not None and result.cvar is not None:
-    risk_pct = (result.var / params.cargo_value) * 100
-    st.markdown(
-        f"""
-        <div class="rc-card rc-risk-card">
-            <h4>⚠️ Đánh giá rủi ro tài chính (Quick View)</h4>
-            <div class="rc-risk-metrics">
-                <div class="rc-risk-item">
-                    <div class="rc-risk-label">💰 VaR 95%</div>
-                    <div class="rc-risk-value">${result.var:,.0f}</div>
+        # Risk metrics card full-width (FIX layout)
+        if result.var is not None and result.cvar is not None:
+            risk_pct = (result.var / params.cargo_value) * 100
+            st.markdown(
+                f"""
+                <div class="rc-card rc-risk-card">
+                    <h4>⚠️ Đánh giá rủi ro tài chính (Quick View)</h4>
+                    <div class="rc-risk-metrics">
+                        <div class="rc-risk-item">
+                            <div class="rc-risk-label">💰 VaR 95%</div>
+                            <div class="rc-risk-value">${result.var:,.0f}</div>
+                        </div>
+                        <div class="rc-risk-item">
+                            <div class="rc-risk-label">🛡️ CVaR 95%</div>
+                            <div class="rc-risk-value">${result.cvar:,.0f}</div>
+                        </div>
+                        <div class="rc-risk-item">
+                            <div class="rc-risk-label">📊 Rủi ro / Giá trị</div>
+                            <div class="rc-risk-value">{risk_pct:.1f}%</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="rc-risk-item">
-                    <div class="rc-risk-label">🛡️ CVaR 95%</div>
-                    <div class="rc-risk-value">${result.cvar:,.0f}</div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        # Fuzzy AHP
+        if params.use_fuzzy:
+            st.markdown("---")
+            st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số")
+
+            st.markdown(
+                """
+                <div class="explanation-box">
+                    <h4>📚 Fuzzy AHP là gì?</h4>
+                    <ul>
+                        <li>Sử dụng <b>tam giác mờ (Low – Mid – High)</b> để biểu diễn sự không chắc chắn trong ý kiến chuyên gia.</li>
+                        <li>Trọng số cuối cùng được tính bằng 
+                            <span class="rc-tooltip" data-tip="(Low + Mid + High) / 3">(Low + Mid + High) / 3</span> 
+                            rồi chuẩn hóa lại.</li>
+                        <li>Giúp mô hình <b>mềm dẻo hơn</b>, không phụ thuộc duy nhất vào một bộ trọng số cứng.</li>
+                    </ul>
                 </div>
-                <div class="rc-risk-item">
-                    <div class="rc-risk-label">📊 Rủi ro / Giá trị</div>
-                    <div class="rc-risk-value">{risk_pct:.1f}%</div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
+            st.plotly_chart(fig_fuzzy, use_container_width=True)
+
+            fuzzy_table = build_fuzzy_table(result.weights, params.fuzzy_uncertainty)
+            st.dataframe(fuzzy_table, use_container_width=True)
+
+            most_unc, diff_map = most_uncertain_criterion(result.weights, params.fuzzy_uncertainty)
+            st.markdown(
+                f"""
+                <div style="background:#00331F; padding:15px; border-radius:10px;
+                border:2px solid #00FFAA; color:#CCFFE6;">
+                    <b>🔍 Tiêu chí dao động mạnh nhất:</b> {most_unc}<br>
+                    <small>Độ chênh lệch (Low → High): {diff_map[most_unc]:.4f}</small>
                 </div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+                """,
+                unsafe_allow_html=True
+            )
 
-# === Fuzzy AHP ===
-if params.use_fuzzy:
-    st.markdown("---")
-    st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số")
+            st.subheader("🔥 Heatmap mức dao động Fuzzy (Premium Green)")
+            fig_heat = fuzzy_heatmap_premium(diff_map)
+            st.plotly_chart(fig_heat, use_container_width=True)
 
-    st.markdown(
-        """
-        <div class="explanation-box">
-            <h4>📚 Fuzzy AHP là gì?</h4>
-            <ul>
-                <li>Sử dụng <b>tam giác mờ (Low – Mid – High)</b> để biểu diễn sự không chắc chắn trong ý kiến chuyên gia.</li>
-                <li>Trọng số cuối cùng được tính bằng 
-                    <span class="rc-tooltip" data-tip="(Low + Mid + High) / 3">(Low + Mid + High) / 3</span> 
-                    rồi chuẩn hóa lại.</li>
-                <li>Giúp mô hình <b>mềm dẻo hơn</b>, không phụ thuộc duy nhất vào một bộ trọng số cứng.</li>
-            </ul>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+        # Export
+        st.markdown("---")
+        st.subheader("📥 Xuất báo cáo")
 
-   # === Fuzzy AHP ===
-if params.use_fuzzy:
-    st.markdown("---")
-    st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số")
+        col_e1, col_e2 = st.columns(2)
 
-    st.markdown(
-        """
-        <div class="explanation-box">
-            <h4>📚 Fuzzy AHP là gì?</h4>
-            <ul>
-                <li>Sử dụng <b>tam giác mờ (Low – Mid – High)</b> để biểu diễn sự không chắc chắn trong ý kiến chuyên gia.</li>
-                <li>Trọng số cuối cùng được tính bằng 
-                    <span class="rc-tooltip" data-tip="(Low + Mid + High) / 3">(Low + Mid + High) / 3</span> 
-                    rồi chuẩn hóa lại.</li>
-                <li>Giúp mô hình <b>mềm dẻo hơn</b>, không phụ thuộc duy nhất vào một bộ trọng số cứng.</li>
-            </ul>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+        with col_e1:
+            excel_data = self.report_gen.generate_excel(result.results, result.weights)
+            st.download_button(
+                "📊 Tải Excel (kết quả + trọng số)",
+                data=excel_data,
+                file_name=f"riskcast_v54_{params.route.replace(' ', '_')}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True
+            )
 
-    # Biểu đồ fuzzy
-    fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
-    st.plotly_chart(fig_fuzzy, use_container_width=True)
-
-    # Bảng fuzzy
-    fuzzy_table = build_fuzzy_table(result.weights, params.fuzzy_uncertainty)
-    st.dataframe(fuzzy_table, use_container_width=True)
-
-    # Tiêu chí dao động mạnh nhất
-    most_unc, diff_map = most_uncertain_criterion(result.weights, params.fuzzy_uncertainty)
-    st.markdown(
-        f"""
-        <div style="background:#00331F; padding:15px; border-radius:10px;
-        border:2px solid #00FFAA; color:#CCFFE6;">
-            <b>🔍 Tiêu chí dao động mạnh nhất:</b> {most_unc}<br>
-            <small>Độ chênh lệch (Low → High): {diff_map[most_unc]:.4f}</small>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # Heatmap Fuzzy
-    st.subheader("🔥 Heatmap mức dao động Fuzzy (Premium Green)")
-    fig_heat = fuzzy_heatmap_premium(diff_map)
-    st.plotly_chart(fig_heat, use_container_width=True)
+        with col_e2:
+            pdf_data = self.report_gen.generate_pdf(result.results, params, result.var, result.cvar)
+            if pdf_data:
+                st.download_button(
+                    "📄 Tải PDF (tóm tắt báo cáo)",
+                    data=pdf_data,
+                    file_name=f"riskcast_v54_{params.route.replace(' - ', '_')}.pdf",
+                    mime="application/pdf",
+                    use_container_width=True
+                )
 
     def run(self):
         self.initialize()
