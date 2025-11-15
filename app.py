@@ -44,7 +44,7 @@ def app_config():
 
 
 def apply_enterprise_css():
-    """Premium Green · Mixed Enterprise."""
+    """Luxury Black · Green Neon · Enterprise."""
     st.markdown("""
     <style>
     * {
@@ -53,7 +53,7 @@ def apply_enterprise_css():
     }
 
     .stApp {
-        background: #0e1613 !important;
+        background: #020509 !important; /* Nền đen sâu */
         color: #e9fff4 !important;
         font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif !important;
         font-size: 1rem !important;
@@ -65,13 +65,16 @@ def apply_enterprise_css():
         max-width: 1500px !important;
     }
 
-    /* HEADER */
+    /* ================= HEADER LUXURY ================= */
     .rc-header {
         padding: 1.2rem 1.6rem;
-        border-radius: 18px;
-        background: linear-gradient(135deg, rgba(18,44,36,0.9), rgba(5,15,12,0.98));
-        border: 1px solid rgba(0,255,153,0.22);
-        box-shadow: 0 10px 26px rgba(0,0,0,0.55);
+        border-radius: 22px;
+        background: radial-gradient(circle at top left, #072017, #020908 55%, #000000 100%);
+        border: 1px solid rgba(0,255,153,0.32);
+        box-shadow:
+            0 0 0 1px rgba(0,255,153,0.28),
+            0 18px 40px rgba(0,0,0,0.95),
+            0 0 30px rgba(0,255,153,0.4);
         margin-bottom: 1.8rem;
         display: flex;
         justify-content: space-between;
@@ -85,59 +88,64 @@ def apply_enterprise_css():
         gap: 1.2rem;
     }
 
-    /* RC shield logo – dual tone */
+    /* LOGO SHIELD – LUXURY NEON */
     .rc-logo {
-        width: 78px;
-        height: 78px;
-        border-radius: 18px;
-        background: radial-gradient(circle at 40% 35%,
-            #ffffff 0%, #d7fff4 14%, #7affd4 32%, #00e6a7 55%, #003826 100%);
+        width: 82px;
+        height: 82px;
+        border-radius: 22px;
+        background:
+            radial-gradient(circle at 35% 25%, #ffffff 0%, #d7fff4 12%, #7affd4 30%, #00e6a7 55%, #003826 100%);
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 900;
-        font-size: 1.75rem;
+        font-size: 1.9rem;
         color: #001c12;
         border: 3px solid #c4ffea;
-        box-shadow: 0 0 22px rgba(0,255,153,0.65);
+        box-shadow:
+            0 0 26px rgba(0,255,153,0.85),
+            0 0 60px rgba(0,255,153,0.55);
         text-shadow: 0 0 10px rgba(255,255,255,0.9);
     }
 
     .rc-title {
-        font-size: 1.55rem;
+        font-size: 1.6rem;
         font-weight: 900;
-        letter-spacing: 0.03em;
-        background: linear-gradient(90deg, #eafff8, #beffdd, #d2fff0);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: linear-gradient(90deg, #eafff8, #8cffc8, #c2ffe7);
         -webkit-background-clip: text;
         color: transparent;
-        text-transform: uppercase;
     }
 
     .rc-subtitle {
-        margin-top: 2px;
-        font-size: 0.93rem;
-        opacity: 0.92;
-        color: #c4ffea;
+        margin-top: 4px;
+        font-size: 0.95rem;
+        opacity: 0.95;
+        color: #b9ffe6;
         font-weight: 500;
     }
 
     .rc-badge {
-        background: linear-gradient(120deg, #00e676, #00bfa5);
-        padding: 0.55rem 1.1rem;
+        background: radial-gradient(circle at top, #00ff99, #00bfa5);
+        padding: 0.6rem 1.4rem;
         border-radius: 999px;
         color: #00140c;
-        font-weight: 700;
+        font-weight: 800;
         font-size: 0.9rem;
-        letter-spacing: 0.02em;
-        box-shadow: 0 0 14px rgba(0,255,153,0.55);
+        letter-spacing: 0.06em;
+        box-shadow:
+            0 0 22px rgba(0,255,153,0.75),
+            0 12px 26px rgba(0,0,0,0.9);
         white-space: nowrap;
+        text-transform: uppercase;
     }
 
-    /* SIDEBAR */
+    /* ================= SIDEBAR ================= */
     section[data-testid="stSidebar"] {
-        background: #0a1a15 !important;
+        background: radial-gradient(circle at top, #041610, #020705 55%, #000000 100%) !important;
         border-right: 1px solid rgba(0,255,153,0.24);
-        box-shadow: 8px 0 22px rgba(0,0,0,0.7);
+        box-shadow: 8px 0 24px rgba(0,0,0,0.9);
     }
 
     section[data-testid="stSidebar"] h1,
@@ -158,47 +166,57 @@ def apply_enterprise_css():
         font-weight: 800 !important;
         border-radius: 999px !important;
         border: none !important;
-        padding: 0.6rem 1.7rem !important;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.7), 0 0 14px rgba(0,255,153,0.55) !important;
+        padding: 0.7rem 1.8rem !important;
+        box-shadow:
+            0 10px 24px rgba(0,0,0,0.9),
+            0 0 18px rgba(0,255,153,0.75) !important;
         transition: all 0.12s ease-out !important;
-        font-size: 0.97rem !important;
+        font-size: 0.98rem !important;
     }
 
     .stButton > button:hover {
-        transform: translateY(-1px) scale(1.02);
-        box-shadow: 0 12px 26px rgba(0,0,0,0.85), 0 0 22px rgba(0,255,153,0.8) !important;
+        transform: translateY(-1px) scale(1.03);
+        box-shadow:
+            0 14px 30px rgba(0,0,0,1),
+            0 0 26px rgba(0,255,153,0.95) !important;
     }
 
-    /* CARD */
+    /* ================= CARD CHUNG ================= */
     .rc-card {
-        background: linear-gradient(135deg, rgba(10,25,21,0.75), rgba(5,15,12,0.9));
-        padding: 1.2rem 1.4rem;
-        border-radius: 16px;
-        border: 1px solid rgba(0,255,153,0.18);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+        background: radial-gradient(circle at top left, rgba(0,255,153,0.08), rgba(1,7,6,0.96));
+        padding: 1.3rem 1.5rem;
+        border-radius: 18px;
+        border: 1px solid rgba(0,255,153,0.22);
+        box-shadow:
+            0 0 0 1px rgba(0,40,25,0.9),
+            0 12px 26px rgba(0,0,0,0.85);
         margin-bottom: 1.3rem;
     }
 
-    /* RESULT BOX */
+    /* ================= RESULT BOX (TOP RECOMMENDATION) ================= */
     .result-box {
-        background: radial-gradient(circle at top left,#00ff99,#00bfa5);
+        background: radial-gradient(circle at top left,#00ffcc,#00e676,#00bfa5);
         color: #00130d !important;
-        padding: 1.6rem 2rem;
-        border-radius: 18px;
+        padding: 1.8rem 2.2rem;
+        border-radius: 20px;
         font-weight: 800;
-        box-shadow: 0 0 22px rgba(0, 255, 153, 0.7), 0 18px 40px rgba(0, 0, 0, 0.9);
+        box-shadow:
+            0 0 26px rgba(0,255,153,0.9),
+            0 20px 44px rgba(0,0,0,1);
         border: 2px solid #b9f6ca;
-        margin-top: 0.6rem;
+        margin-top: 0.8rem;
     }
 
-    /* EXPLANATION BOX */
+    /* ================= EXPLANATION BOX ================= */
     .explanation-box {
-        background: rgba(5,25,20,0.95);
+        background: linear-gradient(135deg, rgba(0,15,11,0.98), rgba(0,40,28,0.96));
         border-left: 4px solid #00e676;
         padding: 1.1rem 1.4rem;
-        border-radius: 12px;
+        border-radius: 14px;
         margin-top: 0.7rem;
-        box-shadow: 0 0 16px rgba(0,0,0,0.7);
+        box-shadow:
+            0 0 16px rgba(0,0,0,0.9),
+            0 0 18px rgba(0,255,153,0.24);
     }
 
     .explanation-box h4 {
@@ -213,7 +231,7 @@ def apply_enterprise_css():
         margin: 0.22rem 0;
     }
 
-    /* TEXT TOOLTIP (old style – vẫn giữ để reuse) */
+    /* ================= TOOLTIP TEXT CŨ ================= */
     .rc-tooltip {
         text-decoration: underline dotted #00e676;
         cursor: pointer;
@@ -227,19 +245,19 @@ def apply_enterprise_css():
         position: absolute;
         left: 0;
         bottom: -2.8rem;
-        background: rgba(0,0,0,0.96);
+        background: rgba(0,0,0,0.98);
         padding: 9px 11px;
         border-radius: 8px;
-        border: 1px solid rgba(0,255,153,0.4);
+        border: 1px solid rgba(0,255,153,0.5);
         font-size: 0.85rem;
         color: #d8fff0;
         width: max-content;
         max-width: 320px;
         z-index: 999;
-        box-shadow: 0 0 14px rgba(0,255,153,0.25);
+        box-shadow: 0 0 18px rgba(0,255,153,0.45);
     }
 
-    /* ENTERPRISE ICON TOOLTIP v5.5 */
+    /* ================= ICON TOOLTIP NEON ================= */
     .tooltip-icon {
         display: inline-flex;
         align-items: center;
@@ -253,22 +271,22 @@ def apply_enterprise_css():
         text-align: center;
         font-size: 12px;
         cursor: help;
-        border: 1px solid rgba(0,255,153,0.4);
+        border: 1px solid rgba(0,255,153,0.65);
         font-weight: 700;
-        box-shadow: 0 0 8px rgba(0,255,153,0.25);
+        box-shadow: 0 0 10px rgba(0,255,153,0.45);
         position: relative;
     }
 
     .tooltip-icon:hover {
-        background: rgba(0,255,153,0.3);
+        background: rgba(0,255,153,0.32);
         border-color: #00ff99;
     }
 
     .tooltip-icon:hover::after {
         content: attr(data-tip);
         position: absolute;
-        background: rgba(0,20,15,0.98);
-        border: 1px solid rgba(0,255,153,0.45);
+        background: rgba(0,12,9,0.99);
+        border: 1px solid rgba(0,255,153,0.6);
         padding: 10px 14px;
         border-radius: 10px;
         color: #d8fff0;
@@ -278,15 +296,17 @@ def apply_enterprise_css():
         font-size: 0.82rem;
         line-height: 1.35rem;
         z-index: 999;
-        box-shadow: 0 0 18px rgba(0,255,153,0.35);
+        box-shadow: 0 0 22px rgba(0,255,153,0.6);
     }
 
-    /* DATAFRAME */
+    /* ================= DATAFRAME ================= */
     div[data-testid="stDataFrame"] {
-        border-radius: 12px !important;
-        border: 1px solid rgba(0,255,153,0.25) !important;
+        border-radius: 14px !important;
+        border: 1px solid rgba(0,255,153,0.3) !important;
         overflow: hidden !important;
-        box-shadow: 0 0 16px rgba(0,0,0,0.45) !important;
+        box-shadow:
+            0 0 18px rgba(0,0,0,0.9),
+            0 0 18px rgba(0,255,153,0.32) !important;
     }
 
     [data-testid="stMetricValue"] {
@@ -300,37 +320,43 @@ def apply_enterprise_css():
         font-weight: 600 !important;
     }
 
-    /* TOP3 CARDS */
+    /* ================= TOP 3 CARDS ================= */
     .top3-card {
         position: relative;
-        background: radial-gradient(circle at top left, rgba(0,255,153,0.12), rgba(0,0,0,0.78));
-        border: 1px solid rgba(0,255,153,0.45);
+        background: radial-gradient(circle at top left, rgba(0,255,153,0.2), rgba(0,0,0,0.95));
+        border: 1px solid rgba(0,255,153,0.55);
         padding: 18px 18px;
-        border-radius: 18px;
-        box-shadow: 0 0 18px rgba(0,255,153,0.18);
+        border-radius: 20px;
+        box-shadow:
+            0 0 20px rgba(0,255,153,0.35),
+            0 12px 28px rgba(0,0,0,0.95);
         margin-bottom: 18px;
         text-align: center;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
         transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out;
     }
 
     .top1-card {
-        background: radial-gradient(circle at top left, rgba(255,215,0,0.18), rgba(0,0,0,0.88));
-        border: 1px solid rgba(255,215,0,0.7);
-        box-shadow: 0 0 26px rgba(255,215,0,0.45);
+        background: radial-gradient(circle at top left, rgba(255,215,0,0.22), rgba(0,0,0,0.96));
+        border: 1px solid rgba(255,215,0,0.85);
+        box-shadow:
+            0 0 30px rgba(255,215,0,0.75),
+            0 14px 32px rgba(0,0,0,0.98);
         animation: gold-pulse 2.4s ease-in-out infinite alternate;
     }
 
     @keyframes gold-pulse {
-        0% { box-shadow: 0 0 10px rgba(255,215,0,0.35); border-color: rgba(255,215,0,0.6); }
-        100% { box-shadow: 0 0 26px rgba(255,215,0,0.8); border-color: rgba(255,255,255,0.9); }
+        0% { box-shadow: 0 0 12px rgba(255,215,0,0.55); border-color: rgba(255,215,0,0.7); }
+        100% { box-shadow: 0 0 30px rgba(255,215,0,0.95); border-color: rgba(255,255,255,0.98); }
     }
 
     .top3-card:hover {
-        transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 0 26px rgba(0,255,153,0.35);
-        border-color: rgba(0,255,200,0.85);
+        transform: translateY(-3px) scale(1.03);
+        box-shadow:
+            0 0 28px rgba(0,255,153,0.65),
+            0 16px 36px rgba(0,0,0,1);
+        border-color: rgba(0,255,200,0.95);
     }
 
     .top3-title {
@@ -340,10 +366,10 @@ def apply_enterprise_css():
     }
 
     .top1-title {
-        font-size: 1.15rem;
+        font-size: 1.18rem;
         font-weight: 900;
         color: #ffe680;
-        text-shadow: 0 0 10px rgba(255,210,0,0.7);
+        text-shadow: 0 0 12px rgba(255,210,0,0.9);
     }
 
     .top3-sub {
@@ -366,13 +392,13 @@ def apply_enterprise_css():
         display: inline-block;
         padding: 3px 10px;
         border-radius: 999px;
-        border: 1px solid rgba(0,255,153,0.5);
+        border: 1px solid rgba(0,255,153,0.7);
         font-size: 0.82rem;
         margin-top: 4px;
         color: #c8ffec;
     }
 
-    /* RISK METRICS CARD (VaR / CVaR / Risk Ratio) */
+    /* ================= CARD RISK METRICS ================= */
     .rc-risk-card h4 {
         margin-top: 0;
         margin-bottom: 0.8rem;
@@ -401,10 +427,25 @@ def apply_enterprise_css():
         color: #76ff03;
     }
 
-    /* MOBILE */
+    /* ================= CHART WRAPPER – KHUNG NEON ================= */
+    div[data-testid="stPlotlyChart"] {
+        background: radial-gradient(circle at top, #020f0b, #000000);
+        padding: 16px 18px 12px 18px;
+        border-radius: 18px;
+        border: 1.6px solid rgba(0,255,153,0.75);
+        box-shadow:
+            0 0 24px rgba(0,255,153,0.65),
+            0 16px 34px rgba(0,0,0,0.98);
+        margin-bottom: 1.5rem;
+    }
+
+    /* ================= MOBILE ================= */
     @media (max-width: 900px) {
         .rc-header { flex-direction: column; align-items: flex-start; }
-        .block-container { padding-left: 0.6rem !important; padding-right: 0.6rem !important; }
+        .block-container {
+            padding-left: 0.6rem !important;
+            padding-right: 0.6rem !important;
+        }
         .rc-risk-metrics { flex-direction: column; }
     }
 
