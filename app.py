@@ -5,28 +5,20 @@
 # Author: Bùi Xuân Hoàng (original idea)
 # Refactor + Multi-Package + Full Explanations + Enterprise UX: Kai assistant
 #
-# Nổi bật trong v5.3 Enterprise:
-#   - Profile-Based Recommendation (3 mục tiêu: Tiết kiệm / Cân bằng / An toàn)
-#   - Multi-Package Analysis (5 công ty × 3 gói ICC = 15 phương án)
-#   - Smart Ranking Table với badges
-#   - Cost-Benefit Scatter Plot
-#   - Trade-off Analysis
-#   - Fuzzy AHP Enterprise module (heatmap + radar-style line)
-#   - Forecast chart nền tối + line neon
-#   - TẤT CẢ EXPLANATION BOXES cho NCKH
+# Theme: Premium Green · Mixed Enterprise (Salesforce + Oracle Fusion)
 # =============================================================================
 
 import io
 import warnings
 from dataclasses import dataclass
-from enum import Enum
 from typing import Dict, List, Tuple, Optional
+from enum import Enum
 
 import numpy as np
 import pandas as pd
+import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
-import streamlit as st
 from fpdf import FPDF
 
 warnings.filterwarnings("ignore")
@@ -35,8 +27,314 @@ warnings.filterwarnings("ignore")
 try:
     from statsmodels.tsa.arima.model import ARIMA
     ARIMA_AVAILABLE = True
-except Exception:
+except ImportError:
     ARIMA_AVAILABLE = False
+
+
+# =============================================================================
+# PAGE CONFIG + GLOBAL CSS
+# =============================================================================
+
+def app_config():
+    st.set_page_config(
+        page_title="RISKCAST v5.3 — Multi-Package Analysis",
+        page_icon="🛡️",
+        layout="wide"
+    )
+
+
+def apply_enterprise_css():
+    """Premium Green · Mixed Enterprise (A3 style)."""
+    st.markdown("""
+    <style>
+    * {
+        text-rendering: optimizeLegibility !important;
+        -webkit-font-smoothing: antialiased !important;
+    }
+
+    .stApp {
+        background: #0e1613 !important;
+        color: #e9fff4 !important;
+        font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif !important;
+        font-size: 1rem !important;
+    }
+
+    .block-container {
+        padding-top: 1.2rem !important;
+        padding-bottom: 3rem !important;
+        max-width: 1500px !important;
+    }
+
+    /* HEADER */
+    .rc-header {
+        padding: 1.2rem 1.6rem;
+        border-radius: 18px;
+        background: linear-gradient(135deg, rgba(18,44,36,0.9), rgba(5,15,12,0.98));
+        border: 1px solid rgba(0,255,153,0.22);
+        box-shadow: 0 10px 26px rgba(0,0,0,0.55);
+        margin-bottom: 1.8rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1.4rem;
+    }
+
+    .rc-header-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .rc-logo {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        background: radial-gradient(circle at 30% 30%, #9fffc8 0%, #00c676 45%, #003624 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 1.45rem;
+        color: #002215;
+        border: 2px solid #c4ffea;
+        box-shadow: 0 0 16px rgba(0,255,153,0.35);
+    }
+
+    .rc-title {
+        font-size: 1.55rem;
+        font-weight: 900;
+        letter-spacing: 0.03em;
+        background: linear-gradient(90deg, #eafff8, #beffdd, #d2fff0);
+        -webkit-background-clip: text;
+        color: transparent;
+        text-transform: uppercase;
+    }
+
+    .rc-subtitle {
+        margin-top: 2px;
+        font-size: 0.93rem;
+        opacity: 0.92;
+        color: #c4ffea;
+        font-weight: 500;
+    }
+
+    .rc-badge {
+        background: linear-gradient(120deg, #00e676, #00bfa5);
+        padding: 0.55rem 1.1rem;
+        border-radius: 999px;
+        color: #00140c;
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 0.02em;
+        box-shadow: 0 0 14px rgba(0,255,153,0.55);
+        white-space: nowrap;
+    }
+
+    /* SIDEBAR */
+    section[data-testid="stSidebar"] {
+        background: #0a1a15 !important;
+        border-right: 1px solid rgba(0,255,153,0.24);
+        box-shadow: 8px 0 22px rgba(0,0,0,0.7);
+    }
+
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {
+        color: #b0ffe1 !important;
+        font-weight: 800 !important;
+    }
+
+    section[data-testid="stSidebar"] label {
+        color: #d4fff1 !important;
+        font-weight: 600 !important;
+    }
+
+    .stButton > button {
+        background: linear-gradient(120deg, #00ff99, #00e676, #00bfa5) !important;
+        color: #00140d !important;
+        font-weight: 800 !important;
+        border-radius: 999px !important;
+        border: none !important;
+        padding: 0.6rem 1.7rem !important;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.7), 0 0 14px rgba(0,255,153,0.55) !important;
+        transition: all 0.12s ease-out !important;
+        font-size: 0.97rem !important;
+    }
+
+    .stButton > button:hover {
+        transform: translateY(-1px) scale(1.02);
+        box-shadow: 0 12px 26px rgba(0,0,0,0.85), 0 0 22px rgba(0,255,153,0.8) !important;
+    }
+
+    /* CARD */
+    .rc-card {
+        background: linear-gradient(135deg, rgba(10,25,21,0.75), rgba(5,15,12,0.9));
+        padding: 1.2rem 1.4rem;
+        border-radius: 16px;
+        border: 1px solid rgba(0,255,153,0.18);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+        margin-bottom: 1.3rem;
+    }
+
+    /* RESULT BOX */
+    .result-box {
+        background: radial-gradient(circle at top left,#00ff99,#00bfa5);
+        color: #00130d !important;
+        padding: 1.6rem 2rem;
+        border-radius: 18px;
+        font-weight: 800;
+        box-shadow: 0 0 22px rgba(0, 255, 153, 0.7), 0 18px 40px rgba(0, 0, 0, 0.9);
+        border: 2px solid #b9f6ca;
+        margin-top: 0.6rem;
+    }
+
+    /* EXPLANATION BOX */
+    .explanation-box {
+        background: rgba(5,25,20,0.95);
+        border-left: 4px solid #00e676;
+        padding: 1.1rem 1.4rem;
+        border-radius: 12px;
+        margin-top: 0.7rem;
+        box-shadow: 0 0 16px rgba(0,0,0,0.7);
+    }
+
+    .explanation-box h4 {
+        color: #a5ffdc !important;
+        font-weight: 800;
+        margin-bottom: 0.4rem;
+    }
+
+    .explanation-box li {
+        color: #e0f2f1 !important;
+        font-weight: 500;
+        margin: 0.22rem 0;
+    }
+
+    /* TOOLTIP */
+    .rc-tooltip {
+        text-decoration: underline dotted #00e676;
+        cursor: pointer;
+        position: relative;
+        font-weight: 600;
+        color: #aaffdd;
+    }
+
+    .rc-tooltip:hover::after {
+        content: attr(data-tip);
+        position: absolute;
+        left: 0;
+        bottom: -2.8rem;
+        background: rgba(0,0,0,0.96);
+        padding: 9px 11px;
+        border-radius: 8px;
+        border: 1px solid rgba(0,255,153,0.4);
+        font-size: 0.85rem;
+        color: #d8fff0;
+        width: max-content;
+        max-width: 320px;
+        z-index: 999;
+        box-shadow: 0 0 14px rgba(0,255,153,0.25);
+    }
+
+    /* DATAFRAME */
+    div[data-testid="stDataFrame"] {
+        border-radius: 12px !important;
+        border: 1px solid rgba(0,255,153,0.25) !important;
+        overflow: hidden !important;
+        box-shadow: 0 0 16px rgba(0,0,0,0.45) !important;
+    }
+
+    [data-testid="stMetricValue"] {
+        color: #76ff03 !important;
+        font-weight: 900 !important;
+        font-size: 1.05rem !important;
+    }
+
+    [data-testid="stMetricLabel"] {
+        color: #e0f2f1 !important;
+        font-weight: 600 !important;
+    }
+
+    /* TOP3 CARDS */
+    .top3-card {
+        position: relative;
+        background: radial-gradient(circle at top left, rgba(0,255,153,0.12), rgba(0,0,0,0.78));
+        border: 1px solid rgba(0,255,153,0.45);
+        padding: 18px 18px;
+        border-radius: 18px;
+        box-shadow: 0 0 18px rgba(0,255,153,0.18);
+        margin-bottom: 18px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out;
+    }
+
+    .top1-card {
+        background: radial-gradient(circle at top left, rgba(255,215,0,0.18), rgba(0,0,0,0.88));
+        border: 1px solid rgba(255,215,0,0.7);
+        box-shadow: 0 0 26px rgba(255,215,0,0.45);
+        animation: gold-pulse 2.4s ease-in-out infinite alternate;
+    }
+
+    @keyframes gold-pulse {
+        0% { box-shadow: 0 0 10px rgba(255,215,0,0.35); border-color: rgba(255,215,0,0.6); }
+        100% { box-shadow: 0 0 26px rgba(255,215,0,0.8); border-color: rgba(255,255,255,0.9); }
+    }
+
+    .top3-card:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 0 26px rgba(0,255,153,0.35);
+        border-color: rgba(0,255,200,0.85);
+    }
+
+    .top3-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #a5ffdc;
+    }
+
+    .top1-title {
+        font-size: 1.15rem;
+        font-weight: 900;
+        color: #ffe680;
+        text-shadow: 0 0 10px rgba(255,210,0,0.7);
+    }
+
+    .top3-sub {
+        font-size: 0.92rem;
+        margin-top: 6px;
+        color: #e0f2f1;
+    }
+
+    .badge-icc {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: linear-gradient(120deg, #00e676, #00bfa5);
+        color: #00130d;
+        font-weight: 700;
+        font-size: 0.88rem;
+    }
+
+    .pill-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(0,255,153,0.5);
+        font-size: 0.82rem;
+        margin-top: 4px;
+        color: #c8ffec;
+    }
+
+    /* MOBILE */
+    @media (max-width: 900px) {
+        .rc-header { flex-direction: column; align-items: flex-start; }
+        .block-container { padding-left: 0.6rem !important; padding-right: 0.6rem !important; }
+    }
+
+    </style>
+    """, unsafe_allow_html=True)
 
 
 # =============================================================================
@@ -44,14 +342,12 @@ except Exception:
 # =============================================================================
 
 class CriterionType(Enum):
-    """Loại tiêu chí: chi phí (càng thấp càng tốt) hoặc lợi ích (càng cao càng tốt)."""
     COST = "cost"
     BENEFIT = "benefit"
 
 
 @dataclass
 class AnalysisParams:
-    """Các tham số đầu vào cho 1 lần phân tích."""
     cargo_value: float
     good_type: str
     route: str
@@ -68,7 +364,6 @@ class AnalysisParams:
 
 @dataclass
 class AnalysisResult:
-    """Kết quả phân tích."""
     results: pd.DataFrame
     weights: pd.Series
     data_adjusted: pd.DataFrame
@@ -78,17 +373,15 @@ class AnalysisResult:
     forecast: np.ndarray
 
 
-# Danh sách tiêu chí
 CRITERIA = [
     "C1: Tỷ lệ phí",
     "C2: Thời gian xử lý",
     "C3: Tỷ lệ tổn thất",
     "C4: Hỗ trợ ICC",
     "C5: Chăm sóc KH",
-    "C6: Rủi ro khí hậu",
+    "C6: Rủi ro khí hậu"
 ]
 
-# Profile weights - Trọng số theo mục tiêu
 PRIORITY_PROFILES = {
     "💰 Tiết kiệm chi phí": {
         "C1: Tỷ lệ phí": 0.35,
@@ -96,7 +389,7 @@ PRIORITY_PROFILES = {
         "C3: Tỷ lệ tổn thất": 0.15,
         "C4: Hỗ trợ ICC": 0.15,
         "C5: Chăm sóc KH": 0.10,
-        "C6: Rủi ro khí hậu": 0.15,
+        "C6: Rủi ro khí hậu": 0.15
     },
     "⚖️ Cân bằng": {
         "C1: Tỷ lệ phí": 0.20,
@@ -104,7 +397,7 @@ PRIORITY_PROFILES = {
         "C3: Tỷ lệ tổn thất": 0.20,
         "C4: Hỗ trợ ICC": 0.20,
         "C5: Chăm sóc KH": 0.10,
-        "C6: Rủi ro khí hậu": 0.15,
+        "C6: Rủi ro khí hậu": 0.15
     },
     "🛡️ An toàn tối đa": {
         "C1: Tỷ lệ phí": 0.10,
@@ -112,221 +405,48 @@ PRIORITY_PROFILES = {
         "C3: Tỷ lệ tổn thất": 0.25,
         "C4: Hỗ trợ ICC": 0.25,
         "C5: Chăm sóc KH": 0.10,
-        "C6: Rủi ro khí hậu": 0.20,
-    },
+        "C6: Rủi ro khí hậu": 0.20
+    }
 }
 
-# ICC Package definitions
 ICC_PACKAGES = {
     "ICC A": {
         "coverage": 1.0,
         "premium_multiplier": 1.5,
-        "description": "Bảo vệ toàn diện mọi rủi ro trừ điều khoản loại trừ (All Risks)",
+        "description": "Bảo vệ toàn diện mọi rủi ro trừ điều khoản loại trừ (All Risks)"
     },
     "ICC B": {
         "coverage": 0.75,
         "premium_multiplier": 1.0,
-        "description": "Bảo vệ các rủi ro chính (hỏa hoạn, va chạm, chìm đắm, Named Perils)",
+        "description": "Bảo vệ các rủi ro chính (hỏa hoạn, va chạm, chìm đắm, Named Perils)"
     },
     "ICC C": {
         "coverage": 0.5,
         "premium_multiplier": 0.65,
-        "description": "Bảo vệ cơ bản (chỉ các rủi ro lớn như chìm, cháy, va chạm nghiêm trọng)",
-    },
+        "description": "Bảo vệ cơ bản (chỉ các rủi ro lớn như chìm, cháy, va chạm nghiêm trọng)"
+    }
 }
 
-# Map loại tiêu chí
 COST_BENEFIT_MAP = {
     "C1: Tỷ lệ phí": CriterionType.COST,
     "C2: Thời gian xử lý": CriterionType.COST,
     "C3: Tỷ lệ tổn thất": CriterionType.COST,
     "C4: Hỗ trợ ICC": CriterionType.BENEFIT,
     "C5: Chăm sóc KH": CriterionType.BENEFIT,
-    "C6: Rủi ro khí hậu": CriterionType.COST,
+    "C6: Rủi ro khí hậu": CriterionType.COST
 }
 
-# Độ nhạy rủi ro khí hậu theo công ty
 SENSITIVITY_MAP = {
     "Chubb": 0.95,
     "PVI": 1.05,
     "BaoViet": 1.00,
     "BaoMinh": 1.02,
-    "MIC": 1.03,
+    "MIC": 1.03
 }
 
 
 # =============================================================================
-# UI STYLING — ENTERPRISE ESG PREMIUM GREEN
-# =============================================================================
-
-def apply_custom_css() -> None:
-    """CSS Enterprise: Sidebar, Header, Card, Table, Mobile Hybrid Responsive."""
-    st.markdown(
-        """
-    <style>
-    * {
-        text-rendering: optimizeLegibility !important;
-        -webkit-font-smoothing: antialiased !important;
-    }
-
-    .stApp {
-        background: radial-gradient(circle at top, #00ff99 0%, #001a0f 35%, #000c08 100%) !important;
-        font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
-        color: #e6fff7 !important;
-        font-size: 1.05rem !important;
-    }
-
-    .block-container {
-        padding-top: 1rem !important;
-        padding-bottom: 2rem !important;
-        max-width: 1400px !important;
-    }
-
-    h1 { font-size: 2.8rem !important; font-weight: 900 !important; letter-spacing: 0.03em; }
-    h2 { font-size: 2.1rem !important; font-weight: 800 !important; }
-    h3 { font-size: 1.5rem !important; font-weight: 700 !important; }
-
-    .app-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1.1rem 1.5rem;
-        border-radius: 18px;
-        background: linear-gradient(120deg, rgba(0, 255, 153, 0.14), rgba(0, 0, 0, 0.88));
-        border: 1px solid rgba(0, 255, 153, 0.45);
-        box-shadow: 0 0 0 1px rgba(0, 255, 153, 0.12), 0 18px 45px rgba(0, 0, 0, 0.85);
-        margin-bottom: 1.2rem;
-        gap: 1.5rem;
-    }
-
-    .app-header-left { display: flex; align-items: center; gap: 0.9rem; }
-
-    .app-logo-circle {
-        width: 64px; height: 64px; border-radius: 18px;
-        background: radial-gradient(circle at 30% 30%, #b9f6ca 0%, #00c853 38%, #00381f 100%);
-        display: flex; align-items: center; justify-content: center;
-        font-weight: 900; font-size: 1.4rem; color: #00130d;
-        box-shadow: 0 0 14px rgba(0, 255, 153, 0.65), 0 0 36px rgba(0, 0, 0, 0.75);
-        border: 2px solid #e8f5e9;
-    }
-
-    .app-header-title {
-        font-size: 1.5rem; font-weight: 800;
-        background: linear-gradient(90deg, #e8fffb, #b9f6ca, #e8fffb);
-        -webkit-background-clip: text; color: transparent;
-        letter-spacing: 0.05em; text-transform: uppercase;
-    }
-
-    .app-header-subtitle { font-size: 0.9rem; color: #ccffec; opacity: 0.9; }
-
-    .app-header-badge {
-        font-size: 0.86rem; font-weight: 600; padding: 0.55rem 0.9rem;
-        border-radius: 999px; background: radial-gradient(circle at 0 0, #00e676, #00bfa5);
-        color: #00130d; display: flex; align-items: center; gap: 0.35rem;
-        white-space: nowrap; box-shadow: 0 0 14px rgba(0, 255, 153, 0.65), 0 0 22px rgba(0, 0, 0, 0.7);
-    }
-
-    section[data-testid="stSidebar"] {
-        background: radial-gradient(circle at 0 0, #003322 0%, #000f0a 40%, #000805 100%) !important;
-        border-right: 1px solid rgba(0, 230, 118, 0.55);
-        box-shadow: 8px 0 22px rgba(0, 0, 0, 0.85);
-    }
-
-    section[data-testid="stSidebar"] > div { padding-top: 1.1rem; }
-
-    section[data-testid="stSidebar"] h1,
-    section[data-testid="stSidebar"] h2,
-    section[data-testid="stSidebar"] h3 {
-        color: #a5ffdc !important; font-weight: 800 !important;
-    }
-
-    section[data-testid="stSidebar"] label {
-        color: #e0f2f1 !important; font-weight: 600 !important; font-size: 0.92rem !important;
-    }
-
-    .stButton > button {
-        background: linear-gradient(120deg, #00ff99, #00e676, #00bfa5) !important;
-        color: #00130d !important; font-weight: 800 !important;
-        border-radius: 999px !important; border: none !important;
-        padding: 0.65rem 1.9rem !important;
-        box-shadow: 0 0 14px rgba(0, 255, 153, 0.7), 0 10px 22px rgba(0, 0, 0, 0.85) !important;
-        transition: all 0.12s ease-out; font-size: 0.98rem !important;
-    }
-
-    .stButton > button:hover {
-        transform: translateY(-1px) scale(1.02);
-        box-shadow: 0 0 20px rgba(0, 255, 153, 0.95), 0 14px 30px rgba(0, 0, 0, 0.9) !important;
-    }
-
-    .premium-card {
-        background: radial-gradient(circle at top left, rgba(0, 255, 153, 0.10), rgba(0, 0, 0, 0.95));
-        border-radius: 16px; padding: 1.1rem 1.2rem;
-        border: 1px solid rgba(0, 255, 153, 0.45);
-        box-shadow: 0 0 0 1px rgba(0, 255, 153, 0.08), 0 16px 38px rgba(0, 0, 0, 0.9);
-        margin-bottom: 1.2rem;
-    }
-
-    .rc-card {
-        background: radial-gradient(circle at top left, rgba(0,255,153,0.12), rgba(0,0,0,0.88));
-        border-radius: 16px;
-        padding: 1.0rem 1.1rem 1.1rem 1.1rem;
-        border: 1px solid rgba(0,255,153,0.40);
-        box-shadow: 0 0 0 1px rgba(0,255,153,0.08), 0 14px 32px rgba(0,0,0,0.90);
-        margin-bottom: 1.1rem;
-    }
-
-    .result-box {
-        background: radial-gradient(circle at top left,#00ff99,#00bfa5);
-        color: #00130d !important; padding: 1.6rem 2rem; border-radius: 18px;
-        font-weight: 800; box-shadow: 0 0 22px rgba(0, 255, 153, 0.7), 0 18px 40px rgba(0, 0, 0, 0.9);
-        border: 2px solid #b9f6ca; margin-top: 0.6rem;
-    }
-
-    .explanation-box {
-        background: rgba(0,40,28,0.92); border-left: 4px solid #00e676;
-        padding: 1.2rem 1.5rem; border-radius: 12px; margin-top: 0.7rem;
-        box-shadow: 0 0 16px rgba(0,0,0,0.7);
-    }
-
-    .explanation-box h4 { color: #a5ffdc !important; font-weight: 800; }
-    .explanation-box li { color: #e0f2f1 !important; font-weight: 500; margin: 0.25rem 0; }
-
-    .rc-info-badge {
-        display:inline-flex; align-items:center; gap:4px;
-        padding:2px 8px; border-radius:999px;
-        border:1px solid rgba(0,255,153,0.6);
-        font-size:0.78rem; color:#c8ffec;
-        background:rgba(0,0,0,0.55);
-    }
-
-    .rc-info-badge span.icon {
-        font-size:0.9rem;
-    }
-
-    div[data-testid="stDataFrame"] {
-        border-radius: 14px !important; border: 1px solid rgba(0, 255, 170, 0.45) !important;
-        overflow: hidden !important;
-        box-shadow: 0 0 0 1px rgba(0, 255, 170, 0.10), 0 16px 40px rgba(0, 0, 0, 0.85) !important;
-    }
-
-    [data-testid="stMetricValue"] {
-        color: #76ff03 !important; font-weight: 900 !important; font-size: 1.1rem !important;
-    }
-
-    [data-testid="stMetricLabel"] {
-        color: #e0f2f1 !important; font-weight: 600 !important;
-    }
-
-    @media (max-width: 900px) {
-        .block-container { padding-left: 0.8rem !important; padding-right: 0.8rem !important; }
-        .app-header { flex-direction: column; align-items: flex-start; }
-    }
-    </style>
-    """,
-        unsafe_allow_html=True,
-    )
-# =============================================================================
-# DATA LAYER — INDUSTRY STANDARD LEVEL 1
+# DATA LAYER
 # =============================================================================
 
 class DataService:
@@ -335,16 +455,12 @@ class DataService:
     @staticmethod
     @st.cache_data(ttl=3600)
     def load_historical_data() -> pd.DataFrame:
-        """
-        Dữ liệu rủi ro khí hậu theo tuyến (12 tháng), chuẩn hóa 0–1.
-        Mô phỏng theo mức độ bão, sóng, mưa, chậm trễ năm 2023.
-        """
         climate_base = {
             "VN - EU": [0.28, 0.30, 0.35, 0.40, 0.52, 0.60, 0.67, 0.70, 0.75, 0.72, 0.60, 0.48],
             "VN - US": [0.33, 0.36, 0.40, 0.46, 0.55, 0.63, 0.72, 0.78, 0.80, 0.74, 0.62, 0.50],
             "VN - Singapore": [0.18, 0.20, 0.24, 0.27, 0.32, 0.36, 0.40, 0.43, 0.45, 0.42, 0.35, 0.30],
             "VN - China": [0.20, 0.23, 0.27, 0.31, 0.38, 0.42, 0.48, 0.50, 0.53, 0.49, 0.40, 0.34],
-            "Domestic": [0.12, 0.13, 0.14, 0.16, 0.20, 0.22, 0.23, 0.25, 0.27, 0.24, 0.20, 0.18],
+            "Domestic": [0.12, 0.13, 0.14, 0.16, 0.20, 0.22, 0.23, 0.25, 0.27, 0.24, 0.20, 0.18]
         }
         df = pd.DataFrame({"month": list(range(1, 13))})
         for route, values in climate_base.items():
@@ -354,97 +470,78 @@ class DataService:
     @staticmethod
     @st.cache_data
     def get_company_data() -> pd.DataFrame:
-        """Thông số cơ bản của từng công ty bảo hiểm."""
         return (
-            pd.DataFrame(
-                {
-                    "Company": ["Chubb", "PVI", "BaoViet", "BaoMinh", "MIC"],
-                    "C1: Tỷ lệ phí": [0.42, 0.36, 0.40, 0.38, 0.34],
-                    "C2: Thời gian xử lý": [12, 10, 15, 14, 11],
-                    "C3: Tỷ lệ tổn thất": [0.07, 0.09, 0.11, 0.10, 0.08],
-                    "C4: Hỗ trợ ICC": [9, 8, 7, 8, 7],
-                    "C5: Chăm sóc KH": [9, 8, 7, 7, 6],
-                }
-            ).set_index("Company")
+            pd.DataFrame({
+                "Company": ["Chubb", "PVI", "BaoViet", "BaoMinh", "MIC"],
+                "C1: Tỷ lệ phí": [0.42, 0.36, 0.40, 0.38, 0.34],
+                "C2: Thời gian xử lý": [12, 10, 15, 14, 11],
+                "C3: Tỷ lệ tổn thất": [0.07, 0.09, 0.11, 0.10, 0.08],
+                "C4: Hỗ trợ ICC": [9, 8, 7, 8, 7],
+                "C5: Chăm sóc KH": [9, 8, 7, 7, 6],
+            })
+            .set_index("Company")
         )
 
 
 # =============================================================================
-# CORE ALGORITHMS — FUZZY AHP & MONTE CARLO
+# CORE ALGORITHMS
 # =============================================================================
 
 class FuzzyAHP:
-    """
-    Áp dụng Fuzzy AHP (tam giác) trên trọng số.
-    """
-
     @staticmethod
     def apply(weights: pd.Series, uncertainty_pct: float) -> pd.Series:
         factor = uncertainty_pct / 100.0
         w = weights.values
         low = np.maximum(w * (1 - factor), 1e-9)
         high = np.minimum(w * (1 + factor), 0.9999)
-        defuzzified = (low + w + high) / 3.0  # Centroid
+        defuzzified = (low + w + high) / 3.0
         normalized = defuzzified / defuzzified.sum()
         return pd.Series(normalized, index=weights.index)
 
 
 class MonteCarloSimulator:
-    """
-    Mô phỏng Monte Carlo cho rủi ro khí hậu (C6).
-    """
-
     @staticmethod
     @st.cache_data(ttl=600)
     def simulate(
         base_risk: float,
         sensitivity_map: Dict[str, float],
-        n_simulations: int,
+        n_simulations: int
     ) -> Tuple[List[str], np.ndarray, np.ndarray]:
         rng = np.random.default_rng(2025)
         companies = list(sensitivity_map.keys())
         mu = np.array([base_risk * sensitivity_map[c] for c in companies])
-        sigma = np.maximum(0.03, mu * 0.12)  # 12% CV
+        sigma = np.maximum(0.03, mu * 0.12)
         sims = rng.normal(loc=mu, scale=sigma, size=(n_simulations, len(companies)))
         sims = np.clip(sims, 0.0, 1.0)
         return companies, sims.mean(axis=0), sims.std(axis=0)
-# =============================================================================
-# CORE ALGORITHMS — TOPSIS, RISK METRICS, FORECAST
-# =============================================================================
+
 
 class TOPSISAnalyzer:
-    """Phân tích TOPSIS."""
-
     @staticmethod
     def analyze(
         data: pd.DataFrame,
         weights: pd.Series,
-        cost_benefit: Dict[str, CriterionType],
+        cost_benefit: Dict[str, CriterionType]
     ) -> np.ndarray:
         M = data[list(weights.index)].values.astype(float)
-        denom = np.sqrt((M**2).sum(axis=0))
+        denom = np.sqrt((M ** 2).sum(axis=0))
         denom[denom == 0] = 1.0
         R = M / denom
-
         V = R * weights.values
-
         is_cost = np.array([cost_benefit[c] == CriterionType.COST for c in weights.index])
         ideal_best = np.where(is_cost, V.min(axis=0), V.max(axis=0))
         ideal_worst = np.where(is_cost, V.max(axis=0), V.min(axis=0))
-
         d_plus = np.sqrt(((V - ideal_best) ** 2).sum(axis=1))
         d_minus = np.sqrt(((V - ideal_worst) ** 2).sum(axis=1))
         return d_minus / (d_plus + d_minus + 1e-12)
 
 
 class RiskCalculator:
-    """Tính toán VaR, CVaR & độ tin cậy."""
-
     @staticmethod
     def calculate_var_cvar(
         loss_rates: np.ndarray,
         cargo_value: float,
-        confidence: float = 0.95,
+        confidence: float = 0.95
     ) -> Tuple[float, float]:
         if len(loss_rates) == 0:
             return 0.0, 0.0
@@ -456,14 +553,12 @@ class RiskCalculator:
 
 
 class Forecaster:
-    """Dự báo rủi ro khí hậu 1 tháng tiếp theo."""
-
     @staticmethod
     def forecast(
         historical: pd.DataFrame,
         route: str,
         current_month: int,
-        use_arima: bool = True,
+        use_arima: bool = True
     ) -> Tuple[np.ndarray, np.ndarray]:
         if route not in historical.columns:
             route = historical.columns[1]
@@ -501,7 +596,6 @@ class Forecaster:
 # =============================================================================
 
 def build_fuzzy_table(weights: pd.Series, fuzzy_pct: float) -> pd.DataFrame:
-    """Tạo bảng Fuzzy: Low – Mid – High – Centroid cho từng tiêu chí."""
     rows = []
     factor = fuzzy_pct / 100.0
     for crit in weights.index:
@@ -510,12 +604,11 @@ def build_fuzzy_table(weights: pd.Series, fuzzy_pct: float) -> pd.DataFrame:
         high = min(w * (1 + factor), 1.0)
         centroid = (low + w + high) / 3.0
         rows.append([crit, round(low, 4), round(w, 4), round(high, 4), round(centroid, 4)])
-
-    return pd.DataFrame(rows, columns=["Tiêu chí", "Low", "Mid", "High", "Centroid"])
+    df = pd.DataFrame(rows, columns=["Tiêu chí", "Low", "Mid", "High", "Centroid"])
+    return df
 
 
 def most_uncertain_criterion(weights: pd.Series, fuzzy_pct: float) -> Tuple[str, Dict[str, float]]:
-    """Xác định tiêu chí có độ dao động mạnh nhất (High - Low lớn nhất)."""
     factor = fuzzy_pct / 100.0
     diff_map: Dict[str, float] = {}
     for crit in weights.index:
@@ -528,7 +621,6 @@ def most_uncertain_criterion(weights: pd.Series, fuzzy_pct: float) -> Tuple[str,
 
 
 def fuzzy_heatmap_premium(diff_map: Dict[str, float]) -> go.Figure:
-    """Heatmap Premium Green thể hiện mức dao động Fuzzy (High - Low)."""
     values = list(diff_map.values())
     labels = list(diff_map.keys())
 
@@ -542,23 +634,23 @@ def fuzzy_heatmap_premium(diff_map: Dict[str, float]) -> go.Figure:
             [0.2, "#006642"],
             [0.4, "#00AA66"],
             [0.6, "#00DD88"],
-            [1.0, "#00FFAA"],
-        ],
+            [1.0, "#00FFAA"]
+        ]
     )
 
     fig.update_layout(
         title=dict(
             text="<b>🌿 Heatmap mức dao động Fuzzy (Premium Green)</b>",
             font=dict(size=22, color="#CCFFE6"),
-            x=0.5,
+            x=0.5
         ),
         paper_bgcolor="#001a12",
         plot_bgcolor="#001a12",
         margin=dict(l=40, r=40, t=80, b=40),
         coloraxis_colorbar=dict(
             title="Dao động",
-            tickfont=dict(color="#CCFFE6"),
-        ),
+            tickfont=dict(color="#CCFFE6")
+        )
     )
     fig.update_xaxes(tickangle=-35)
     fig.update_yaxes(showticklabels=False)
@@ -566,7 +658,6 @@ def fuzzy_heatmap_premium(diff_map: Dict[str, float]) -> go.Figure:
 
 
 def fuzzy_chart_premium(weights: pd.Series, fuzzy_pct: float) -> go.Figure:
-    """Biểu đồ Fuzzy Premium: Low / Mid / High cho từng tiêu chí."""
     factor = fuzzy_pct / 100.0
     labels = list(weights.index)
     low_vals, mid_vals, high_vals = [], [], []
@@ -581,75 +672,61 @@ def fuzzy_chart_premium(weights: pd.Series, fuzzy_pct: float) -> go.Figure:
 
     fig = go.Figure()
 
-    fig.add_trace(
-        go.Scatter(
-            x=labels,
-            y=low_vals,
-            mode="lines+markers",
-            name="Low",
-            line=dict(width=2, color="#004d40", dash="dot"),
-            marker=dict(size=8),
-            hovertemplate="Tiêu chí: %{x}<br>Low: %{y:.2f}<extra></extra>",
-        )
-    )
+    fig.add_trace(go.Scatter(
+        x=labels, y=low_vals,
+        mode="lines+markers", name="Low",
+        line=dict(width=2, color="#004d40", dash="dot"),
+        marker=dict(size=8),
+        hovertemplate="Tiêu chí: %{x}<br>Low: %{y:.2f}<extra></extra>"
+    ))
 
-    fig.add_trace(
-        go.Scatter(
-            x=labels,
-            y=mid_vals,
-            mode="lines+markers",
-            name="Mid (gốc)",
-            line=dict(width=3, color="#00e676"),
-            marker=dict(size=9, symbol="diamond"),
-            hovertemplate="Tiêu chí: %{x}<br>Mid: %{y:.2f}<extra></extra>",
-        )
-    )
+    fig.add_trace(go.Scatter(
+        x=labels, y=mid_vals,
+        mode="lines+markers", name="Mid (gốc)",
+        line=dict(width=3, color="#00e676"),
+        marker=dict(size=9, symbol="diamond"),
+        hovertemplate="Tiêu chí: %{x}<br>Mid: %{y:.2f}<extra></extra>"
+    ))
 
-    fig.add_trace(
-        go.Scatter(
-            x=labels,
-            y=high_vals,
-            mode="lines+markers",
-            name="High",
-            line=dict(width=2, color="#69f0ae", dash="dash"),
-            marker=dict(size=8),
-            hovertemplate="Tiêu chí: %{x}<br>High: %{y:.2f}<extra></extra>",
-        )
-    )
+    fig.add_trace(go.Scatter(
+        x=labels, y=high_vals,
+        mode="lines+markers", name="High",
+        line=dict(width=2, color="#69f0ae", dash="dash"),
+        marker=dict(size=8),
+        hovertemplate="Tiêu chí: %{x}<br>High: %{y:.2f}<extra></extra>"
+    ))
 
     fig.update_layout(
         title=dict(
             text=f"<b>🌿 Fuzzy AHP — Low / Mid / High (±{fuzzy_pct:.0f}%)</b>",
             font=dict(size=22, color="#e6fff7"),
-            x=0.5,
+            x=0.5
         ),
         paper_bgcolor="#001a12",
         plot_bgcolor="#001a12",
         legend=dict(
             bgcolor="rgba(0,0,0,0.35)",
             bordercolor="#00e676",
-            borderwidth=1,
+            borderwidth=1
         ),
         margin=dict(l=40, r=40, t=80, b=80),
-        font=dict(size=13, color="#e6fff7"),
+        font=dict(size=13, color="#e6fff7")
     )
     fig.update_xaxes(showgrid=False, tickangle=-20)
     fig.update_yaxes(
         title="Trọng số",
         range=[0, max(0.4, max(high_vals) * 1.15)],
         showgrid=True,
-        gridcolor="#004d40",
+        gridcolor="#004d40"
     )
     return fig
+
+
 # =============================================================================
 # MULTI-PACKAGE ANALYZER
 # =============================================================================
 
 class MultiPackageAnalyzer:
-    """
-    Phân tích tất cả các phương án (Công ty × Gói ICC).
-    """
-
     def __init__(self):
         self.data_service = DataService()
         self.fuzzy_ahp = FuzzyAHP()
@@ -659,7 +736,6 @@ class MultiPackageAnalyzer:
         self.forecaster = Forecaster()
 
     def run_analysis(self, params: AnalysisParams, historical: pd.DataFrame) -> AnalysisResult:
-        # Lấy trọng số theo profile
         profile_weights = PRIORITY_PROFILES[params.priority]
         weights = pd.Series(profile_weights, index=CRITERIA)
 
@@ -668,13 +744,13 @@ class MultiPackageAnalyzer:
 
         company_data = self.data_service.get_company_data()
 
-        # Rủi ro khí hậu cơ bản theo tuyến & tháng
         if params.month in historical["month"].values:
-            base_risk = float(historical.loc[historical["month"] == params.month, params.route].iloc[0])
+            base_risk = float(
+                historical.loc[historical["month"] == params.month, params.route].iloc[0]
+            )
         else:
             base_risk = 0.4
 
-        # Monte Carlo cho C6
         if params.use_mc:
             companies, mc_mean, mc_std = self.mc_simulator.simulate(
                 base_risk, SENSITIVITY_MAP, params.mc_runs
@@ -685,7 +761,6 @@ class MultiPackageAnalyzer:
             mc_mean = np.zeros(len(company_data))
             mc_std = np.zeros(len(company_data))
 
-        # Tạo tất cả phương án (Company × ICC Package)
         all_options = []
         for company in company_data.index:
             for icc_name, icc_data in ICC_PACKAGES.items():
@@ -698,44 +773,32 @@ class MultiPackageAnalyzer:
                 idx = list(company_data.index).index(company)
                 option["C6: Rủi ro khí hậu"] = mc_mean[idx]
 
-                all_options.append(
-                    {
-                        "company": company,
-                        "icc_package": icc_name,
-                        "coverage": icc_data["coverage"],
-                        "premium_rate": option["C1: Tỷ lệ phí"],
-                        "estimated_cost": params.cargo_value * option["C1: Tỷ lệ phí"],
-                        "C1: Tỷ lệ phí": option["C1: Tỷ lệ phí"],
-                        "C2: Thời gian xử lý": option["C2: Thời gian xử lý"],
-                        "C3: Tỷ lệ tổn thất": option["C3: Tỷ lệ tổn thất"],
-                        "C4: Hỗ trợ ICC": option["C4: Hỗ trợ ICC"],
-                        "C5: Chăm sóc KH": option["C5: Chăm sóc KH"],
-                        "C6: Rủi ro khí hậu": option["C6: Rủi ro khí hậu"],
-                        "C6_std": mc_std[idx],
-                    }
-                )
+                all_options.append({
+                    "company": company,
+                    "icc_package": icc_name,
+                    "coverage": icc_data["coverage"],
+                    "premium_rate": option["C1: Tỷ lệ phí"],
+                    "estimated_cost": params.cargo_value * option["C1: Tỷ lệ phí"],
+                    "C1: Tỷ lệ phí": option["C1: Tỷ lệ phí"],
+                    "C2: Thời gian xử lý": option["C2: Thời gian xử lý"],
+                    "C3: Tỷ lệ tổn thất": option["C3: Tỷ lệ tổn thất"],
+                    "C4: Hỗ trợ ICC": option["C4: Hỗ trợ ICC"],
+                    "C5: Chăm sóc KH": option["C5: Chăm sóc KH"],
+                    "C6: Rủi ro khí hậu": option["C6: Rủi ro khí hậu"],
+                    "C6_std": mc_std[idx]
+                })
 
         data_adjusted = pd.DataFrame(all_options)
 
-        # Phụ phí nếu lô hàng lớn (>$50k)
         if params.cargo_value > 50_000:
             data_adjusted["C1: Tỷ lệ phí"] *= 1.1
             data_adjusted["estimated_cost"] *= 1.1
 
-        # Tính TOPSIS score
         scores = self.topsis.analyze(
-            data_adjusted[
-                [
-                    "C1: Tỷ lệ phí",
-                    "C2: Thời gian xử lý",
-                    "C3: Tỷ lệ tổn thất",
-                    "C4: Hỗ trợ ICC",
-                    "C5: Chăm sóc KH",
-                    "C6: Rủi ro khí hậu",
-                ]
-            ],
+            data_adjusted[["C1: Tỷ lệ phí", "C2: Thời gian xử lý", "C3: Tỷ lệ tổn thất",
+                           "C4: Hỗ trợ ICC", "C5: Chăm sóc KH", "C6: Rủi ro khí hậu"]],
             weights,
-            COST_BENEFIT_MAP,
+            COST_BENEFIT_MAP
         )
 
         data_adjusted["score"] = scores
@@ -754,21 +817,18 @@ class MultiPackageAnalyzer:
 
         data_adjusted["category"] = data_adjusted.apply(categorize_option, axis=1)
 
-        # Độ tin cậy
         eps = 1e-9
         cv_c6 = data_adjusted["C6_std"].values / (data_adjusted["C6_mean"].values + eps)
         conf = 1.0 / (1.0 + cv_c6)
         conf = 0.3 + 0.7 * (conf - conf.min()) / (np.ptp(conf) + eps)
         data_adjusted["confidence"] = conf
 
-        # VaR/CVaR
         var = cvar = None
         if params.use_var:
             var, cvar = self.risk_calc.calculate_var_cvar(
                 data_adjusted["C6_mean"].values, params.cargo_value
             )
 
-        # Forecast
         hist_series, forecast = self.forecaster.forecast(
             historical, params.route, params.month, use_arima=params.use_arima
         )
@@ -780,15 +840,15 @@ class MultiPackageAnalyzer:
             var=var,
             cvar=cvar,
             historical=hist_series,
-            forecast=forecast,
+            forecast=forecast
         )
+
+
 # =============================================================================
-# VISUALIZATION
+# CHART FACTORY
 # =============================================================================
 
 class ChartFactory:
-    """Tạo các biểu đồ Plotly."""
-
     @staticmethod
     def _apply_theme(fig: go.Figure, title: str) -> go.Figure:
         fig.update_layout(
@@ -796,7 +856,7 @@ class ChartFactory:
             title=dict(
                 text=f"<b>{title}</b>",
                 font=dict(size=22, color="#e6fff7"),
-                x=0.5,
+                x=0.5
             ),
             font=dict(size=15, color="#e6fff7"),
             plot_bgcolor="#001016",
@@ -805,85 +865,89 @@ class ChartFactory:
             legend=dict(
                 bgcolor="rgba(0,0,0,0.3)",
                 bordercolor="#00e676",
-                borderwidth=1,
-            ),
+                borderwidth=1
+            )
         )
         fig.update_xaxes(
             showgrid=True,
             gridcolor="#00332b",
-            tickfont=dict(size=14, color="#e6fff7"),
+            tickfont=dict(size=14, color="#e6fff7")
         )
         fig.update_yaxes(
             showgrid=True,
             gridcolor="#00332b",
-            tickfont=dict(size=14, color="#e6fff7"),
+            tickfont=dict(size=14, color="#e6fff7")
         )
         return fig
 
     @staticmethod
     def create_weights_pie(weights: pd.Series, title: str) -> go.Figure:
-        colors = ["#00e676", "#69f0ae", "#b9f6ca", "#00bfa5", "#1de9b6", "#64ffda"]
+        colors = ['#00e676', '#69f0ae', '#b9f6ca', '#00bfa5', '#1de9b6', '#64ffda']
         labels_full = list(weights.index)
-        labels_short = [c.split(":")[0] for c in labels_full]
+        labels_short = [c.split(':')[0] for c in labels_full]
 
-        fig = go.Figure(
-            data=[
-                go.Pie(
-                    labels=labels_full,
-                    values=weights.values,
-                    text=labels_short,
-                    textinfo="text+percent",
-                    textposition="inside",
-                    hole=0.18,
-                    marker=dict(colors=colors, line=dict(color="#00130d", width=2)),
-                    pull=[0.04] * len(weights),
-                    hovertemplate="<b>%{label}</b><br>Tỉ trọng: %{percent}<extra></extra>",
-                )
-            ]
-        )
+        fig = go.Figure(data=[go.Pie(
+            labels=labels_full,
+            values=weights.values,
+            text=labels_short,
+            textinfo='text+percent',
+            textposition='inside',
+            hole=0.18,
+            marker=dict(colors=colors, line=dict(color='#00130d', width=2)),
+            pull=[0.04] * len(weights),
+            hovertemplate="<b>%{label}</b><br>Tỉ trọng: %{percent}<extra></extra>"
+        )])
 
         fig.update_layout(
             title=dict(
                 text=f"<b>{title}</b>",
                 font=dict(size=20, color="#a5ffdc"),
                 x=0.5,
-                y=0.98,
+                y=0.98
             ),
             showlegend=True,
-            legend=dict(title="<b>Các tiêu chí</b>", font=dict(size=13, color="#e6fff7")),
+            legend=dict(
+                title="<b>Các tiêu chí</b>",
+                font=dict(size=13, color="#e6fff7")
+            ),
             paper_bgcolor="#001016",
             plot_bgcolor="#001016",
             margin=dict(l=0, r=0, t=80, b=0),
-            height=480,
+            height=480
         )
         return fig
 
     @staticmethod
     def create_cost_benefit_scatter(results: pd.DataFrame) -> go.Figure:
-        """Biểu đồ scatter: Chi phí vs Điểm số (màu theo gói ICC)."""
-        color_map = {"ICC A": "#ff6b6b", "ICC B": "#ffd93d", "ICC C": "#6bcf7f"}
+        color_map = {
+            "ICC A": "#ff6b6b",
+            "ICC B": "#ffd93d",
+            "ICC C": "#6bcf7f"
+        }
 
         fig = go.Figure()
 
         for icc in ["ICC C", "ICC B", "ICC A"]:
             df_icc = results[results["icc_package"] == icc]
-            fig.add_trace(
-                go.Scatter(
-                    x=df_icc["estimated_cost"],
-                    y=df_icc["score"],
-                    mode="markers+text",
-                    name=icc,
-                    text=df_icc["company"],
-                    textposition="top center",
-                    marker=dict(size=15, color=color_map[icc], line=dict(width=2, color="#000")),
-                    hovertemplate=(
-                        "<b>%{text}</b><br>"
-                        f"Gói: {icc}<br>"
-                        "Chi phí: $%{x:,.0f}<br>"
-                        "Điểm: %{y:.3f}<extra></extra>"
-                    ),
+            fig.add_trace(go.Scatter(
+                x=df_icc["estimated_cost"],
+                y=df_icc["score"],
+                mode="markers+text",
+                name=icc,
+                text=df_icc["company"],
+                textposition="top center",
+                marker=dict(
+                    size=15,
+                    color=color_map[icc],
+                    line=dict(width=2, color="#000")
+                ),
+                hovertemplate=(
+                    "<b>%{text}</b><br>" +
+                    f"Gói: {icc}<br>" +
+                    "Chi phí: $%{x:,.0f}<br>" +
+                    "Điểm: %{y:.3f}<extra></extra>"
                 )
-            )
+            ))
 
         fig.update_xaxes(title="<b>Chi phí ước tính ($)</b>")
         fig.update_yaxes(title="<b>Điểm TOPSIS</b>", range=[0, 1])
@@ -891,8 +955,86 @@ class ChartFactory:
         return ChartFactory._apply_theme(fig, "💰 Chi phí vs Chất lượng (Cost-Benefit Analysis)")
 
     @staticmethod
+    def create_top_recommendations_bar(results: pd.DataFrame) -> go.Figure:
+        df = results.head(5).copy()
+        df["label"] = df["company"] + " - " + df["icc_package"]
+
+        fig = go.Figure(data=[go.Bar(
+            x=df["score"],
+            y=df["label"],
+            orientation="h",
+            text=[f"{v:.3f}" for v in df["score"]],
+            textposition="outside",
+            marker=dict(
+                color=df["score"],
+                colorscale=[[0, '#69f0ae'], [0.5, '#00e676'], [1, '#00c853']],
+                line=dict(color='#00130d', width=1)
+            ),
+            hovertemplate="<b>%{y}</b><br>Score: %{x:.3f}<br>Chi phí: $%{customdata:,.0f}<extra></extra>",
+            customdata=df["estimated_cost"]
+        )])
+
+        fig.update_xaxes(title="<b>Điểm TOPSIS</b>", range=[0, 1])
+        fig.update_yaxes(title="<b>Phương án</b>")
+
+        return ChartFactory._apply_theme(fig, "🏆 Top 5 Phương án Tốt nhất")
+
+    @staticmethod
+    def create_forecast_chart(
+        historical: np.ndarray,
+        forecast: np.ndarray,
+        route: str,
+        selected_month: int
+    ) -> go.Figure:
+        hist_len = len(historical)
+        months_hist = list(range(1, hist_len + 1))
+        next_month = selected_month % 12 + 1
+        months_fc = [next_month]
+
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatter(
+            x=months_hist,
+            y=historical,
+            mode="lines+markers",
+            name="📈 Lịch sử",
+            line=dict(color="#00e676", width=3),
+            marker=dict(size=9),
+            hovertemplate="Tháng %{x}<br>Rủi ro: %{y:.1%}<extra></extra>"
+        ))
+
+        fig.add_trace(go.Scatter(
+            x=months_fc,
+            y=forecast,
+            mode="lines+markers",
+            name="🔮 Dự báo",
+            line=dict(color="#ffeb3b", width=3, dash="dash"),
+            marker=dict(size=11, symbol="diamond"),
+            hovertemplate="Tháng %{x}<br>Dự báo: %{y:.1%}<extra></extra>"
+        ))
+
+        fig = ChartFactory._apply_theme(fig, f"Dự báo rủi ro khí hậu — {route}")
+
+        fig.update_xaxes(
+            title="<b>Tháng</b>",
+            tickmode="linear",
+            tick0=1,
+            dtick=1,
+            range=[1, 12],
+            tickvals=list(range(1, 13))
+        )
+
+        max_val = max(float(historical.max()), float(forecast.max()))
+        fig.update_yaxes(
+            title="<b>Mức rủi ro (0–1)</b>",
+            range=[0, max(1.0, max_val * 1.15)],
+            tickformat=".0%"
+        )
+
+        return fig
+
+    @staticmethod
     def create_category_comparison(results: pd.DataFrame) -> go.Figure:
-        """So sánh 3 loại phương án: Tiết kiệm / Cân bằng / An toàn."""
         categories = ["💰 Tiết kiệm", "⚖️ Cân bằng", "🛡️ An toàn"]
         avg_scores = []
         avg_costs = []
@@ -908,110 +1050,52 @@ class ChartFactory:
 
         fig = go.Figure()
 
-        fig.add_trace(
-            go.Bar(
-                name="Điểm trung bình",
-                x=categories,
-                y=avg_scores,
-                marker=dict(color="#00e676"),
-                yaxis="y",
-                hovertemplate="<b>%{x}</b><br>Điểm TB: %{y:.3f}<extra></extra>",
-            )
-        )
+        fig.add_trace(go.Bar(
+            name="Điểm trung bình",
+            x=categories,
+            y=avg_scores,
+            marker=dict(color='#00e676'),
+            yaxis="y",
+            hovertemplate="<b>%{x}</b><br>Điểm TB: %{y:.3f}<extra></extra>"
+        ))
 
-        fig.add_trace(
-            go.Scatter(
-                name="Chi phí trung bình",
-                x=categories,
-                y=avg_costs,
-                mode="lines+markers",
-                marker=dict(size=12, color="#ffeb3b"),
-                line=dict(width=3, color="#ffeb3b"),
-                yaxis="y2",
-                hovertemplate="<b>%{x}</b><br>Chi phí TB: $%{y:,.0f}<extra></extra>",
-            )
-        )
+        fig.add_trace(go.Scatter(
+            name="Chi phí trung bình",
+            x=categories,
+            y=avg_costs,
+            mode="lines+markers",
+            marker=dict(size=10, color='#ffeb3b'),
+            line=dict(width=3, color='#ffeb3b'),
+            yaxis="y2",
+            hovertemplate="<b>%{x}</b><br>Chi phí TB: $%{y:,.0f}<extra></extra>"
+        ))
 
         fig.update_layout(
             title=dict(
                 text="<b>📊 So sánh 3 loại phương án</b>",
                 font=dict(size=22, color="#e6fff7"),
-                x=0.5,
+                x=0.5
             ),
             yaxis=dict(
                 title=dict(text="<b>Điểm TOPSIS</b>", font=dict(color="#00e676")),
                 range=[0, 1],
-                tickfont=dict(color="#00e676"),
+                tickfont=dict(color="#00e676")
             ),
             yaxis2=dict(
                 title=dict(text="<b>Chi phí ($)</b>", font=dict(color="#ffeb3b")),
                 overlaying="y",
                 side="right",
-                tickfont=dict(color="#ffeb3b"),
+                tickfont=dict(color="#ffeb3b")
             ),
             paper_bgcolor="#000c11",
             plot_bgcolor="#001016",
             font=dict(color="#e6fff7"),
-            legend=dict(bgcolor="rgba(0,0,0,0.3)", bordercolor="#00e676", borderwidth=1),
-        )
-
-        return fig
-
-    @staticmethod
-    def create_forecast_chart(
-        historical: np.ndarray,
-        forecast: np.ndarray,
-        route: str,
-        selected_month: int,
-    ) -> go.Figure:
-        """Dự báo rủi ro khí hậu."""
-        hist_len = len(historical)
-        months_hist = list(range(1, hist_len + 1))
-        next_month = selected_month % 12 + 1
-        months_fc = [next_month]
-
-        fig = go.Figure()
-
-        fig.add_trace(
-            go.Scatter(
-                x=months_hist,
-                y=historical,
-                mode="lines+markers",
-                name="📈 Lịch sử",
-                line=dict(color="#00e676", width=3),
-                marker=dict(size=9),
-                hovertemplate="Tháng %{x}<br>Rủi ro: %{y:.1%}<extra></extra>",
-            )
-        )
-
-        fig.add_trace(
-            go.Scatter(
-                x=months_fc,
-                y=forecast,
-                mode="lines+markers",
-                name="🔮 Dự báo",
-                line=dict(color="#ffeb3b", width=3, dash="dash"),
-                marker=dict(size=11, symbol="diamond"),
-                hovertemplate="Tháng %{x}<br>Dự báo: %{y:.1%}<extra></extra>",
-            )
-        )
-
-        fig = ChartFactory._apply_theme(fig, f"Dự báo rủi ro khí hậu — {route}")
-
-        fig.update_xaxes(
-            title="<b>Tháng</b>",
-            tickmode="linear",
-            tick0=1,
-            dtick=1,
-            range=[1, 12],
-            tickvals=list(range(1, 13)),
-        )
-
-        max_val = max(float(historical.max()), float(forecast.max()))
-        fig.update_yaxes(
-            title="<b>Mức rủi ro (0–1)</b>",
-            range=[0, max(1.0, max_val * 1.15)],
-            tickformat=".0%",
+            legend=dict(
+                bgcolor="rgba(0,0,0,0.3)",
+                bordercolor="#00e676",
+                borderwidth=1
+            ),
+            margin=dict(l=60, r=60, t=80, b=60)
         )
 
         return fig
@@ -1022,14 +1106,12 @@ class ChartFactory:
 # =============================================================================
 
 class ReportGenerator:
-    """Xuất Excel & PDF."""
-
     @staticmethod
     def generate_pdf(
         results: pd.DataFrame,
         params: AnalysisParams,
         var: Optional[float],
-        cvar: Optional[float],
+        cvar: Optional[float]
     ) -> bytes:
         try:
             pdf = FPDF()
@@ -1083,14 +1165,15 @@ class ReportGenerator:
     def generate_excel(results: pd.DataFrame, weights: pd.Series) -> bytes:
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-            results[
-                ["rank", "company", "icc_package", "estimated_cost", "score", "confidence", "category"]
-            ].to_excel(writer, sheet_name="Results", index=False)
+            results[["rank", "company", "icc_package", "estimated_cost", "score",
+                     "confidence", "category"]].to_excel(writer, sheet_name="Results", index=False)
             pd.DataFrame({"weight": weights.values}, index=weights.index).to_excel(
                 writer, sheet_name="Weights"
             )
         buffer.seek(0)
         return buffer.getvalue()
+
+
 # =============================================================================
 # STREAMLIT UI
 # =============================================================================
@@ -1102,12 +1185,31 @@ class StreamlitUI:
         self.report_gen = ReportGenerator()
 
     def initialize(self):
-        st.set_page_config(
-            page_title="RISKCAST v5.3 — Multi-Package Analysis",
-            page_icon="🛡️",
-            layout="wide",
+        app_config()
+        apply_enterprise_css()
+
+    def render_header(self):
+        st.markdown(
+            """
+            <div class="rc-header">
+                <div class="rc-header-left">
+                    <div class="rc-logo">RC</div>
+                    <div>
+                        <div class="rc-title">RISKCAST v5.3 — MULTI-PACKAGE ANALYSIS</div>
+                        <div class="rc-subtitle">
+                            15 phương án (5 Công ty × 3 Gói ICC) · 
+                            <span class="rc-tooltip" data-tip="Hệ thống tự điều chỉnh trọng số theo mục tiêu (Tiết kiệm / Cân bằng / An toàn)">Profile-based recommendation</span> ·
+                            <span class="rc-tooltip" data-tip="TOPSIS + Monte Carlo + VaR/CVaR + Fuzzy AHP">Hybrid ESG Risk Engine</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="rc-badge">
+                    🎯 Smart ESG Risk &amp; Insurance Decision
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
         )
-        apply_custom_css()
 
     def render_sidebar(self) -> AnalysisParams:
         with st.sidebar:
@@ -1116,11 +1218,11 @@ class StreamlitUI:
             cargo_value = st.number_input("Giá trị (USD)", 1000, value=39_000, step=1_000)
             good_type = st.selectbox(
                 "Loại hàng",
-                ["Điện tử", "Đông lạnh", "Hàng khô", "Nguy hiểm", "Khác"],
+                ["Điện tử", "Đông lạnh", "Hàng khô", "Nguy hiểm", "Khác"]
             )
             route = st.selectbox(
                 "Tuyến vận chuyển",
-                ["VN - EU", "VN - US", "VN - Singapore", "VN - China", "Domestic"],
+                ["VN - EU", "VN - US", "VN - Singapore", "VN - China", "Domestic"]
             )
             method = st.selectbox("Phương thức", ["Sea", "Air", "Truck"])
             month = st.selectbox("Tháng", list(range(1, 13)), index=8)
@@ -1130,38 +1232,57 @@ class StreamlitUI:
             priority = st.selectbox(
                 "Chọn mục tiêu ưu tiên",
                 list(PRIORITY_PROFILES.keys()),
-                help="Hệ thống sẽ tự động điều chỉnh trọng số theo mục tiêu bạn chọn",
+                help="Hệ thống sẽ tự động điều chỉnh trọng số theo mục tiêu bạn chọn"
             )
 
             st.markdown("---")
             st.header("⚙️ Cấu hình mô hình")
 
-            use_fuzzy = st.checkbox("Bật Fuzzy AHP", True)
-            use_arima = st.checkbox("Dùng ARIMA dự báo", True)
-            use_mc = st.checkbox("Monte Carlo (C6)", True)
-            use_var = st.checkbox("Tính VaR/CVaR", True)
+            use_fuzzy = st.checkbox("Bật Fuzzy AHP", True,
+                                    help="Xử lý bất định trong đánh giá chuyên gia bằng tam giác mờ")
+            use_arima = st.checkbox("Dùng ARIMA dự báo", True,
+                                    help="Dùng ARIMA(1,1,1) để dự báo rủi ro khí hậu tháng kế tiếp")
+            use_mc = st.checkbox("Monte Carlo (C6)", True,
+                                 help="Mô phỏng nhiều kịch bản rủi ro khí hậu để lấy mean & std")
+            use_var = st.checkbox("Tính VaR/CVaR", True,
+                                  help="Đo lường tổn thất tối đa & tổn thất trung bình trong tail")
 
             mc_runs = st.number_input("Số lần Monte Carlo", 500, 10_000, 2_000, 500)
-            fuzzy_uncertainty = (
-                st.slider("Mức bất định Fuzzy (%)", 0, 50, 15) if use_fuzzy else 15
-            )
+            fuzzy_uncertainty = st.slider("Mức bất định Fuzzy (%)", 0, 50, 15) if use_fuzzy else 15
 
             return AnalysisParams(
-                cargo_value,
-                good_type,
-                route,
-                method,
-                month,
-                priority,
-                use_fuzzy,
-                use_arima,
-                use_mc,
-                use_var,
-                mc_runs,
-                fuzzy_uncertainty,
+                cargo_value, good_type, route, method, month, priority,
+                use_fuzzy, use_arima, use_mc, use_var, mc_runs, fuzzy_uncertainty
             )
 
-    # =============================== DISPLAY RESULTS ===========================
+    def display_profile_explanation(self, params: AnalysisParams):
+        st.markdown('<div class="rc-card">', unsafe_allow_html=True)
+        st.subheader(f"📌 Đã chọn mục tiêu: {params.priority}")
+
+        profile_weights = PRIORITY_PROFILES[params.priority]
+        st.markdown(
+            f"""
+            <div class="explanation-box">
+                <h4>⚙️ Trọng số tự động theo mục tiêu</h4>
+                <ul>
+                    <li><b>C1 (Chi phí):</b> {profile_weights['C1: Tỷ lệ phí']:.0%}</li>
+                    <li><b>C2 (Thời gian xử lý):</b> {profile_weights['C2: Thời gian xử lý']:.0%}</li>
+                    <li><b>C3 (Tỷ lệ tổn thất):</b> {profile_weights['C3: Tỷ lệ tổn thất']:.0%}</li>
+                    <li><b>C4 (Hỗ trợ ICC):</b> {profile_weights['C4: Hỗ trợ ICC']:.0%}</li>
+                    <li><b>C5 (Chăm sóc KH):</b> {profile_weights['C5: Chăm sóc KH']:.0%}</li>
+                    <li><b>C6 (Rủi ro khí hậu):</b> {profile_weights['C6: Rủi ro khí hậu']:.0%}</li>
+                </ul>
+                <p>
+                    <b>💡 Gợi ý dùng trong báo cáo NCKH:</b><br>
+                    Trình bày rằng hệ thống áp dụng <span class="rc-tooltip" 
+                    data-tip="Trọng số được xác định trước theo hành vi ra quyết định điển hình của nhà xuất nhập khẩu">
+                    hồ sơ ưu tiên (priority profile)</span> để phản ánh mục tiêu thực tế của doanh nghiệp.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
 
     def display_results(self, result: AnalysisResult, params: AnalysisParams):
         st.success("✅ Đã phân tích xong 15 phương án (5 công ty × 3 gói ICC)")
@@ -1173,12 +1294,16 @@ class StreamlitUI:
                 🏆 <b>GỢI Ý TỐT NHẤT CHO MỤC TIÊU: {params.priority}</b><br><br>
                 <span style="font-size:1.6rem;">{top['company']} - {top['icc_package']}</span><br><br>
                 💰 Chi phí: <b>${top['estimated_cost']:,.0f}</b> ({top['premium_rate']:.2%} giá trị hàng)<br>
-                📊 Điểm TOPSIS: <b>{top['score']:.3f}</b> |
+                📊 Điểm TOPSIS 
+                    <span class="rc-tooltip" data-tip="TOPSIS đo mức độ gần với phương án lý tưởng (ideal best) và xa phương án tệ nhất (ideal worst). Điểm càng cao càng tốt.">
+                        (giải thích)
+                    </span>: <b>{top['score']:.3f}</b> | 
                 🎯 Độ tin cậy: <b>{top['confidence']:.2f}</b><br>
-                📦 Loại: <b>{top['category']}</b>
+                📦 Loại gợi ý: <b>{top['category']}</b><br>
+                📜 Gói ICC: <b>{ICC_PACKAGES[top['icc_package']]['description']}</b>
             </div>
             """,
-            unsafe_allow_html=True,
+            unsafe_allow_html=True
         )
 
         st.markdown("---")
@@ -1189,68 +1314,93 @@ class StreamlitUI:
             <div class="explanation-box">
                 <h4>🎯 Vì sao <b>{top['company']} - {top['icc_package']}</b> được khuyến nghị?</h4>
                 <ul>
-                    <li><b>Điểm TOPSIS cao nhất:</b> {top['score']:.3f} - Cân bằng tốt nhất giữa chi phí và bảo vệ.</li>
-                    <li><b>Phù hợp với mục tiêu:</b> {params.priority} - Trọng số đã điều chỉnh theo ưu tiên của bạn.</li>
-                    <li><b>Chi phí ước tính:</b> ${top['estimated_cost']:,.0f} ({top['premium_rate']:.2%} giá trị hàng).</li>
-                    <li><b>Độ tin cậy:</b> {top['confidence']:.2f} - Dựa trên biến động rủi ro khí hậu (Monte Carlo).</li>
-                    <li><b>Mức bảo vệ:</b> {ICC_PACKAGES[top['icc_package']]['description']}</li>
+                    <li><b>Điểm TOPSIS cao nhất:</b> {top['score']:.3f} (gần phương án lý tưởng nhất).</li>
+                    <li><b>Cân bằng theo mục tiêu:</b> {params.priority} 
+                        – trọng số được điều chỉnh để ưu tiên mục tiêu này.</li>
+                    <li><b>Chi phí &amp; bảo vệ:</b> ${top['estimated_cost']:,.0f} với mức bảo vệ 
+                        "<i>{ICC_PACKAGES[top['icc_package']]['description']}</i>".</li>
+                    <li><b>Độ tin cậy mô hình:</b> {top['confidence']:.2f} 
+                        – dựa trên độ biến động rủi ro khí hậu (Monte Carlo).</li>
                 </ul>
+                <p>
+                    <b>📌 Gợi ý viết NCKH:</b> có thể mô tả đây là 
+                    <span class="rc-tooltip" data-tip="Kết quả tích hợp giữa mô hình MC, TOPSIS, VaR/CVaR, Fuzzy AHP và bộ trọng số theo hồ sơ ưu tiên.">
+                        phương án tối ưu đa tiêu chí
+                    </span> phù hợp khẩu vị rủi ro và ngân sách của doanh nghiệp.
+                </p>
             </div>
             """,
-            unsafe_allow_html=True,
+            unsafe_allow_html=True
         )
 
-        # Top 3 metrics
-        st.markdown(
-            """
-            <div class="explanation-box">
-                <h4>🥇 So sánh Top 3 phương án (tóm tắt):</h4>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        # Top 3 Premium Cards
+        st.markdown("## 🏅 Top 3 phương án (Premium View)")
 
         cols = st.columns(3)
         top3 = result.results.head(3)
         medals = ["🥇", "🥈", "🥉"]
-        for idx, col in enumerate(cols):
-            if idx < len(top3):
-                row = top3.iloc[idx]
-                with col:
-                    st.metric(
-                        f"{medals[idx]} #{idx+1}: {row['company']}",
-                        row["icc_package"],
-                        f"${row['estimated_cost']:,.0f}",
-                    )
-                    st.caption(f"Điểm: {row['score']:.3f} | {row['category']}")
-                    st.caption(f"Tin cậy: {row['confidence']:.2f}")
 
-        # Bảng 15 phương án
+        for i, col in enumerate(cols):
+            if i >= len(top3):
+                continue
+            r = top3.iloc[i]
+            card_class = "top3-card"
+            title_class = "top3-title"
+            if i == 0:
+                card_class += " top1-card"
+                title_class = "top1-title"
+
+            with col:
+                st.markdown(
+                    f"""
+                    <div class="{card_class}">
+                        <div class="{title_class}">{medals[i]} #{i+1}: {r['company']}</div>
+                        <div class="top3-sub">
+                            <span class="badge-icc">{r['icc_package']}</span>
+                            <div class="pill-badge">{r['category']}</div>
+                        </div>
+                        <div class="top3-sub" style="color:#7CFFA1; font-size:0.98rem;">
+                            💰 Chi phí: <b>${r['estimated_cost']:,.0f}</b>
+                        </div>
+                        <div class="top3-sub">
+                            📊 Điểm TOPSIS: <b>{r['score']:.3f}</b>
+                        </div>
+                        <div class="top3-sub">
+                            🎯 Tin cậy mô hình: <b>{r['confidence']:.2f}</b>
+                        </div>
+                        <div class="top3-sub">
+                            🌪 Rủi ro khí hậu (mean ± std): 
+                            <b>{r['C6_mean']:.2%} ± {r['C6_std']:.2%}</b>
+                        </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+        # Table 15 options
         st.markdown("---")
-        st.subheader("📋 Bảng so sánh 15 phương án")
+        st.subheader("📋 Bảng so sánh 15 phương án (đầy đủ)")
 
-        df_display = result.results[
-            ["rank", "company", "icc_package", "category", "estimated_cost", "score", "confidence"]
-        ].copy()
+        df_display = result.results[["rank", "company", "icc_package", "category",
+                                     "estimated_cost", "score", "confidence"]].copy()
         df_display.columns = ["Hạng", "Công ty", "Gói ICC", "Loại", "Chi phí", "Điểm", "Tin cậy"]
         df_display["Chi phí"] = df_display["Chi phí"].apply(lambda x: f"${x:,.0f}")
         df_display = df_display.set_index("Hạng")
 
         st.dataframe(df_display, use_container_width=True)
 
-        # Giải thích loại phương án
         st.markdown(
-            f"""
+            """
             <div class="explanation-box">
-                <h4>💡 Giải thích 3 loại phương án:</h4>
+                <h4>💡 Giải thích 3 loại phương án</h4>
                 <ul>
-                    <li><b>💰 Tiết kiệm (ICC C):</b> {ICC_PACKAGES['ICC C']['description']} – Phù hợp hàng giá trị thấp, tuyến ngắn.</li>
-                    <li><b>⚖️ Cân bằng (ICC B):</b> {ICC_PACKAGES['ICC B']['description']} – Lựa chọn chuẩn cho đa số lô hàng.</li>
-                    <li><b>🛡️ An toàn (ICC A):</b> {ICC_PACKAGES['ICC A']['description']} – Dành cho hàng giá trị cao, tuyến xa, rủi ro lớn.</li>
+                    <li><b>💰 Tiết kiệm (ICC C):</b> phí thấp nhất, bảo vệ cơ bản – phù hợp hàng giá trị thấp, tuyến ngắn.</li>
+                    <li><b>⚖️ Cân bằng (ICC B):</b> phí trung bình, bảo vệ vừa – phù hợp đa số lô hàng thông thường.</li>
+                    <li><b>🛡️ An toàn (ICC A):</b> phí cao nhất, bảo vệ toàn diện – phù hợp hàng giá trị cao, tuyến rủi ro lớn.</li>
                 </ul>
             </div>
             """,
-            unsafe_allow_html=True,
+            unsafe_allow_html=True
         )
 
         # VaR/CVaR
@@ -1259,131 +1409,83 @@ class StreamlitUI:
             st.markdown(
                 f"""
                 <div class="explanation-box">
-                    <h4>⚠️ Đánh giá rủi ro tài chính (VaR/CVaR):</h4>
+                    <h4>⚠️ Đánh giá rủi ro tài chính 
+                        <span class="rc-tooltip" data-tip="VaR: tổn thất tối đa với mức tin cậy 95%. CVaR: tổn thất trung bình trong 5% trường hợp xấu nhất.">
+                            (VaR / CVaR)
+                        </span>
+                    </h4>
                     <ul>
-                        <li><b>VaR 95%:</b> ${result.var:,.0f} (~{risk_pct:.1f}% giá trị hàng).</li>
-                        <li><b>CVaR 95%:</b> ${result.cvar:,.0f} – Tổn thất trung bình trong 5% kịch bản xấu nhất.</li>
-                        <li><b>Nhận định:</b> {"✅ Rủi ro ở mức chấp nhận được." if risk_pct < 10 else "⚠️ Rủi ro cao, cần cân nhắc tăng mức bảo vệ."}</li>
+                        <li><b>VaR 95%:</b> ${result.var:,.0f} ({risk_pct:.1f}% giá trị hàng).</li>
+                        <li><b>CVaR 95%:</b> ${result.cvar:,.0f} – tổn thất trung bình trong vùng tail.</li>
+                        <li><b>Nhận định:</b> {'✅ Rủi ro ở mức chấp nhận được.' if risk_pct < 10 else '⚠️ Rủi ro khá cao, nên tăng mức bảo hiểm.'}</li>
                     </ul>
                 </div>
                 """,
-                unsafe_allow_html=True,
+                unsafe_allow_html=True
             )
 
-        # ======================= CHARTS TEMPLATE ENTERPRISE =====================
+        # Charts section
         st.markdown("---")
-        st.markdown(
-            """
-            <h2 style="color:#d9fff2; font-weight:900; margin-bottom:0.5rem;">
-                📊 Biểu đồ phân tích · Analytics Overview
-            </h2>
-            """,
-            unsafe_allow_html=True,
-        )
+        st.subheader("📊 Biểu đồ phân tích")
 
-        # Row 1: Cost-Benefit & Category Comparison
-        col1, col2 = st.columns([1, 1], gap="large")
-        with col1:
-            st.markdown('<div class="rc-card">', unsafe_allow_html=True)
-            st.markdown("#### 💰 Chi phí – Chất lượng (Cost–Benefit)", unsafe_allow_html=True)
+        col_scatter, col_cat = st.columns(2)
+        with col_scatter:
+            st.markdown("#### 📉 Chi phí – Chất lượng (Cost–Benefit)")
             fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
             st.plotly_chart(fig_scatter, use_container_width=True)
-            st.markdown("</div>", unsafe_allow_html=True)
 
-        with col2:
-            st.markdown('<div class="rc-card">', unsafe_allow_html=True)
-            st.markdown("#### 📊 So sánh 3 loại phương án", unsafe_allow_html=True)
-            fig_cat = self.chart_factory.create_category_comparison(result.results)
-            st.plotly_chart(fig_cat, use_container_width=True)
-            st.markdown("</div>", unsafe_allow_html=True)
+        with col_cat:
+            st.markdown("#### 📊 So sánh 3 loại phương án")
+            fig_category = self.chart_factory.create_category_comparison(result.results)
+            st.plotly_chart(fig_category, use_container_width=True)
 
-        # Row 2: Weights Pie & Forecast
-        col3, col4 = st.columns([1, 1], gap="large")
-        with col3:
-            st.markdown('<div class="rc-card">', unsafe_allow_html=True)
-            st.markdown(
-                """
-                <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <h4 style="margin:0;">🍀 Trọng số tiêu chí (sau khi áp dụng)</h4>
-                    <span class="rc-info-badge"><span class="icon">ⓘ</span>Fuzzy AHP + Profile</span>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+        st.markdown("#### 🏆 Top 5 phương án tốt nhất")
+        fig_top5 = self.chart_factory.create_top_recommendations_bar(result.results)
+        st.plotly_chart(fig_top5, use_container_width=True)
+
+        # Weights + VaR metrics
+        st.markdown("---")
+        col_w1, col_w2 = st.columns(2)
+
+        with col_w1:
             fig_weights = self.chart_factory.create_weights_pie(
-                result.weights, f"Trọng số tiêu chí ({params.priority})"
+                result.weights,
+                "Trọng số tiêu chí (sau khi áp dụng Fuzzy AHP)" if params.use_fuzzy else "Trọng số tiêu chí"
             )
             st.plotly_chart(fig_weights, use_container_width=True)
-            st.markdown("</div>", unsafe_allow_html=True)
 
-        with col4:
-            st.markdown('<div class="rc-card">', unsafe_allow_html=True)
-            st.markdown(
-                """
-                <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <h4 style="margin:0;">🌤️ Dự báo rủi ro khí hậu theo tháng</h4>
-                    <span class="rc-info-badge"><span class="icon">ⓘ</span>ARIMA / Linear trend</span>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+        with col_w2:
+            st.markdown("#### 📉 Dự báo rủi ro khí hậu theo tháng")
             fig_forecast = self.chart_factory.create_forecast_chart(
                 result.historical, result.forecast, params.route, params.month
             )
             st.plotly_chart(fig_forecast, use_container_width=True)
-            st.markdown("</div>", unsafe_allow_html=True)
 
-        # Row 3: VaR / CVaR / Risk ratio KPIs
-        if result.var is not None and result.cvar is not None:
-            var_value = result.var
-            cvar_value = result.cvar
-            risk_ratio = result.var / params.cargo_value if params.cargo_value > 0 else 0.0
+            if result.var is not None and result.cvar is not None:
+                st.metric("💰 VaR 95%", f"${result.var:,.0f}")
+                st.metric("🛡️ CVaR 95%", f"${result.cvar:,.0f}")
+                risk_pct = (result.var / params.cargo_value) * 100
+                st.metric("📊 Rủi ro / Giá trị", f"{risk_pct:.1f}%")
 
-            colA, colB, colC = st.columns([1, 1, 1], gap="large")
-            with colA:
-                st.markdown('<div class="rc-card">', unsafe_allow_html=True)
-                st.markdown("#### 💸 VaR 95%", unsafe_allow_html=True)
-                st.markdown(
-                    f"<h2 style='color:#00ff99;margin-top:0.4rem;'>${var_value:,.0f}</h2>",
-                    unsafe_allow_html=True,
-                )
-                st.markdown("</div>", unsafe_allow_html=True)
-
-            with colB:
-                st.markdown('<div class="rc-card">', unsafe_allow_html=True)
-                st.markdown("#### 🛡️ CVaR 95%", unsafe_allow_html=True)
-                st.markdown(
-                    f"<h2 style='color:#00ff99;margin-top:0.4rem;'>${cvar_value:,.0f}</h2>",
-                    unsafe_allow_html=True,
-                )
-                st.markdown("</div>", unsafe_allow_html=True)
-
-            with colC:
-                st.markdown('<div class="rc-card">', unsafe_allow_html=True)
-                st.markdown("#### 📉 Rủi ro / Giá trị", unsafe_allow_html=True)
-                st.markdown(
-                    f"<h2 style='color:#00ff99;margin-top:0.4rem;'>{risk_ratio:.1%}</h2>",
-                    unsafe_allow_html=True,
-                )
-                st.markdown("</div>", unsafe_allow_html=True)
-
-        # ======================= FUZZY AHP SECTION =============================
+        # Fuzzy AHP
         if params.use_fuzzy:
             st.markdown("---")
-            st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số (Enterprise Module)")
+            st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số")
 
             st.markdown(
                 """
                 <div class="explanation-box">
                     <h4>📚 Fuzzy AHP là gì?</h4>
                     <ul>
-                        <li><b>Mục đích:</b> Xử lý sự không chắc chắn trong ý kiến chuyên gia khi gán trọng số.</li>
-                        <li><b>Cách làm:</b> Mỗi trọng số được biểu diễn thành tam giác (Low–Mid–High).</li>
-                        <li><b>Kết quả:</b> Trọng số defuzzified (Centroid) dùng trong TOPSIS.</li>
+                        <li>Sử dụng <b>tam giác mờ (Low – Mid – High)</b> để biểu diễn sự không chắc chắn trong ý kiến chuyên gia.</li>
+                        <li>Trọng số cuối cùng được tính bằng 
+                            <span class="rc-tooltip" data-tip="(Low + Mid + High) / 3">phương pháp centroid</span> 
+                            rồi chuẩn hóa lại.</li>
+                        <li>Giúp mô hình <b>mềm dẻo hơn</b>, không phụ thuộc duy nhất vào một bộ trọng số cứng.</li>
                     </ul>
                 </div>
                 """,
-                unsafe_allow_html=True,
+                unsafe_allow_html=True
             )
 
             fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
@@ -1392,108 +1494,58 @@ class StreamlitUI:
             fuzzy_table = build_fuzzy_table(result.weights, params.fuzzy_uncertainty)
             st.dataframe(fuzzy_table, use_container_width=True)
 
-            most_unc, diff_map = most_uncertain_criterion(
-                result.weights, params.fuzzy_uncertainty
-            )
+            most_unc, diff_map = most_uncertain_criterion(result.weights, params.fuzzy_uncertainty)
             st.markdown(
                 f"""
                 <div style="background:#00331F; padding:15px; border-radius:10px;
-                border:2px solid #00FFAA; color:#CCFFE6; margin-top:0.8rem;">
+                border:2px solid #00FFAA; color:#CCFFE6;">
                     <b>🔍 Tiêu chí dao động mạnh nhất:</b> {most_unc}<br>
                     <small>Độ chênh lệch (Low → High): {diff_map[most_unc]:.4f}</small>
                 </div>
                 """,
-                unsafe_allow_html=True,
+                unsafe_allow_html=True
             )
 
             st.subheader("🔥 Heatmap mức dao động Fuzzy (Premium Green)")
             fig_heat = fuzzy_heatmap_premium(diff_map)
             st.plotly_chart(fig_heat, use_container_width=True)
 
-        # ======================= EXPORT SECTION ================================
+        # Export
         st.markdown("---")
         st.subheader("📥 Xuất báo cáo")
 
-        colx, coly = st.columns(2)
-        with colx:
+        col_e1, col_e2 = st.columns(2)
+
+        with col_e1:
             excel_data = self.report_gen.generate_excel(result.results, result.weights)
             st.download_button(
                 "📊 Tải Excel (kết quả + trọng số)",
                 data=excel_data,
                 file_name=f"riskcast_v53_{params.route.replace(' ', '_')}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True,
+                use_container_width=True
             )
 
-        with coly:
-            pdf_data = self.report_gen.generate_pdf(
-                result.results, params, result.var, result.cvar
-            )
+        with col_e2:
+            pdf_data = self.report_gen.generate_pdf(result.results, params, result.var, result.cvar)
             if pdf_data:
                 st.download_button(
-                    "📄 Tải PDF (tóm tắt cho NCKH)",
+                    "📄 Tải PDF (tóm tắt báo cáo)",
                     data=pdf_data,
                     file_name=f"riskcast_v53_{params.route.replace(' - ', '_')}.pdf",
                     mime="application/pdf",
-                    use_container_width=True,
+                    use_container_width=True
                 )
-
-    # =============================== RUN APP ==================================
 
     def run(self):
         self.initialize()
-
-        st.markdown(
-            """
-            <div class="app-header">
-                <div class="app-header-left">
-                    <div class="app-logo-circle">RC</div>
-                    <div>
-                        <div class="app-header-title">RISKCAST v5.3 — MULTI-PACKAGE ANALYSIS</div>
-                        <div class="app-header-subtitle">
-                            15 Phương án (5 Công ty × 3 Gói ICC) · Profile-Based Recommendation · Smart Ranking · Cost-Benefit Analysis · Fuzzy AHP · VaR/CVaR · Full Explanations for Research
-                        </div>
-                    </div>
-                </div>
-                <div class="app-header-badge">
-                    <span>🎯 Smart Recommendation</span>
-                    <span>·</span>
-                    <span>15 Phương án</span>
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        self.render_header()
 
         historical = DataService.load_historical_data()
         params = self.render_sidebar()
-
-        # Card giải thích profile
-        st.markdown('<div class="premium-card">', unsafe_allow_html=True)
-        st.subheader(f"📌 Đã chọn mục tiêu: {params.priority}")
-
-        profile_weights = PRIORITY_PROFILES[params.priority]
-        st.markdown(
-            f"""
-            <div class="explanation-box">
-                <h4>⚙️ Trọng số tự động theo mục tiêu:</h4>
-                <ul>
-                    <li><b>C1 (Chi phí):</b> {profile_weights['C1: Tỷ lệ phí']:.0%}</li>
-                    <li><b>C2 (Thời gian):</b> {profile_weights['C2: Thời gian xử lý']:.0%}</li>
-                    <li><b>C3 (Tổn thất):</b> {profile_weights['C3: Tỷ lệ tổn thất']:.0%}</li>
-                    <li><b>C4 (Hỗ trợ ICC):</b> {profile_weights['C4: Hỗ trợ ICC']:.0%}</li>
-                    <li><b>C5 (Chăm sóc KH):</b> {profile_weights['C5: Chăm sóc KH']:.0%}</li>
-                    <li><b>C6 (Khí hậu):</b> {profile_weights['C6: Rủi ro khí hậu']:.0%}</li>
-                </ul>
-                <p><b>💡 Lưu ý:</b> Đây là bộ trọng số được thiết kế cho RISKCAST dựa trên best practices ngành bảo hiểm.</p>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
+        self.display_profile_explanation(params)
 
         st.markdown("---")
-
         if st.button("🚀 PHÂN TÍCH 15 PHƯƠNG ÁN", type="primary", use_container_width=True):
             with st.spinner("🔄 Đang phân tích tất cả phương án..."):
                 try:
