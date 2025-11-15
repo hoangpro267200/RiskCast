@@ -1474,254 +1474,159 @@ class StreamlitUI:
         top3 = result.results.head(3)
         medals = ["🥇", "🥈", "🥉"]
 
-               # ===================== TOP 3 PREMIUM CARDS (FULL EFFECT) =====================
+          # ===================== TOP 3 PREMIUM CARDS (FULL EFFECT) =====================
 
-        # CSS cho card + hiệu ứng + tooltip
-        st.markdown("""
-        <style>
-        .top3-card {
-            position: relative;
-            background: radial-gradient(circle at top left, rgba(0,255,153,0.12), rgba(0,0,0,0.78));
-            border: 1px solid rgba(0,255,153,0.45);
-            padding: 20px 22px;
-            border-radius: 18px;
-            box-shadow: 0 0 18px rgba(0,255,153,0.18);
-            margin-bottom: 18px;
-            text-align: center;
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out;
-        }
+# CSS cho card + hiệu ứng + tooltip
+st.markdown("""
+<style>
+.top3-card {
+    position: relative;
+    background: radial-gradient(circle at top left, rgba(0,255,153,0.12), rgba(0,0,0,0.78));
+    border: 1px solid rgba(0,255,153,0.45);
+    padding: 20px 22px;
+    border-radius: 18px;
+    box-shadow: 0 0 18px rgba(0,255,153,0.18);
+    margin-bottom: 18px;
+    text-align: center;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out;
+}
+.top1-card {
+    background: radial-gradient(circle at top left, rgba(255,215,0,0.20), rgba(0,0,0,0.82));
+    border: 1px solid rgba(255,215,0,0.7);
+    box-shadow: 0 0 26px rgba(255,215,0,0.45);
+    animation: gold-pulse 2.4s ease-in-out infinite alternate;
+}
+@keyframes gold-pulse {
+    0% { box-shadow: 0 0 10px rgba(255,215,0,0.35); border-color: rgba(255,215,0,0.6); }
+    100% { box-shadow: 0 0 26px rgba(255,215,0,0.75); border-color: rgba(255,255,255,0.95); }
+}
+.top3-card:hover {
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 0 26px rgba(0,255,153,0.35);
+    border-color: rgba(0,255,200,0.85);
+}
+.top3-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #a5ffdc;
+}
+.top1-title {
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: #ffe680;
+    text-shadow: 0 0 10px rgba(255,210,0,0.7);
+}
+.top3-sub { font-size: 1rem; margin-top: 6px; color: #e0f2f1; }
+.badge-icc {
+    display: inline-block; padding: 4px 10px; border-radius: 999px;
+    background: linear-gradient(120deg, #00e676, #00bfa5);
+    color: #00130d; font-weight: 700; font-size: 0.9rem;
+}
+.pill-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    border: 1px solid rgba(0,255,153,0.5); font-size: 0.85rem; margin-top: 4px; color: #c8ffec;
+}
+.top3-btn {
+    margin-top: 10px; padding: 6px 14px; border-radius: 999px;
+    border: 1px solid rgba(0,255,153,0.7); background: rgba(0,0,0,0.65);
+    color: #c8ffec; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+}
+.top3-btn:hover {
+    background: linear-gradient(120deg, #00ff99, #00e676);
+    color: #00130d; transform: translateY(-1px);
+    box-shadow: 0 0 12px rgba(0,255,153,0.7);
+}
+.info-tt { position: relative; display: inline-block; cursor: pointer; }
+.info-tt .info-text {
+    opacity: 0; visibility: hidden; width: 250px; background: rgba(0,0,0,0.9);
+    color: #e0f2f1; text-align: left; border-radius: 8px; padding: 10px 12px;
+    border: 1px solid rgba(0,255,153,0.45); position: absolute; z-index: 999;
+    bottom: 125%; left: 50%; transform: translateX(-50%); font-size: 0.85rem;
+}
+.info-tt:hover .info-text { opacity: 1; visibility: visible; }
+</style>
+""", unsafe_allow_html=True)
 
-        /* Card #1 – Gold Edition */
-        .top1-card {
-            background: radial-gradient(circle at top left, rgba(255,215,0,0.20), rgba(0,0,0,0.82));
-            border: 1px solid rgba(255,215,0,0.7);
-            box-shadow: 0 0 26px rgba(255,215,0,0.45);
-            animation: gold-pulse 2.4s ease-in-out infinite alternate;
-        }
+st.markdown("## 🏅 Top 3 phương án (Premium View)")
 
-        @keyframes gold-pulse {
-            0% {
-                box-shadow: 0 0 10px rgba(255,215,0,0.35);
-                border-color: rgba(255,215,0,0.6);
-            }
-            100% {
-                box-shadow: 0 0 26px rgba(255,215,0,0.75);
-                border-color: rgba(255,255,255,0.95);
-            }
-        }
+cols = st.columns(3)
+top3 = result.results.head(3)
+medals = ["🥇", "🥈", "🥉"]
 
-        /* Hover zoom cho tất cả card */
-        .top3-card:hover {
-            transform: translateY(-4px) scale(1.03);
-            box-shadow: 0 0 26px rgba(0,255,153,0.35);
-            border-color: rgba(0,255,200,0.85);
-        }
+for i, col in enumerate(cols):
+    r = top3.iloc[i]
 
-        .top3-title {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: #a5ffdc;
-        }
+    card_class = "top3-card"
+    title_class = "top3-title"
+    if i == 0:
+        card_class += " top1-card"
+        title_class = "top1-title"
 
-        .top1-title {
-            font-size: 1.3rem;
-            font-weight: 900;
-            color: #ffe680;
-            text-shadow: 0 0 10px rgba(255,210,0,0.7);
-        }
+    with col:
+        st.markdown(f"""
+        <div class="{card_class}">
+            <div class="{title_class}">{medals[i]} #{i+1}: {r['company']}</div>
 
-        .top3-sub {
-            font-size: 1rem;
-            margin-top: 6px;
-            color: #e0f2f1;
-        }
+            <div class="top3-sub info-tt">
+                <b class="badge-icc">{r['icc_package']}</b>
+                <span class="info-text">
+                    <b>Loại điều khoản ICC</b><br><br>
+                    • ICC A – bảo hiểm rộng nhất<br>
+                    • ICC B – mức trung<br>
+                    • ICC C – cơ bản, chi phí thấp<br>
+                </span>
+            </div>
 
-        .badge-icc {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 999px;
-            background: linear-gradient(120deg, #00e676, #00bfa5);
-            color: #00130d;
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
+            <div class="top3-sub info-tt" style="color:#7CFFA1; font-size:1.1rem;">
+                💰 Chi phí kỳ vọng: <b>${r['estimated_cost']:,.0f}</b>
+            </div>
 
-        .pill-badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(0,255,153,0.5);
-            font-size: 0.85rem;
-            margin-top: 4px;
-            color: #c8ffec;
-        }
+            <div class="top3-sub info-tt">
+                📊 Điểm: <b>{r['score']:.3f}</b> · <span class="pill-badge">{r['category']}</span>
+            </div>
 
-        .top3-btn {
-            margin-top: 10px;
-            padding: 6px 14px;
-            border-radius: 999px;
-            border: 1px solid rgba(0,255,153,0.7);
-            background: rgba(0,0,0,0.65);
-            color: #c8ffec;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.15s ease-out, transform 0.15s ease-out, box-shadow 0.15s ease-out;
-        }
-        .top3-btn:hover {
-            background: linear-gradient(120deg, #00ff99, #00e676);
-            color: #00130d;
-            transform: translateY(-1px);
-            box-shadow: 0 0 12px rgba(0,255,153,0.7);
-        }
+            <div class="top3-sub info-tt">
+                🎯 Tin cậy: <b>{r['confidence']:.2f}</b>
+            </div>
 
-        /* Tooltip chung cho Điểm / ICC / Tiết kiệm / Tin cậy / Biến động */
-        .info-tt {
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
-        }
-        .info-tt .info-text {
-            opacity: 0;
-            visibility: hidden;
-            width: 250px;
-            background: rgba(0,0,0,0.9);
-            color: #e0f2f1;
-            text-align: left;
-            border-radius: 8px;
-            padding: 10px 12px;
-            border: 1px solid rgba(0,255,153,0.45);
-            position: absolute;
-            z-index: 999;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 0.85rem;
-            transition: opacity 0.18s ease-out;
-        }
-        .info-tt:hover .info-text {
-            opacity: 1;
-            visibility: visible;
-        }
+            <div class="top3-sub info-tt">
+                🌪 Biến động rủi ro: <b>{r['C6_std']:.2f}</b>
+            </div>
 
-        </style>
+            <button class="top3-btn">📘 Xem phân tích chi tiết</button>
+        </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("## 🏅 Top 3 phương án (Premium View)")
+# ===================== WEIGHTS & METRICS =====================
 
-        cols = st.columns(3)
-        top3 = result.results.head(3)
-        medals = ["🥇", "🥈", "🥉"]
+col1, col2 = st.columns(2)
 
-        for i, col in enumerate(cols):
-            r = top3.iloc[i]
+with col1:
+    fig_weights = chart_factory.create_weights_pie(
+        result.weights,
+        f"Trọng số áp dụng ({params.priority})"
+    )
+    st.plotly_chart(fig_weights, use_container_width=True)
 
-            card_class = "top3-card"
-            title_class = "top3-title"
-            if i == 0:
-                card_class += " top1-card"
-                title_class = "top1-title"
+with col2:
+    if result.var is not None and result.cvar is not None:
+        st.metric("💰 VaR 95%", f"${result.var:,.0f}")
+        st.metric("🛡️ CVaR 95%", f"${result.cvar:,.0f}")
+        risk_pct = (result.var / params.cargo_value) * 100
+        st.metric("📊 Rủi ro / Giá trị", f"{risk_pct:.1f}%")
 
-            with col:
-                st.markdown(f"""
-                <div class="{card_class}">
-                    <div class="{title_class}">{medals[i]} #{i+1}: {r['company']}</div>
+# ===================== FORECAST =====================
 
-                    <!-- Loại ICC + tooltip -->
-                    <div class="top3-sub info-tt">
-                        <b class="badge-icc">{r['icc_package']}</b>
-                        <span class="info-text">
-                            <b>Loại điều khoản ICC</b><br><br>
-                            • <b>ICC A</b>: Bảo hiểm rộng nhất, gần như mọi rủi ro (All Risks).<br>
-                            • <b>ICC B</b>: Mức trung bình – bảo hiểm các rủi ro chính, loại trừ nhiều hơn A.<br>
-                            • <b>ICC C</b>: Cơ bản, chi phí thấp nhưng bảo vệ ít nhất.<br><br>
-                            Gói càng cao → phạm vi bảo vệ càng rộng, chi phí càng tăng.
-                        </span>
-                    </div>
+st.markdown("---")
 
-                    <!-- Hạng mục Tiết kiệm / Chi phí -->
-                    <div class="top3-sub info-tt" style="color:#7CFFA1; font-size:1.1rem;">
-                        💰 Chi phí kỳ vọng: <b>${r['estimated_cost']:,.0f}</b>
-                        <span class="info-text">
-                            <b>Ý nghĩa chi phí</b><br><br>
-                            Đây là mức chi phí bảo hiểm ước tính sau khi mô phỏng Monte Carlo.<br>
-                            Giúp doanh nghiệp so sánh:<br>
-                            • Gói nào <b>tiết kiệm</b> hơn về chi phí.<br>
-                            • Gói nào xứng đáng trả thêm để đổi lấy mức bảo vệ cao hơn.
-                        </span>
-                    </div>
+fig_forecast = chart_factory.create_forecast_chart(
+    result.historical, result.forecast, params.route, params.month
+)
 
-                    <!-- Điểm tổng hợp -->
-                    <div class="top3-sub info-tt">
-                        📊 Điểm: <b>{r['score']:.3f}</b> · <span class="pill-badge">{r['category']}</span>
-                        <span class="info-text">
-                            <b>Điểm tổng hợp TOPSIS</b><br><br>
-                            Điểm này tổng hợp từ:<br>
-                            • Tỷ lệ phí (C1)<br>
-                            • Thời gian xử lý (C2)<br>
-                            • Tỷ lệ tổn thất (C3)<br>
-                            • Chất lượng hỗ trợ ICC (C4)<br>
-                            • Chăm sóc khách hàng (C5)<br>
-                            • Rủi ro khí hậu tuyến đường (C6)<br><br>
-                            Điểm càng cao → phương án càng gần “phương án lý tưởng”.
-                        </span>
-                    </div>
+st.plotly_chart(fig_forecast, use_container_width=True)
 
-                    <!-- Tin cậy -->
-                    <div class="top3-sub info-tt">
-                        🎯 Tin cậy: <b>{r['confidence']:.2f}</b>
-                        <span class="info-text">
-                            <b>Tin cậy của phương án</b><br><br>
-                            Được tính từ độ ổn định kết quả sau hàng nghìn lần mô phỏng Monte Carlo.<br>
-                            • 0.70 – 1.00: Rất ổn định, ít bị ảnh hưởng khi điều kiện rủi ro thay đổi.<br>
-                            • 0.40 – 0.69: Ổn định trung bình.<br>
-                            • &lt; 0.40: Nhạy cảm, dễ biến động, cần xem xét kỹ.<br>
-                        </span>
-                    </div>
-
-                    <!-- Độ biến động rủi ro (dùng C6_std) -->
-                    <div class="top3-sub info-tt">
-                        🌪 Biến động rủi ro: <b>{r['C6_std']:.2f}</b>
-                        <span class="info-text">
-                            <b>Độ biến động rủi ro khí hậu (C6_std)</b><br><br>
-                            • Phản ánh mức dao động của rủi ro khí hậu trên tuyến đường vận chuyển.<br>
-                            • Giá trị càng cao → rủi ro khó dự đoán, biến động mạnh.<br>
-                            • Giá trị thấp → rủi ro ổn định, dễ kiểm soát hơn.<br><br>
-                            Chỉ số này giúp doanh nghiệp cân nhắc giữa <b>chi phí</b> và <b>mức độ an toàn</b>.
-                        </span>
-                    </div>
-
-                    <!-- Nút xem chi tiết (để bạn giải thích trong bảo vệ là có thể mở panel phân tích sâu) -->
-                    <button class="top3-btn">📘 Xem phân tích chi tiết</button>
-                </div>
-                """, unsafe_allow_html=True)
-
-
-        # Weights & Metrics
-        col1, col2 = st.columns(2)
-        with col1:
-            fig_weights = self.chart_factory.create_weights_pie(
-                result.weights,
-                f"Trọng số áp dụng ({params.priority})"
-            )
-            st.plotly_chart(fig_weights, use_container_width=True)
-        
-        with col2:
-            if result.var is not None and result.cvar is not None:
-                st.metric("💰 VaR 95%", f"${result.var:,.0f}")
-                st.metric("🛡️ CVaR 95%", f"${result.cvar:,.0f}")
-                risk_pct = (result.var / params.cargo_value) * 100
-                st.metric("📊 Rủi ro / Giá trị", f"{risk_pct:.1f}%")
-        
-        # Forecast
-        st.markdown("---")
-        fig_forecast = self.chart_factory.create_forecast_chart(
-            result.historical, result.forecast, params.route, params.month
-        )
-        st.plotly_chart(fig_forecast, use_container_width=True)
-        
         # FUZZY AHP MODULE (GIỮ NGUYÊN HOÀN TOÀN)
         if params.use_fuzzy:
             st.markdown("---")
