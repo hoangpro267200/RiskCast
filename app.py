@@ -359,13 +359,17 @@ def apply_enterprise_css():
                 radial-gradient(circle at bottom right,
                     rgba(0,255,204,0.35),
                     rgba(10,40,32,0.92));
-            color: #001a10 !important;
+            color: #ffffff !important;
         }
 
         .result-box b,
         .result-box strong {
-            color: #000f08 !important;
+            color: #ffffff !important;
             font-weight: 900 !important;
+            text-shadow:
+                0 0 8px rgba(255,255,255,0.8),
+                0 0 16px rgba(0,255,153,0.9),
+                0 0 24px rgba(0,255,153,0.7);
         }
 
         .result-box p,
@@ -375,8 +379,66 @@ def apply_enterprise_css():
         .result-box h2,
         .result-box h3,
         .result-box h4 {
-            color: #001a10 !important;
+            color: #ffffff !important;
             font-weight: 700 !important;
+            text-shadow:
+                0 0 6px rgba(255,255,255,0.6),
+                0 0 12px rgba(0,255,153,0.7);
+        }
+
+        /* Neon glow cho giá trị quan trọng */
+        .result-box .neon-highlight {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 8px;
+            border: 2px solid rgba(0,255,153,0.8);
+            background: rgba(0,20,15,0.4);
+            color: #00ff99 !important;
+            font-weight: 900 !important;
+            text-shadow:
+                0 0 8px rgba(0,255,153,0.9),
+                0 0 16px rgba(0,255,153,0.8),
+                0 0 24px rgba(0,255,153,0.6);
+            box-shadow:
+                0 0 12px rgba(0,255,153,0.6),
+                0 0 24px rgba(0,255,153,0.4),
+                inset 0 0 12px rgba(0,255,153,0.2);
+            animation: neon-pulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes neon-pulse {
+            0% {
+                box-shadow:
+                    0 0 8px rgba(0,255,153,0.4),
+                    0 0 16px rgba(0,255,153,0.3),
+                    inset 0 0 8px rgba(0,255,153,0.15);
+                text-shadow:
+                    0 0 6px rgba(0,255,153,0.7),
+                    0 0 12px rgba(0,255,153,0.6),
+                    0 0 18px rgba(0,255,153,0.5);
+            }
+            100% {
+                box-shadow:
+                    0 0 16px rgba(0,255,153,0.8),
+                    0 0 28px rgba(0,255,153,0.6),
+                    inset 0 0 16px rgba(0,255,153,0.3);
+                text-shadow:
+                    0 0 10px rgba(0,255,153,1),
+                    0 0 20px rgba(0,255,153,0.9),
+                    0 0 30px rgba(0,255,153,0.7);
+            }
+        }
+
+        /* Title với neon glow mạnh */
+        .result-box h2,
+        .result-box h3 {
+            color: #ffffff !important;
+            font-weight: 900 !important;
+            text-shadow:
+                0 0 10px rgba(255,255,255,0.9),
+                0 0 20px rgba(0,255,153,1),
+                0 0 30px rgba(0,255,153,0.8),
+                0 0 40px rgba(0,255,153,0.6);
         }
 
         .explanation-box {
