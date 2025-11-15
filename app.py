@@ -904,76 +904,7 @@ def apply_enterprise_css():
                         rgba(255,200,0,0.32));
             color: #3a2f00;
         }
-        /* ================= PREMIUM TABLE ================== */
-
-.premium-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-    background: rgba(0, 40, 25, 0.55);
-    border: 1px solid #00ffbf33;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 0 15px #00ffbf22;
-}
-
-.premium-table th {
-    padding: 12px 10px;
-    text-align: center;
-    background: #004d33;
-    color: #d4fff3;
-    font-weight: 700;
-    font-size: 1rem;
-    border-bottom: 1px solid #00ffbf55;
-}
-
-.premium-table td {
-    padding: 10px;
-    text-align: center;
-    color: #e8fff5;
-    font-size: 0.95rem;
-    border-bottom: 1px solid #00ffbf22;
-}
-
-.premium-table tr:last-child td {
-    border-bottom: none;
-}
-
-.label-col {
-    font-weight: 600;
-    color: #b6ffe8;
-}
-
-.highlight-value {
-    color: #00ffbf;
-    font-weight: 700;
-}/* ===================== GOLD THEME FOR TABLE ===================== */
-
-.premium-table.gold-theme thead th {
-    background: linear-gradient(135deg,
-        rgba(255,215,0,0.25),
-        rgba(255,180,0,0.35),
-        rgba(255,160,0,0.45)
-    );
-    color: #fff6d6;
-    text-shadow: 0 0 12px rgba(255,215,0,0.7);
-}
-
-.premium-table.gold-theme tbody td {
-    background: rgba(255,215,0,0.05);
-    color: #fff8cc;
-}
-
-.premium-table.gold-theme .highlight-value {
-    color: #ffe15d;
-    font-weight: 700;
-}
-
-.premium-table.gold-theme tr:hover td {
-    background: rgba(255,215,0,0.08);
-}
-
-</style>
+        </style>
         """,
         unsafe_allow_html=True,
     )
@@ -1820,88 +1751,6 @@ class ReportGenerator:
             )
         buffer.seek(0)
         return buffer.getvalue()
-# =============================================================================
-# PREMIUM COMPARISON TABLES (Top 3 / Top 5 / By ICC / By Company)
-# =============================================================================
-
-def render_compare_top3(df):
-    top3 = df.head(3)
-    st.markdown("## 🥇 Bảng so sánh Top 3 (Premium Table)")
-    st.markdown("<table class='premium-table gold-theme'><thead><tr>"
-                "<th>Hạng</th><th>Công ty</th><th>Gói</th><th>Chi phí</th>"
-                "<th>Điểm</th><th>Tin cậy</th>"
-                "</tr></thead><tbody>", unsafe_allow_html=True)
-    for _, r in top3.iterrows():
-        st.markdown(
-            f"<tr>"
-            f"<td class='label-col'>#{int(r['rank'])}</td>"
-            f"<td>{r['company']}</td>"
-            f"<td>{r['icc_package']}</td>"
-            f"<td class='highlight-value'>${r['estimated_cost']:,.0f}</td>"
-            f"<td>{r['score']:.3f}</td>"
-            f"<td>{r['confidence']:.2f}</td>"
-            "</tr>", unsafe_allow_html=True)
-    st.markdown("</tbody></table>", unsafe_allow_html=True)
-
-
-def render_compare_top5(df):
-    top5 = df.head(5)
-    st.markdown("## 🏅 Bảng so sánh Top 5 (Premium Table)")
-    st.markdown("<table class='premium-table'><thead><tr>"
-                "<th>Hạng</th><th>Công ty</th><th>Gói</th><th>Chi phí</th>"
-                "<th>Điểm</th><th>Tin cậy</th>"
-                "</tr></thead><tbody>", unsafe_allow_html=True)
-    for _, r in top5.iterrows():
-        st.markdown(
-            f"<tr>"
-            f"<td class='label-col'>#{int(r['rank'])}</td>"
-            f"<td>{r['company']}</td>"
-            f"<td>{r['icc_package']}</td>"
-            f"<td class='highlight-value'>${r['estimated_cost']:,.0f}</td>"
-            f"<td>{r['score']:.3f}</td>"
-            f"<td>{r['confidence']:.2f}</td>"
-            "</tr>", unsafe_allow_html=True)
-    st.markdown("</tbody></table>", unsafe_allow_html=True)
-
-
-def render_compare_by_icc(df):
-    st.markdown("## 📦 So sánh theo từng gói ICC")
-    for icc in ["ICC A", "ICC B", "ICC C"]:
-        sub = df[df["icc_package"] == icc]
-        st.markdown(f"### 🔰 {icc}")
-        st.markdown("<table class='premium-table'><thead><tr>"
-                    "<th>Hạng</th><th>Công ty</th><th>Chi phí</th>"
-                    "<th>Điểm</th><th>Tin cậy</th>"
-                    "</tr></thead><tbody>", unsafe_allow_html=True)
-        for _, r in sub.iterrows():
-            st.markdown(
-                f"<tr>"
-                f"<td class='label-col'>#{int(r['rank'])}</td>"
-                f"<td>{r['company']}</td>"
-                f"<td class='highlight-value'>${r['estimated_cost']:,.0f}</td>"
-                f"<td>{r['score']:.3f}</td>"
-                f"<td>{r['confidence']:.2f}</td>"
-                "</tr>", unsafe_allow_html=True)
-        st.markdown("</tbody></table><br>", unsafe_allow_html=True)
-
-
-def render_compare_by_company(df):
-    st.markdown("## 🏢 So sánh theo từng công ty bảo hiểm")
-    for comp in df["company"].unique():
-        sub = df[df["company"] == comp]
-        st.markdown(f"### 🏛 {comp}")
-        st.markdown("<table class='premium-table'><thead><tr>"
-                    "<th>Gói</th><th>Chi phí</th><th>Điểm</th><th>Tin cậy</th>"
-                    "</tr></thead><tbody>", unsafe_allow_html=True)
-        for _, r in sub.iterrows():
-            st.markdown(
-                f"<tr>"
-                f"<td class='label-col'>{r['icc_package']}</td>"
-                f"<td class='highlight-value'>${r['estimated_cost']:,.0f}</td>"
-                f"<td>{r['score']:.3f}</td>"
-                f"<td>{r['confidence']:.2f}</td>"
-                "</tr>", unsafe_allow_html=True)
-        st.markdown("</tbody></table><br>", unsafe_allow_html=True)
 
 
 # =============================================================================
@@ -2117,23 +1966,11 @@ và xa phương án tệ nhất (ideal worst). Điểm càng cao càng tốt.">i
         df_display["Chi phí"] = df_display["Chi phí"].apply(lambda x: f"${x:,.0f}")
         df_display = df_display.set_index("Hạng")
 
-       st.dataframe(df_display, use_container_width=True)
+        st.dataframe(df_display, use_container_width=True)
 
-st.markdown("---")
-render_compare_top3(result.results)
-
-st.markdown("---")
-render_compare_top5(result.results)
-
-st.markdown("---")
-render_compare_by_icc(result.results)
-
-st.markdown("---")
-render_compare_by_company(result.results)
-
-st.markdown(
-    """
-    <div class="explanation-box">
+        st.markdown(
+            """
+            <div class="explanation-box">
                 <h4>💡 Giải thích 3 loại phương án</h4>
                 <ul>
                     <li><b>💰 Tiết kiệm (ICC C):</b> phí thấp nhất, bảo vệ cơ bản – phù hợp hàng giá trị thấp, tuyến ngắn.</li>
