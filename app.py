@@ -350,26 +350,83 @@ def apply_enterprise_css():
         }
 
         .result-box {
-            padding: 1.7rem 2.1rem;
-            border-radius: 20px;
-            background:
-                radial-gradient(circle at top left,
-                    rgba(0,255,153,0.48),
-                    rgba(15,50,40,0.90)),
-                radial-gradient(circle at bottom right,
-                    rgba(0,255,204,0.35),
-                    rgba(10,40,32,0.92));
+            padding: 0 !important;
+            border-radius: 16px;
+            background: rgba(5,25,20,0.95);
             color: #ffffff !important;
+            border: 2px solid rgba(0,255,153,0.35);
+            box-shadow:
+                0 0 16px rgba(0,255,153,0.25),
+                0 12px 30px rgba(0,0,0,0.9);
+            overflow: hidden;
+        }
+
+        .result-box table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        .result-box thead {
+            background: linear-gradient(135deg,
+                        rgba(0,255,153,0.25),
+                        rgba(0,200,120,0.28));
+        }
+
+        .result-box thead th {
+            padding: 1.3rem 1.5rem;
+            text-align: left;
+            font-weight: 900;
+            font-size: 1.15rem;
+            color: #ffffff;
+            text-shadow:
+                0 0 8px rgba(0,255,153,0.8),
+                0 0 16px rgba(0,255,153,0.6);
+            border-bottom: 2px solid rgba(0,255,153,0.4);
+        }
+
+        .result-box tbody tr {
+            border-bottom: 1px solid rgba(0,255,153,0.18);
+        }
+
+        .result-box tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .result-box tbody tr:hover {
+            background: rgba(0,255,153,0.08);
+        }
+
+        .result-box tbody td {
+            padding: 1rem 1.5rem;
+            color: #e9fff4;
+            font-weight: 600;
+            font-size: 0.96rem;
+        }
+
+        .result-box tbody td:first-child {
+            color: #a5ffdc;
+            font-weight: 700;
+            width: 28%;
+            border-right: 1px solid rgba(0,255,153,0.2);
+        }
+
+        .result-box tbody td:last-child {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* Highlight values */
+        .result-box .value-highlight {
+            color: #00ff99;
+            font-weight: 800;
+            text-shadow: 0 0 8px rgba(0,255,153,0.5);
         }
 
         .result-box b,
         .result-box strong {
             color: #ffffff !important;
             font-weight: 900 !important;
-            text-shadow:
-                0 0 8px rgba(255,255,255,0.8),
-                0 0 16px rgba(0,255,153,0.9),
-                0 0 24px rgba(0,255,153,0.7);
         }
 
         .result-box p,
@@ -381,64 +438,6 @@ def apply_enterprise_css():
         .result-box h4 {
             color: #ffffff !important;
             font-weight: 700 !important;
-            text-shadow:
-                0 0 6px rgba(255,255,255,0.6),
-                0 0 12px rgba(0,255,153,0.7);
-        }
-
-        /* Neon glow cho giá trị quan trọng */
-        .result-box .neon-highlight {
-            display: inline-block;
-            padding: 0.4rem 1rem;
-            border-radius: 8px;
-            border: 2px solid rgba(0,255,153,0.8);
-            background: rgba(0,20,15,0.4);
-            color: #00ff99 !important;
-            font-weight: 900 !important;
-            text-shadow:
-                0 0 8px rgba(0,255,153,0.9),
-                0 0 16px rgba(0,255,153,0.8),
-                0 0 24px rgba(0,255,153,0.6);
-            box-shadow:
-                0 0 12px rgba(0,255,153,0.6),
-                0 0 24px rgba(0,255,153,0.4),
-                inset 0 0 12px rgba(0,255,153,0.2);
-            animation: neon-pulse 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes neon-pulse {
-            0% {
-                box-shadow:
-                    0 0 8px rgba(0,255,153,0.4),
-                    0 0 16px rgba(0,255,153,0.3),
-                    inset 0 0 8px rgba(0,255,153,0.15);
-                text-shadow:
-                    0 0 6px rgba(0,255,153,0.7),
-                    0 0 12px rgba(0,255,153,0.6),
-                    0 0 18px rgba(0,255,153,0.5);
-            }
-            100% {
-                box-shadow:
-                    0 0 16px rgba(0,255,153,0.8),
-                    0 0 28px rgba(0,255,153,0.6),
-                    inset 0 0 16px rgba(0,255,153,0.3);
-                text-shadow:
-                    0 0 10px rgba(0,255,153,1),
-                    0 0 20px rgba(0,255,153,0.9),
-                    0 0 30px rgba(0,255,153,0.7);
-            }
-        }
-
-        /* Title với neon glow mạnh */
-        .result-box h2,
-        .result-box h3 {
-            color: #ffffff !important;
-            font-weight: 900 !important;
-            text-shadow:
-                0 0 10px rgba(255,255,255,0.9),
-                0 0 20px rgba(0,255,153,1),
-                0 0 30px rgba(0,255,153,0.8),
-                0 0 40px rgba(0,255,153,0.6);
         }
 
         .explanation-box {
