@@ -1467,7 +1467,7 @@ class StreamlitUI:
         st.markdown("---")
         st.subheader("📊 Biểu đồ phân tích")
 
-  # === FIX LAYOUT HÀNG 1 (TÁCH 2 BIỂU ĐỒ + CĂN ĐỀU CHIỀU CAO) ===
+# === FIX LAYOUT HÀNG 1 (TÁCH 2 BIỂU ĐỒ + CĂN ĐỀU CHIỀU CAO) ===
 col_scatter, col_cat = st.columns([1, 1], gap="large")
 
 with col_scatter:
@@ -1484,10 +1484,10 @@ with col_cat:
     st.plotly_chart(fig_category, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-
-        st.markdown("#### 🏆 Top 5 phương án tốt nhất")
-        fig_top5 = self.chart_factory.create_top_recommendations_bar(result.results)
-        st.plotly_chart(fig_top5, use_container_width=True)
+# === PHẦN TOP 5 — PHẢI ĐỂ NGOÀI CÁC "with col_*" (KHÔNG ĐƯỢC THỤT VÀO) ===
+st.markdown("#### 🏆 Top 5 phương án tốt nhất")
+fig_top5 = self.chart_factory.create_top_recommendations_bar(result.results)
+st.plotly_chart(fig_top5, use_container_width=True)
 
         # Weights + Forecast + Risk metrics
         st.markdown("---")
