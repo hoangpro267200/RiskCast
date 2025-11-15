@@ -1,10 +1,9 @@
 # =============================================================================
-# RISKCAST v5.5 — ENTERPRISE ULTRA TOOLTIP EDITION
+# RISKCAST v5.5 — ENTERPRISE EDITION (Layout FIX + Shield Logo + Chart Gap)
 # ESG Logistics Risk Assessment Dashboard
 #
 # Author: Bùi Xuân Hoàng (original idea)
 # Refactor + Multi-Package + Full Explanations + Enterprise UX: Kai assistant
-# FIX 2-COLUMN PLOTLY OVERLAP (v3): Kai assistant
 #
 # Theme: Premium Green · Mixed Enterprise (Salesforce + Oracle Fusion)
 # =============================================================================
@@ -38,7 +37,7 @@ except ImportError:
 
 def app_config():
     st.set_page_config(
-        page_title="RISKCAST v5.5 — Enterprise Tooltip Edition",
+        page_title="RISKCAST v5.5 — Multi-Package Analysis",
         page_icon="🛡️",
         layout="wide"
     )
@@ -214,7 +213,7 @@ def apply_enterprise_css():
         margin: 0.22rem 0;
     }
 
-    /* TEXT TOOLTIP (old style – vẫn giữ để reuse) */
+    /* TOOLTIP */
     .rc-tooltip {
         text-decoration: underline dotted #00e676;
         cursor: pointer;
@@ -238,48 +237,6 @@ def apply_enterprise_css():
         max-width: 320px;
         z-index: 999;
         box-shadow: 0 0 14px rgba(0,255,153,0.25);
-    }
-
-    /* ENTERPRISE ICON TOOLTIP v5.5 */
-    .tooltip-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        margin-left: 6px;
-        background: rgba(0,255,153,0.15);
-        color: #a5ffdc;
-        border-radius: 50%;
-        width: 18px;
-        height: 18px;
-        text-align: center;
-        font-size: 12px;
-        cursor: help;
-        border: 1px solid rgba(0,255,153,0.4);
-        font-weight: 700;
-        box-shadow: 0 0 8px rgba(0,255,153,0.25);
-        position: relative;
-    }
-
-    .tooltip-icon:hover {
-        background: rgba(0,255,153,0.3);
-        border-color: #00ff99;
-    }
-
-    .tooltip-icon:hover::after {
-        content: attr(data-tip);
-        position: absolute;
-        background: rgba(0,20,15,0.98);
-        border: 1px solid rgba(0,255,153,0.45);
-        padding: 10px 14px;
-        border-radius: 10px;
-        color: #d8fff0;
-        width: 260px;
-        left: 22px;
-        bottom: -4px;
-        font-size: 0.82rem;
-        line-height: 1.35rem;
-        z-index: 999;
-        box-shadow: 0 0 18px rgba(0,255,153,0.35);
     }
 
     /* DATAFRAME */
@@ -373,7 +330,7 @@ def apply_enterprise_css():
         color: #c8ffec;
     }
 
-    /* RISK METRICS CARD (VaR / CVaR / Risk Ratio) */
+    /* RISK METRICS CARD */
     .rc-risk-card h4 {
         margin-top: 0;
         margin-bottom: 0.8rem;
@@ -637,10 +594,7 @@ class Forecaster:
         use_arima: bool = True
     ) -> Tuple[np.ndarray, np.ndarray]:
         if route not in historical.columns:
-            if len(historical.columns) > 1:
-                route = historical.columns[1] 
-            else:
-                return np.array([]), np.array([0.0]) 
+            route = historical.columns[1]
 
         full_series = historical[route].values
         n_total = len(full_series)
@@ -823,21 +777,21 @@ class MultiPackageAnalyzer:
 
         company_data = self.data_service.get_company_data()
 
-        if params.month in historical["month"].values and params.route in historical.columns:
+        if params.month in historical["month"].values:
             base_risk = float(
                 historical.loc[historical["month"] == params.month, params.route].iloc[0]
             )
         else:
-            base_risk = 0.4 
+            base_risk = 0.4
 
         if params.use_mc:
             companies, mc_mean, mc_std = self.mc_simulator.simulate(
                 base_risk, SENSITIVITY_MAP, params.mc_runs
             )
-            order = [list(SENSITIVITY_MAP.keys()).index(c) for c in company_data.index]
+            order = [companies.index(c) for c in company_data.index]
             mc_mean, mc_std = mc_mean[order], mc_std[order]
         else:
-            mc_mean = np.array([base_risk * SENSITIVITY_MAP[c] for c in company_data.index])
+            mc_mean = np.zeros(len(company_data))
             mc_std = np.zeros(len(company_data))
 
         all_options = []
@@ -899,13 +853,7 @@ class MultiPackageAnalyzer:
         eps = 1e-9
         cv_c6 = data_adjusted["C6_std"].values / (data_adjusted["C6_mean"].values + eps)
         conf = 1.0 / (1.0 + cv_c6)
-        
-        ptp_conf = np.ptp(conf)
-        if ptp_conf > 0:
-            conf = 0.3 + 0.7 * (conf - conf.min()) / ptp_conf
-        else:
-            conf = np.full_like(conf, 0.65)
-            
+        conf = 0.3 + 0.7 * (conf - conf.min()) / (np.ptp(conf) + eps)
         data_adjusted["confidence"] = conf
 
         var = cvar = None
@@ -940,14 +888,13 @@ class ChartFactory:
             template="plotly_dark",
             title=dict(
                 text=f"<b>{title}</b>",
-                font=dict(size=20, color="#e6fff7"), # FIX: Giảm cỡ chữ tiêu đề 1 chút
-                x=0.5,
-                y=0.95 
+                font=dict(size=22, color="#e6fff7"),
+                x=0.5
             ),
             font=dict(size=15, color="#e6fff7"),
             plot_bgcolor="#001016",
             paper_bgcolor="#000c11",
-            margin=dict(l=60, r=40, t=60, b=60), 
+            margin=dict(l=70, r=40, t=80, b=70),
             legend=dict(
                 bgcolor="rgba(0,0,0,0.3)",
                 bordercolor="#00e676",
@@ -989,16 +936,16 @@ class ChartFactory:
                 text=f"<b>{title}</b>",
                 font=dict(size=20, color="#a5ffdc"),
                 x=0.5,
-                y=0.95
+                y=0.98
             ),
             showlegend=True,
             legend=dict(
                 title="<b>Các tiêu chí</b>",
                 font=dict(size=13, color="#e6fff7")
             ),
-            paper_bgcolor="#000c11", # FIX: Đổi paper background
-            plot_bgcolor="#000c11", # FIX: Đổi plot background
-            margin=dict(l=0, r=0, t=60, b=0), 
+            paper_bgcolor="#001016",
+            plot_bgcolor="#001016",
+            margin=dict(l=0, r=0, t=80, b=0),
             height=480
         )
         return fig
@@ -1010,12 +957,9 @@ class ChartFactory:
             "ICC B": "#ffd93d",
             "ICC C": "#6bcf7f"
         }
-        
-        # FIX: Tiêu đề được đặt bên trong
-        chart_title = '💰 Chi phí vs Chất lượng (Cost-Benefit Analysis)'
-        
+
         fig = go.Figure()
-        
+
         for icc in ["ICC C", "ICC B", "ICC A"]:
             df_icc = results[results["icc_package"] == icc]
             fig.add_trace(go.Scatter(
@@ -1041,11 +985,9 @@ class ChartFactory:
         fig.update_xaxes(title="<b>Chi phí ước tính ($)</b>")
         fig.update_yaxes(title="<b>Điểm TOPSIS</b>", range=[0, 1])
 
-        # FIX: Áp dụng theme và tiêu đề vào Plotly Layout
-        fig = ChartFactory._apply_theme(fig, chart_title)
-        fig.update_layout(height=550) 
-        
-        return fig # FIX: Chỉ trả về fig
+        fig = ChartFactory._apply_theme(fig, "💰 Chi phí vs Chất lượng (Cost-Benefit Analysis)")
+        fig.update_layout(height=480)  # đồng bộ chiều cao hàng 1
+        return fig
 
     @staticmethod
     def create_top_recommendations_bar(results: pd.DataFrame) -> go.Figure:
@@ -1083,7 +1025,7 @@ class ChartFactory:
     ) -> go.Figure:
         hist_len = len(historical)
         months_hist = list(range(1, hist_len + 1))
-        next_month = selected_month % 12 + 1 if selected_month in range(1, 13) else 1
+        next_month = selected_month % 12 + 1
         months_fc = [next_month]
 
         fig = go.Figure()
@@ -1108,8 +1050,7 @@ class ChartFactory:
             hovertemplate="Tháng %{x}<br>Dự báo: %{y:.1%}<extra></extra>"
         ))
 
-        # FIX: Tiêu đề đã được đặt bên trong
-        fig = ChartFactory._apply_theme(fig, f"📉 Dự báo rủi ro khí hậu — {route}")
+        fig = ChartFactory._apply_theme(fig, f"Dự báo rủi ro khí hậu — {route}")
 
         fig.update_xaxes(
             title="<b>Tháng</b>",
@@ -1120,15 +1061,14 @@ class ChartFactory:
             tickvals=list(range(1, 13))
         )
 
-        max_val = max(1.0, float(historical.max()) if historical.size > 0 else 0.0)
-        max_val = max(max_val, float(forecast.max()) if forecast.size > 0 else 0.0)
+        max_val = max(float(historical.max()), float(forecast.max()))
         fig.update_yaxes(
             title="<b>Mức rủi ro (0–1)</b>",
             range=[0, max(1.0, max_val * 1.15)],
             tickformat=".0%"
         )
 
-        fig.update_layout(height=450, autosize=False)
+        fig.update_layout(height=480)  # đồng bộ chiều cao hàng 2
         return fig
 
     @staticmethod
@@ -1146,9 +1086,6 @@ class ChartFactory:
                 avg_scores.append(0)
                 avg_costs.append(0)
 
-        # FIX: Tiêu đề được đặt bên trong
-        chart_title = '📊 So sánh 3 loại phương án'
-        
         fig = go.Figure()
 
         fig.add_trace(go.Bar(
@@ -1171,13 +1108,12 @@ class ChartFactory:
             hovertemplate="<b>%{x}</b><br>Chi phí TB: $%{y:,.0f}<extra></extra>"
         ))
 
-        max_cost = max(avg_costs) if avg_costs else 10000
-        y2_range = [0, max(10000, max_cost * 1.2)]
-        
-        # Áp dụng Theme
-        fig = ChartFactory._apply_theme(fig, chart_title)
-
         fig.update_layout(
+            title=dict(
+                text="<b>📊 So sánh 3 loại phương án</b>",
+                font=dict(size=22, color="#e6fff7"),
+                x=0.5
+            ),
             yaxis=dict(
                 title=dict(text="<b>Điểm TOPSIS</b>", font=dict(color="#00e676")),
                 range=[0, 1],
@@ -1187,14 +1123,21 @@ class ChartFactory:
                 title=dict(text="<b>Chi phí ($)</b>", font=dict(color="#ffeb3b")),
                 overlaying="y",
                 side="right",
-                tickfont=dict(color="#ffeb3b"),
-                range=y2_range
+                tickfont=dict(color="#ffeb3b")
             ),
-            margin=dict(l=60, r=60, t=60, b=60), 
-            height=550
+            paper_bgcolor="#000c11",
+            plot_bgcolor="#001016",
+            font=dict(color="#e6fff7"),
+            legend=dict(
+                bgcolor="rgba(0,0,0,0.3)",
+                bordercolor="#00e676",
+                borderwidth=1
+            ),
+            margin=dict(l=60, r=60, t=80, b=60)
         )
-        
-        return fig # FIX: Chỉ trả về fig
+
+        fig.update_layout(height=480)  # đồng bộ chiều cao hàng 1
+        return fig
 
 
 # =============================================================================
@@ -1250,7 +1193,7 @@ class ReportGenerator:
             if var is not None and cvar is not None:
                 pdf.ln(4)
                 pdf.set_font("Arial", "B", 11)
-                pdf.cell(0, 6, f"VaR 95%: ${var:,.0f}    |    CVaR 95%: ${cvar:,.0f}", 0, 1)
+                pdf.cell(0, 6, f"VaR 95%: ${var:,.0f}   |   CVaR 95%: ${cvar:,.0f}", 0, 1)
 
             return pdf.output(dest="S").encode("latin1")
         except Exception as e:
@@ -1295,7 +1238,7 @@ class StreamlitUI:
                         <div class="rc-subtitle">
                             15 phương án (5 Công ty × 3 Gói ICC) · 
                             <span class="rc-tooltip" data-tip="Hệ thống tự điều chỉnh trọng số theo mục tiêu (Tiết kiệm / Cân bằng / An toàn)">Profile-based recommendation</span> ·
-                            <span class.rc-tooltip" data-tip="TOPSIS + Monte Carlo + VaR/CVaR + Fuzzy AHP">Hybrid ESG Risk Engine</span>
+                            <span class="rc-tooltip" data-tip="TOPSIS + Monte Carlo + VaR/CVaR + Fuzzy AHP">Hybrid ESG Risk Engine</span>
                         </div>
                     </div>
                 </div>
@@ -1341,7 +1284,7 @@ class StreamlitUI:
             use_mc = st.checkbox("Monte Carlo (C6)", True,
                                  help="Mô phỏng nhiều kịch bản rủi ro khí hậu để lấy mean & std")
             use_var = st.checkbox("Tính VaR/CVaR", True,
-                                 help="Đo lường tổn thất tối đa & tổn thất trung bình trong tail")
+                                  help="Đo lường tổn thất tối đa & tổn thất trung bình trong tail")
 
             mc_runs = st.number_input("Số lần Monte Carlo", 500, 10_000, 2_000, 500)
             fuzzy_uncertainty = st.slider("Mức bất định Fuzzy (%)", 0, 50, 15) if use_fuzzy else 15
@@ -1370,8 +1313,7 @@ class StreamlitUI:
                 </ul>
                 <p>
                     <b>💡 Gợi ý dùng trong báo cáo NCKH:</b><br>
-                    Trình bày rằng hệ thống áp dụng 
-                    <span class="rc-tooltip" 
+                    Trình bày rằng hệ thống áp dụng <span class="rc-tooltip" 
                     data-tip="Trọng số được xác định trước theo hành vi ra quyết định điển hình của nhà xuất nhập khẩu">
                     hồ sơ ưu tiên (priority profile)</span> để phản ánh mục tiêu thực tế của doanh nghiệp.
                 </p>
@@ -1391,9 +1333,10 @@ class StreamlitUI:
                 🏆 <b>GỢI Ý TỐT NHẤT CHO MỤC TIÊU: {params.priority}</b><br><br>
                 <span style="font-size:1.6rem;">{top['company']} - {top['icc_package']}</span><br><br>
                 💰 Chi phí: <b>${top['estimated_cost']:,.0f}</b> ({top['premium_rate']:.2%} giá trị hàng)<br>
-                📊 Điểm TOPSIS: <b>{top['score']:.3f}</b>
-                <span class="tooltip-icon" data-tip="TOPSIS đo mức độ gần với phương án lý tưởng (ideal best) 
-và xa phương án tệ nhất (ideal worst). Điểm càng cao càng tốt.">i</span> |
+                📊 Điểm TOPSIS 
+                    <span class="rc-tooltip" data-tip="TOPSIS đo mức độ gần với phương án lý tưởng (ideal best) và xa phương án tệ nhất (ideal worst). Điểm càng cao càng tốt.">
+                        (giải thích)
+                    </span>: <b>{top['score']:.3f}</b> | 
                 🎯 Độ tin cậy: <b>{top['confidence']:.2f}</b><br>
                 📦 Loại gợi ý: <b>{top['category']}</b><br>
                 📜 Gói ICC: <b>{ICC_PACKAGES[top['icc_package']]['description']}</b>
@@ -1505,10 +1448,10 @@ và xa phương án tệ nhất (ideal worst). Điểm càng cao càng tốt.">i
             st.markdown(
                 f"""
                 <div class="explanation-box">
-                    <h4>
-                        ⚠️ Đánh giá rủi ro tài chính (VaR / CVaR)
-                        <span class="tooltip-icon" data-tip="VaR 95%: tổn thất tối đa có thể xảy ra với mức tin cậy 95%.
-CVaR 95%: tổn thất trung bình trong 5% trường hợp xấu nhất.">i</span>
+                    <h4>⚠️ Đánh giá rủi ro tài chính 
+                        <span class="rc-tooltip" data-tip="VaR: tổn thất tối đa với mức tin cậy 95%. CVaR: tổn thất trung bình trong 5% trường hợp xấu nhất.">
+                            (VaR / CVaR)
+                        </span>
                     </h4>
                     <ul>
                         <li><b>VaR 95%:</b> ${result.var:,.0f} ({risk_pct:.1f}% giá trị hàng).</li>
@@ -1524,17 +1467,18 @@ CVaR 95%: tổn thất trung bình trong 5% trường hợp xấu nhất.">i</sp
         st.markdown("---")
         st.subheader("📊 Biểu đồ phân tích")
 
-        # FIX: Xóa các tiêu đề st.markdown bên ngoài. Tiêu đề giờ đã nằm TRONG biểu đồ.
-        col_scatter, col_cat = st.columns(2)
-        
+        # 🔧 FIX: tách 2 biểu đồ hàng 1 bằng gap="medium"
+        col_scatter, col_cat = st.columns(2, gap="medium")
+
         with col_scatter:
+            st.markdown("#### 📉 Chi phí – Chất lượng (Cost–Benefit)")
             fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
             st.plotly_chart(fig_scatter, use_container_width=True)
 
         with col_cat:
+            st.markdown("#### 📊 So sánh 3 loại phương án")
             fig_category = self.chart_factory.create_category_comparison(result.results)
             st.plotly_chart(fig_category, use_container_width=True)
-
 
         st.markdown("#### 🏆 Top 5 phương án tốt nhất")
         fig_top5 = self.chart_factory.create_top_recommendations_bar(result.results)
@@ -1542,22 +1486,19 @@ CVaR 95%: tổn thất trung bình trong 5% trường hợp xấu nhất.">i</sp
 
         # Weights + Forecast + Risk metrics
         st.markdown("---")
-        
-        # FIX: Xóa các tiêu đề st.markdown bên ngoài. Tiêu đề giờ đã nằm TRONG biểu đồ.
-        col_w1, col_w2 = st.columns(2)
+
+        # 🔧 FIX: tách 2 biểu đồ hàng 2 bằng gap="medium"
+        col_w1, col_w2 = st.columns(2, gap="medium")
 
         with col_w1:
-            title_pie = "📘 Trọng số tiêu chí"
-            if params.use_fuzzy:
-                title_pie = "📘 Trọng số (sau Fuzzy AHP)"
-            
             fig_weights = self.chart_factory.create_weights_pie(
                 result.weights,
-                title_pie
+                "Trọng số tiêu chí (sau khi áp dụng Fuzzy AHP)" if params.use_fuzzy else "Trọng số tiêu chí"
             )
             st.plotly_chart(fig_weights, use_container_width=True)
 
         with col_w2:
+            st.markdown("#### 📉 Dự báo rủi ro khí hậu theo tháng")
             fig_forecast = self.chart_factory.create_forecast_chart(
                 result.historical, result.forecast, params.route, params.month
             )
