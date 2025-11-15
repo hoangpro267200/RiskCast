@@ -696,6 +696,12 @@ def most_uncertain_criterion(weights: pd.Series, fuzzy_pct: float) -> Tuple[str,
 
 
 def fuzzy_heatmap_premium(diff_map: Dict[str, float]) -> go.Figure:
+    # -------------------------------------------------------------------------
+    # 🌡️ Heatmap mức dao động Fuzzy
+    # - Màu đậm → tiêu chí biến động mạnh
+    # - Màu nhạt → tiêu chí ổn định
+    # 👉 Dùng để xác định tiêu chí có độ bất định cao nhất trong đánh giá
+    # -------------------------------------------------------------------------
     values = list(diff_map.values())
     labels = list(diff_map.keys())
 
@@ -733,6 +739,15 @@ def fuzzy_heatmap_premium(diff_map: Dict[str, float]) -> go.Figure:
 
 
 def fuzzy_chart_premium(weights: pd.Series, fuzzy_pct: float) -> go.Figure:
+    # -------------------------------------------------------------------------
+    # 🎯 Biểu đồ Fuzzy AHP — Thể hiện mức độ bất định (Low–Mid–High)
+    # - Trục X: 6 tiêu chí đánh giá bảo hiểm (C1–C6)
+    # - Trục Y: Giá trị trọng số tương ứng
+    # - Low: Trọng số thấp nhất theo tỉ lệ bất định
+    # - Mid: Trọng số gốc (chuyên gia đưa ra)
+    # - High: Trọng số cao nhất theo tỉ lệ bất định
+    # 👉 Biểu đồ dùng để xem tiêu chí nào nhạy cảm nhất khi thay đổi nhận định
+    # -------------------------------------------------------------------------
     factor = fuzzy_pct / 100.0
     labels = list(weights.index)
     low_vals, mid_vals, high_vals = [], [], []
@@ -957,6 +972,12 @@ class ChartFactory:
 
     @staticmethod
     def create_weights_pie(weights: pd.Series, title: str) -> go.Figure:
+        # -------------------------------------------------------------------------
+        # 📘 Biểu đồ trọng số 6 tiêu chí
+        # - Dùng biểu đồ tròn để xem mức quan trọng của từng tiêu chí
+        # - Nếu bật Fuzzy → trọng số đã được hiệu chỉnh Low–Mid–High (centroid)
+        # 👉 Có thể dùng trong báo cáo để giải thích "vì sao mô hình ra kết quả này"
+        # -------------------------------------------------------------------------
         colors = ['#00e676', '#69f0ae', '#b9f6ca', '#00bfa5', '#1de9b6', '#64ffda']
         labels_full = list(weights.index)
         labels_short = [c.split(':')[0] for c in labels_full]
@@ -994,6 +1015,13 @@ class ChartFactory:
 
     @staticmethod
     def create_cost_benefit_scatter(results: pd.DataFrame) -> go.Figure:
+        # -------------------------------------------------------------------------
+        # 💰📈 Biểu đồ Chi phí – Chất lượng
+        # - Mỗi điểm = 1 phương án (công ty × gói ICC)
+        # - Trục X: Chi phí ước tính (USD)
+        # - Trục Y: Điểm TOPSIS (0–1)
+        # - Mục tiêu: điểm cao + chi phí thấp = lựa chọn tối ưu
+        # -------------------------------------------------------------------------
         color_map = {
             "ICC A": "#ff6b6b",
             "ICC B": "#ffd93d",
@@ -1033,6 +1061,13 @@ class ChartFactory:
 
     @staticmethod
     def create_top_recommendations_bar(results: pd.DataFrame) -> go.Figure:
+        # -------------------------------------------------------------------------
+        # 🏆 Top 5 phương án bảo hiểm tốt nhất
+        # - Thanh ngang biểu thị điểm TOPSIS
+        # - Màu càng đậm → điểm càng cao
+        # - Hiển thị tên công ty + gói ICC
+        # 👉 Giúp người dùng xem nhanh 5 lựa chọn tốt nhất
+        # -------------------------------------------------------------------------
         df = results.head(5).copy()
         df["label"] = df["company"] + " - " + df["icc_package"]
 
@@ -1065,6 +1100,12 @@ class ChartFactory:
         route: str,
         selected_month: int
     ) -> go.Figure:
+        # -------------------------------------------------------------------------
+        # 🌦️ Dự báo rủi ro khí hậu theo tháng
+        # - Đường xanh: dữ liệu rủi ro khí hậu lịch sử theo tuyến (route)
+        # - Điểm vàng: giá trị dự báo tháng kế tiếp (ARIMA hoặc trendline)
+        # 👉 Giúp đánh giá rủi ro môi trường trong thời gian gần
+        # -------------------------------------------------------------------------
         hist_len = len(historical)
         months_hist = list(range(1, hist_len + 1))
         next_month = selected_month % 12 + 1
@@ -1115,6 +1156,15 @@ class ChartFactory:
 
     @staticmethod
     def create_category_comparison(results: pd.DataFrame) -> go.Figure:
+        # -------------------------------------------------------------------------
+        # 📊 So sánh 3 nhóm phương án
+        # - Nhóm 1: 💰 Tiết kiệm (ICC C)
+        # - Nhóm 2: ⚖️ Cân bằng (ICC B)
+        # - Nhóm 3: 🛡️ An toàn (ICC A)
+        # Trục trái: Điểm TOPSIS trung bình của từng loại
+        # Trục phải: Chi phí trung bình của từng loại
+        # 👉 Dùng để xem nhóm nào phù hợp nhất với mục tiêu của doanh nghiệp
+        # -------------------------------------------------------------------------
         categories = ["💰 Tiết kiệm", "⚖️ Cân bằng", "🛡️ An toàn"]
         avg_scores = []
         avg_costs = []
@@ -1236,7 +1286,7 @@ class ReportGenerator:
             if var is not None and cvar is not None:
                 pdf.ln(4)
                 pdf.set_font("Arial", "B", 11)
-                pdf.cell(0, 6, f"VaR 95%: ${var:,.0f}   |   CVaR 95%: ${cvar:,.0f}", 0, 1)
+                pdf.cell(0, 6, f"VaR 95%: ${var:,.0f}    |    CVaR 95%: ${cvar:,.0f}", 0, 1)
 
             return pdf.output(dest="S").encode("latin1")
         except Exception as e:
@@ -1415,7 +1465,12 @@ và xa phương án tệ nhất (ideal worst). Điểm càng cao càng tốt.">i
             unsafe_allow_html=True
         )
 
-        # Top 3 Premium Cards
+        # -------------------------------------------------------------------------
+        # 🥇🥈🥉 Thẻ Premium Top 3
+        # - Hiển thị 3 phương án tốt nhất theo điểm TOPSIS
+        # - Gồm: Công ty, gói ICC, chi phí, điểm, độ tin cậy, rủi ro khí hậu
+        # 👉 Dùng cho presentation: dễ đọc, dễ so sánh, chuyên nghiệp
+        # -------------------------------------------------------------------------
         st.markdown("## 🏅 Top 3 phương án (Premium View)")
 
         cols = st.columns(3)
@@ -1506,11 +1561,11 @@ CVaR 95%: tổn thất trung bình trong 5% trường hợp xấu nhất.">i</sp
                 unsafe_allow_html=True
             )
 
-                # Charts section
+        # Charts section
         st.markdown("---")
-        st.subheader("Biểu đồ phân tích")
+        st.subheader("📊 Biểu đồ phân tích")
 
-        # Biểu đồ 1: Chi phí – Chất lượng (Cost–Benefit)
+        # Biểu đồ 1: Phân tán Chi phí vs Chất lượng (Cost-Benefit)
         st.markdown("""
         <h4 style='display:flex;align-items:center;gap:6px;'>
         📉 Chi phí – Chất lượng (Cost–Benefit)
@@ -1522,7 +1577,7 @@ Trục X: chi phí ước tính; Trục Y: điểm TOPSIS.
         fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
         st.plotly_chart(fig_scatter, use_container_width=True)
 
-        # Biểu đồ 2: So sánh 3 loại phương án
+        # Biểu đồ 2: So sánh 3 loại phương án (Tiết kiệm, Cân bằng, An toàn)
         st.markdown("""
         <h4 style='display:flex;align-items:center;gap:6px;'>
         📊 So sánh 3 loại phương án
@@ -1533,7 +1588,7 @@ của 3 nhóm: Tiết kiệm (ICC C), Cân bằng (ICC B), An toàn (ICC A).">i<
         fig_category = self.chart_factory.create_category_comparison(result.results)
         st.plotly_chart(fig_category, use_container_width=True)
 
-        # Biểu đồ 3: Top 5 phương án tốt nhất
+        # Biểu đồ 3: Top 5 phương án tốt nhất (dạng bar ngang)
         st.markdown("""
         <h4 style='display:flex;align-items:center;gap:6px;'>
         🏆 Top 5 phương án tốt nhất
@@ -1543,7 +1598,7 @@ của 3 nhóm: Tiết kiệm (ICC C), Cân bằng (ICC B), An toàn (ICC A).">i<
         fig_top5 = self.chart_factory.create_top_recommendations_bar(result.results)
         st.plotly_chart(fig_top5, use_container_width=True)
 
-        # Biểu đồ 4: Trọng số tiêu chí
+        # Biểu đồ 4: Biểu đồ tròn thể hiện trọng số các tiêu chí
         st.markdown("""
         <h4 style='display:flex;align-items:center;gap:6px;'>
         📘 Trọng số tiêu chí
@@ -1557,7 +1612,7 @@ Nếu bật Fuzzy AHP, mỗi trọng số được mở rộng thành tam giác 
         )
         st.plotly_chart(fig_weights, use_container_width=True)
 
-        # Biểu đồ 5: Dự báo rủi ro khí hậu
+        # Biểu đồ 5: Biểu đồ đường dự báo rủi ro khí hậu
         st.markdown("""
         <h4 style='display:flex;align-items:center;gap:6px;'>
         📉 Dự báo rủi ro khí hậu theo tháng
@@ -1593,6 +1648,7 @@ mô hình dự báo giá trị tháng kế tiếp (ARIMA hoặc xu hướng tuy�
                 unsafe_allow_html=True
             )
 
+            # Biểu đồ 6: Phân tích tam giác mờ (Low-Mid-High) của Fuzzy AHP
             fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
             st.plotly_chart(fig_fuzzy, use_container_width=True)
 
@@ -1611,6 +1667,7 @@ mô hình dự báo giá trị tháng kế tiếp (ARIMA hoặc xu hướng tuy�
                 unsafe_allow_html=True
             )
 
+            # Biểu đồ 7: Heatmap thể hiện mức độ dao động (bất định) của các trọng số
             st.subheader("🔥 Heatmap mức dao động Fuzzy (Premium Green)")
             fig_heat = fuzzy_heatmap_premium(diff_map)
             st.plotly_chart(fig_heat, use_container_width=True)
