@@ -41,10 +41,8 @@ def app_config():
         page_icon="🛡️",
         layout="wide"
     )
-
-
 def apply_enterprise_css():
-    """AI-LogiCore · Quantum Green · Future Logistics v6.0"""
+    """RISKCAST v6.0 – AI-LogiCore SAFE EDITION | Quantum Green + Future Logistics"""
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
@@ -55,43 +53,44 @@ def apply_enterprise_css():
         box-sizing: border-box;
     }
 
-    /* === BACKGROUND AI QUANTUM === */
+    /* === NỀN CHÍNH + AI PARTICLE (AN TOÀN) === */
     .stApp {
         background: #0a0f0d !important;
         color: #e0fff5 !important;
         font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif !important;
         position: relative;
         overflow: hidden;
+        min-height: 100vh;
     }
 
-    /* AI Particle Background */
+    /* Hiệu ứng hạt lượng tử – Ở DƯỚI nội dung */
     .stApp::before {
         content: '';
         position: absolute;
         top: 0; left: 0; right: 0; bottom: 0;
         background: 
-            radial-gradient(circle at 20% 80%, rgba(0,255,153,0.08) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(0,191,165,0.08) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(0,230,118,0.05) 0%, transparent 50%);
+            radial-gradient(circle at 20% 80%, rgba(0,255,153,0.09) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(0,191,165,0.09) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(0,230,118,0.06) 0%, transparent 50%);
         pointer-events: none;
-        z-index: 0;
-        animation: quantum-pulse 8s ease-in-out infinite alternate;
+        z-index: -1 !important;
+        animation: quantum-pulse 10s ease-in-out infinite alternate;
     }
 
     @keyframes quantum-pulse {
         0% { opacity: 0.6; transform: scale(1); }
-        100% { opacity: 1; transform: scale(1.05); }
+        100% { opacity: 1; transform: scale(1.03); }
     }
 
-    /* AI Scanning Line */
+    /* Dòng quét AI – AN TOÀN, KHÔNG CHE */
     .stApp::after {
         content: '';
         position: absolute;
         top: 0; left: 0; right: 0;
         height: 2px;
         background: linear-gradient(90deg, transparent, #00ff99, transparent);
-        animation: scan-line 4s linear infinite;
-        z-index: 1;
+        animation: scan-line 5s linear infinite;
+        z-index: -1 !important;
         pointer-events: none;
     }
 
@@ -100,6 +99,7 @@ def apply_enterprise_css():
         100% { transform: translateY(200vh); }
     }
 
+    /* === CONTAINER CHÍNH === */
     .block-container {
         padding-top: 1.5rem !important;
         padding-bottom: 4rem !important;
@@ -108,14 +108,40 @@ def apply_enterprise_css():
         z-index: 2;
     }
 
+    /* === HEADER AI-LOGICORE === */
+    .rc-header {
+        padding: 1.4rem 1.8rem;
+        border-radius: 24px;
+        background: linear-gradient(135deg, rgba(10,30,25,0.95), rgba(5,18,15,0.98));
+        border: 1px solid rgba(0,255,153,0.3);
+        box-shadow: 
+            0 12px 32px rgba(0,0,0,0.6),
+            0 0 30px rgba(0,255,153,0.25),
+            inset 0 1px 0 rgba(255,255,255,0.1);
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1.6rem;
+        position: relative;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        z-index: 3;
+    }
+
+    .rc-header-left {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+    }
+
     /* === LOGO AI SHIELD === */
     .rc-logo {
         width: 88px; height: 88px;
         border-radius: 22px;
-        background: conic-gradient(from 0deg at 50% 50%, 
-            #00ff99, #00bfa5, #00e676, #00ff99);
+        background: conic-gradient(from 0deg at 50% 50%, #00ff99, #00bfa5, #00e676, #00ff99);
         display: flex; align-items: center; justify-content: center;
-        font-weight: 900; font-size: 2rem; color: #001a12;
+        font-weight: 900; font-size: 1.4rem; color: #001a12;
         border: 3px solid #00ff99;
         box-shadow: 
             0 0 30px rgba(0,255,153,0.7),
@@ -130,32 +156,13 @@ def apply_enterprise_css():
         content: 'AI';
         font-family: 'JetBrains Mono', monospace;
         font-weight: 900;
-        font-size: 1.4rem;
         color: #001a12;
         text-shadow: 0 0 10px #00ff99;
     }
 
     @keyframes ai-core {
         0%, 100% { box-shadow: 0 0 30px rgba(0,255,153,0.7), 0 0 60px rgba(0,255,153,0.4); }
-        50% { box-shadow: 0 0 40px rgba(0,255,153,0.9), 0 0 80px rgba(0,255,153,0.6), 0 0 100px rgba(0,255,153,0.3); }
-    }
-
-    /* === HEADER AI-LOGICORE === */
-    .rc-header {
-        padding: 1.4rem 1.8rem;
-        border-radius: 24px;
-        background: linear-gradient(135deg, rgba(10,30,25,0.95), rgba(5,18,15,0.98));
-        border: 1px solid rgba(0,255,153,0.3);
-        box-shadow: 
-            0 12px 32px rgba(0,0,0,0.6),
-            0 0 30px rgba(0,255,153,0.25),
-            inset 0 1px 0 rgba(255,255,255,0.1);
-        margin-bottom: 2rem;
-        display: flex; justify-content: space-between; align-items: center;
-        gap: 1.6rem;
-        position: relative;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        50% { box-shadow: 0 0 40px rgba(0,255,153,0.9), 0 0 80px rgba(0,255,153,0.6); }
     }
 
     .rc-title {
@@ -166,7 +173,7 @@ def apply_enterprise_css():
         -webkit-background-clip: text;
         color: transparent;
         text-transform: uppercase;
-        text-shadow: 0 0 20px rgba(0,255,153,0.4);
+        text-shadow: 0 0 20px rgba(0,255,153,0.3);
     }
 
     .rc-subtitle {
@@ -186,9 +193,7 @@ def apply_enterprise_css():
         font-weight: 800;
         font-size: 0.92rem;
         letter-spacing: 0.03em;
-        box-shadow: 
-            0 0 20px rgba(0,255,153,0.6),
-            0 8px 20px rgba(0,0,0,0.5);
+        box-shadow: 0 0 20px rgba(0,255,153,0.6), 0 8px 20px rgba(0,0,0,0.5);
         white-space: nowrap;
         position: relative;
         overflow: hidden;
@@ -208,12 +213,13 @@ def apply_enterprise_css():
         100% { left: 100%; }
     }
 
-    /* === SIDEBAR AI === */
+    /* === SIDEBAR === */
     section[data-testid="stSidebar"] {
         background: linear-gradient(180deg, #0a1a15, #081310) !important;
         border-right: 1px solid rgba(0,255,153,0.3);
         box-shadow: 10px 0 30px rgba(0,0,0,0.8);
         backdrop-filter: blur(10px);
+        z-index: 10;
     }
 
     section[data-testid="stSidebar"] h1,
@@ -223,7 +229,12 @@ def apply_enterprise_css():
         text-shadow: 0 0 10px rgba(0,255,153,0.4);
     }
 
-    /* === BUTTON AI === */
+    section[data-testid="stSidebar"] label {
+        color: #d4fff1 !important;
+        font-weight: 600 !important;
+    }
+
+    /* === NÚT AI === */
     .stButton > button {
         background: linear-gradient(135deg, #00ff99, #00e676, #00bfa5) !important;
         color: #00140d !important;
@@ -239,6 +250,7 @@ def apply_enterprise_css():
         font-size: 1rem !important;
         position: relative;
         overflow: hidden;
+        z-index: 5;
     }
 
     .stButton > button:hover {
@@ -250,24 +262,19 @@ def apply_enterprise_css():
         border-color: #00ff99 !important;
     }
 
-    .stButton > button:active {
-        transform: translateY(0) scale(0.98);
-    }
-
-    /* === CARD GLASSMORPHISM === */
+    /* === CARD GLASS === */
     .rc-card {
         background: rgba(10, 28, 24, 0.75);
         padding: 1.4rem 1.6rem;
         border-radius: 20px;
         border: 1px solid rgba(0,255,153,0.25);
-        box-shadow: 
-            0 8px 32px rgba(0,0,0,0.5),
-            0 0 20px rgba(0,255,153,0.15);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(0,255,153,0.15);
         margin-bottom: 1.5rem;
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         position: relative;
         transition: all 0.3s ease;
+        z-index: 3;
     }
 
     .rc-card:hover {
@@ -276,7 +283,7 @@ def apply_enterprise_css():
         border-color: rgba(0,255,153,0.5);
     }
 
-    /* === RESULT BOX AI === */
+    /* === RESULT BOX === */
     .result-box {
         background: linear-gradient(135deg, #00ff99, #00bfa5, #00e676);
         color: #00130d !important;
@@ -292,29 +299,10 @@ def apply_enterprise_css():
         margin-top: 0.8rem;
         position: relative;
         overflow: hidden;
+        z-index: 4;
     }
 
-    .result-box::before {
-        content: '';
-        position: absolute;
-        top: -50%; left: -50%;
-        width: 200%; height: 200%;
-        background: repeating-linear-gradient(
-            45deg,
-            transparent,
-            transparent 10px,
-            rgba(255,255,255,0.05) 10px,
-            rgba(255,255,255,0.05) 20px
-        );
-        animation: ai-grid 15s linear infinite;
-    }
-
-    @keyframes ai-grid {
-        0% { transform: translate(0, 0) rotate(0deg); }
-        100% { transform: translate(50px, 50px) rotate(45deg); }
-    }
-
-    /* === TOOLTIP AI VOICE === */
+    /* === TOOLTIP AI === */
     .tooltip-icon {
         display: inline-flex;
         align-items: center;
@@ -331,6 +319,7 @@ def apply_enterprise_css():
         box-shadow: 0 0 12px rgba(0,255,153,0.3);
         position: relative;
         transition: all 0.2s ease;
+        z-index: 999;
     }
 
     .tooltip-icon:hover {
@@ -353,60 +342,59 @@ def apply_enterprise_css():
         bottom: -10px;
         font-size: 0.88rem;
         line-height: 1.4rem;
-        z-index: 999;
-        box-shadow: 0 0 25px rgba(0,255,153,0.4);
+        z-index: 9999;
         font-family: 'JetBrains Mono', monospace;
+        box-shadow: 0 0 25px rgba(0,255,153,0.4);
     }
 
-    /* === TOP1 CARD 3D FLIP === */
-    .top1-card {
-        perspective: 1000px;
-        position: relative;
+    /* === DATAFRAME & METRIC === */
+    div[data-testid="stDataFrame"] {
+        border-radius: 16px !important;
+        border: 1px solid rgba(0,255,153,0.3) !important;
+        overflow: hidden !important;
+        box-shadow: 0 0 20px rgba(0,0,0,0.5) !important;
+        z-index: 2;
     }
 
-    .top1-card-inner {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        transform-style: preserve-3d;
+    [data-testid="stMetricValue"] {
+        color: #76ff03 !important;
+        font-weight: 900 !important;
+        font-size: 1.1rem !important;
     }
 
-    .top1-card:hover .top1-card-inner {
-        transform: rotateY(180deg);
-    }
-
-    .top1-face, .top1-back {
-        position: absolute;
-        width: 100%; height: 100%;
-        backface-visibility: hidden;
+    /* === TOP CARDS === */
+    .top3-card {
+        background: radial-gradient(circle at top left, rgba(0,255,153,0.12), rgba(0,0,0,0.78));
+        border: 1px solid rgba(0,255,153,0.45);
+        padding: 18px;
         border-radius: 20px;
-        padding: 20px;
-        box-shadow: 0 0 30px rgba(255,215,0,0.5);
+        box-shadow: 0 0 18px rgba(0,255,153,0.18);
+        margin-bottom: 18px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        z-index: 3;
     }
 
-    .top1-face {
+    .top1-card {
         background: radial-gradient(circle at top left, rgba(255,215,0,0.25), rgba(0,0,0,0.9));
         border: 2px solid rgba(255,215,0,0.8);
+        box-shadow: 0 0 30px rgba(255,215,0,0.5);
+        animation: gold-pulse 2.5s ease-in-out infinite alternate;
     }
 
-    .top1-back {
-        background: linear-gradient(135deg, #001a12, #002018);
-        border: 2px solid #00ff99;
-        transform: rotateY(180deg);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: #e0fff5;
-        font-size: 0.9rem;
+    @keyframes gold-pulse {
+        0% { box-shadow: 0 0 15px rgba(255,215,0,0.4); }
+        100% { box-shadow: 0 0 35px rgba(255,215,0,0.8); }
     }
 
     /* === MOBILE === */
     @media (max-width: 900px) {
-        .rc-header { flex-direction: column; align-items: center; text-align: center; }
+        .rc-header { flex-direction: column; align-items: center; text-align: center; gap: 1rem; }
         .rc-title { font-size: 1.5rem; }
+        .rc-logo { width: 70px; height: 70px; font-size: 1.2rem; }
         .stButton > button { padding: 0.6rem 1.6rem; font-size: 0.95rem; }
+        .block-container { padding: 1rem !important; }
     }
     </style>
     """, unsafe_allow_html=True)
