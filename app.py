@@ -42,610 +42,648 @@ def app_config():
         layout="wide"
     )
 def apply_enterprise_css():
-    """RISKCAST Ultra Luxury v3 – Max Glow (Black + Neon Green)."""
+    """RISKCAST Ultra Luxury v3 – Max Glow (Black + Neon Green) - Fixed Version."""
     st.markdown(
         """
-       <style>
-/* =========================================================
-   RISKCAST ULTRA LUXURY NEON v3.3 – Max Glow (Black + Neon Green)
-   Author: Kai assistant for Bùi Xuân Hoàng
-   Theme: Luxury Black + Bright Neon Green
-   - NÂNG ĐỘ SÁNG NỀN TỔNG THỂ và RESULT BOX.
-   - GIẢM GLOW nhẹ cho chuyên nghiệp.
-   - TỐI ƯU FIX chart Plotly bị phóng to / tràn khung.
-========================================================= */
+        <style>
+        /* =========================================================
+           GLOBAL RESET + TYPO
+        ========================================================= */
+        * {
+            text-rendering: optimizeLegibility !important;
+            -webkit-font-smoothing: antialiased !important;
+            scroll-behavior: smooth;
+        }
 
-/* ===========================
-   GLOBAL RESET + TYPO
-=========================== */
-* {
-    text-rendering: optimizeLegibility !important;
-    -webkit-font-smoothing: antialiased !important;
-    scroll-behavior: smooth;
-}
+        html, body {
+            background: #020608 !important;
+        }
 
-html, body {
-    background: #05090B !important;
-}
+        .stApp {
+            background: radial-gradient(circle at top,
+                        #041619 0%,
+                        #020608 40%,
+                        #000000 100%) !important;
+            color: #e9fff4 !important;
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif !important;
+            font-size: 16px !important;
+        }
 
-/* App background – sáng hơn một chút */
-.stApp {
-    background: radial-gradient(circle at top,
-                                #103236 0%, /* Sáng hơn một chút */
-                                #072629 38%, /* Sáng hơn một chút */
-                                #000000 100%) !important;
-    color: #e9fff4 !important;
-    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif !important;
-    font-size: 16px !important;
-}
+        .block-container {
+            padding-top: 1.4rem !important;
+            padding-bottom: 3.4rem !important;
+            max-width: 1500px !important;
+        }
 
-/* Giới hạn độ rộng nội dung chính */
-.block-container {
-    padding-top: 1.4rem !important;
-    padding-bottom: 3.4rem !important;
-    max-width: 1500px !important;
-}
+        h1, h2, h3, h4, h5 {
+            font-weight: 800 !important;
+            letter-spacing: 0.02em;
+            color: #eafff8 !important;
+        }
 
-h1, h2, h3, h4, h5 {
-    font-weight: 800 !important;
-    letter-spacing: 0.02em;
-    color: #eafff8 !important;
-}
+        /* =========================================================
+           LUXURY GLOW UTILITIES
+        ========================================================= */
+        .neon-text {
+            background: linear-gradient(90deg, #eafff8, #9dffd0, #e0fff7);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
 
-/* ===========================
-   NEON UTILITIES
-=========================== */
-.neon-text {
-    background: linear-gradient(90deg, #eafff8, #9dffd0, #e0fff7);
-    -webkit-background-clip: text;
-    color: transparent;
-}
+        .neon-soft {
+            text-shadow: 0 0 14px rgba(0,255,153,0.45);
+        }
 
-/* giảm glow 1 xíu cho đỡ gắt */
-.neon-soft {
-    text-shadow: 0 0 10px rgba(0,255,153,0.35); /* Giảm nhẹ glow */
-}
+        .neon-hard {
+            text-shadow:
+                0 0 4px rgba(0,255,153,0.9),
+                0 0 10px rgba(0,255,153,0.8),
+                0 0 25px rgba(0,255,153,0.7);
+        }
 
-.neon-hard {
-    text-shadow:
-        0 0 3px rgba(0,255,153,0.8), /* Giảm nhẹ glow */
-        0 0 8px rgba(0,255,153,0.7), /* Giảm nhẹ glow */
-        0 0 20px rgba(0,255,153,0.6); /* Giảm nhẹ glow */
-}
+        .glow-ring {
+            box-shadow:
+                0 0 0 1px rgba(0,255,153,0.25),
+                0 0 20px rgba(0,255,153,0.25),
+                0 0 40px rgba(0,255,153,0.30);
+        }
 
-.glow-ring {
-    box-shadow:
-        0 0 0 1px rgba(0,255,153,0.20), /* Giảm nhẹ glow */
-        0 0 16px rgba(0,255,153,0.20), /* Giảm nhẹ glow */
-        0 0 30px rgba(0,255,153,0.25); /* Giảm nhẹ glow */
-}
+        .glass {
+            background: linear-gradient(135deg,
+                rgba(6, 24, 20, 0.94),
+                rgba(0, 0, 0, 0.98)) !important;
+            border-radius: 18px;
+            border: 1px solid rgba(0,255,153,0.22);
+            box-shadow:
+                0 16px 40px rgba(0,0,0,0.85),
+                0 0 30px rgba(0,255,153,0.22);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
 
-/* Glass panel tổng quát */
-.glass {
-    background: linear-gradient(135deg,
-        rgba(6, 24, 20, 0.92),
-        rgba(0, 0, 0, 0.96)) !important;
-    border-radius: 18px;
-    border: 1px solid rgba(0,255,153,0.20);
-    box-shadow:
-        0 12px 30px rgba(0,0,0,0.85), /* Giảm nhẹ shadow */
-        0 0 20px rgba(0,255,153,0.18); /* Giảm nhẹ glow */
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-}
+        /* =========================================================
+           HEADER – ULTRA LUXURY
+        ========================================================= */
+        .rc-header {
+            position: relative;
+            padding: 1.3rem 1.7rem;
+            margin-bottom: 2.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.6rem;
+            overflow: hidden;
+        }
 
-/* ===========================
-   HEADER – ULTRA LUXURY
-=========================== */
-.rc-header {
-    position: relative;
-    padding: 1.3rem 1.7rem;
-    margin-bottom: 2.1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1.6rem;
-    overflow: hidden;
-    border-radius: 22px;
-    background: radial-gradient(circle at 10% 0%,
-                                 rgba(0,255,153,0.14) 0%, /* Giảm glow */
-                                 rgba(0,0,0,0.98) 55%);
-    box-shadow:
-        0 0 0 1px rgba(0,255,153,0.30), /* Giảm glow */
-        0 16px 40px rgba(0,0,0,0.95); /* Giảm shadow */
-}
+        .rc-header::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: 22px;
+            background: radial-gradient(circle at 10% 0%,
+                        rgba(0,255,153,0.16) 0%,
+                        transparent 45%),
+                        radial-gradient(circle at 90% 100%,
+                        rgba(0,255,204,0.18) 0%,
+                        transparent 55%);
+            opacity: 0.85;
+            pointer-events: none;
+        }
 
-.rc-header-left {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    gap: 1.3rem;
-}
+        .rc-header::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 22px;
+            border: 1px solid rgba(0,255,153,0.45);
+            box-shadow:
+                0 0 0 1px rgba(0,255,153,0.25),
+                0 0 18px rgba(0,255,153,0.55),
+                0 18px 45px rgba(0,0,0,0.95);
+            pointer-events: none;
+        }
 
-/* Logo khiên RISKCAST */
-.rc-logo {
-    width: 82px;
-    height: 82px;
-    border-radius: 22px;
-    background:
-        radial-gradient(circle at 30% 20%,
-            #ffffff 0%, #d7fff4 14%, #9affdf 34%, transparent 60%),
-        radial-gradient(circle at 70% 80%,
-            #00ffcc 0%, #00e6aa 35%, #00664a 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 900;
-    font-size: 1.8rem;
-    color: #00140d;
-    border: 3px solid #c4ffea;
-    box-shadow:
-        0 0 10px rgba(0,255,153,0.7), /* Giảm glow */
-        0 0 30px rgba(0,255,153,0.75); /* Giảm glow */
-    text-shadow:
-        0 0 4px rgba(0,0,0,0.55),
-        0 0 14px rgba(0,255,153,0.9); /* Giảm glow */
-}
+        .rc-header-left {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 1.3rem;
+        }
 
-/* Tiêu đề */
-.rc-title {
-    font-size: 1.55rem;
-    font-weight: 900;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    background: linear-gradient(90deg,
-                                 #f4fff9,
-                                 #c2ffe0,
-                                 #e2fff7);
-    -webkit-background-clip: text;
-    color: transparent;
-}
+        .rc-logo {
+            width: 82px;
+            height: 82px;
+            border-radius: 22px;
+            background:
+                radial-gradient(circle at 30% 20%,
+                    #ffffff 0%, #d7fff4 14%, #9affdf 34%, transparent 60%),
+                radial-gradient(circle at 70% 80%,
+                    #00ffcc 0%, #00e6aa 35%, #00664a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.8rem;
+            color: #00140d;
+            border: 3px solid #c4ffea;
+            box-shadow:
+                0 0 12px rgba(0,255,153,0.75),
+                0 0 38px rgba(0,255,153,0.85);
+            text-shadow:
+                0 0 4px rgba(0,0,0,0.55),
+                0 0 16px rgba(0,255,153,0.95);
+        }
 
-.rc-subtitle {
-    margin-top: 4px;
-    font-size: 0.95rem;
-    color: #c4ffea;
-    opacity: 0.95;
-    font-weight: 500;
-}
+        .rc-title {
+            font-size: 1.55rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: linear-gradient(90deg,
+                        #f4fff9,
+                        #c2ffe0,
+                        #e2fff7);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
 
-/* Badge Enterprise */
-.rc-badge {
-    position: relative;
-    z-index: 2;
-    background: linear-gradient(135deg, #00ff99, #00e676, #00bfa5);
-    padding: 0.7rem 1.5rem;
-    border-radius: 999px;
-    color: #00140c;
-    font-weight: 800;
-    font-size: 0.92rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    box-shadow:
-        0 0 16px rgba(0,255,153,0.6), /* Giảm glow */
-        0 12px 30px rgba(0,0,0,0.9); /* Giảm shadow */
-    white-space: nowrap;
-}
+        .rc-subtitle {
+            margin-top: 4px;
+            font-size: 0.95rem;
+            color: #c4ffea;
+            opacity: 0.95;
+            font-weight: 500;
+        }
 
-/* ===========================
-   SIDEBAR – BRIGHT PREMIUM GREEN
-=========================== */
-section[data-testid="stSidebar"] {
-    background: radial-gradient(circle at top,
-                                #083025 0%, /* Sáng hơn */
-                                #061B18 45%, /* Sáng hơn */
-                                #000000 100%) !important;
-    border-right: 1px solid rgba(0,255,153,0.24); /* Giảm border */
-    box-shadow: 8px 0 25px rgba(0,0,0,0.85); /* Giảm shadow */
-}
+        .rc-badge {
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(135deg, #00ff99, #00e676, #00bfa5);
+            padding: 0.7rem 1.5rem;
+            border-radius: 999px;
+            color: #00140c;
+            font-weight: 800;
+            font-size: 0.92rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            box-shadow:
+                0 0 18px rgba(0,255,153,0.7),
+                0 14px 36px rgba(0,0,0,0.9);
+            white-space: nowrap;
+        }
 
-section[data-testid="stSidebar"] > div {
-    padding-top: 0.5rem;
-}
+        /* =========================================================
+           SIDEBAR – LUXURY PANEL
+        ========================================================= */
+        section[data-testid="stSidebar"] {
+            background: radial-gradient(circle at top,
+                        #031914 0%,
+                        #020806 45%,
+                        #000000 100%) !important;
+            border-right: 1px solid rgba(0,255,153,0.26);
+            box-shadow: 10px 0 30px rgba(0,0,0,0.85);
+        }
 
-section[data-testid="stSidebar"] h1,
-section[data-testid="stSidebar"] h2,
-section[data-testid="stSidebar"] h3 {
-    color: #c8ffec !important;
-    font-weight: 800 !important;
-}
+        section[data-testid="stSidebar"] > div {
+            padding-top: 0.5rem;
+        }
 
-section[data-testid="stSidebar"] label {
-    color: #e0fff4 !important;
-    font-weight: 600 !important;
-}
+        section[data-testid="stSidebar"] h1,
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3 {
+            color: #c8ffec !important;
+            font-weight: 800 !important;
+        }
 
-/* Input trong sidebar */
-section[data-testid="stSidebar"]
-    .stTextInput > div > div > input,
-section[data-testid="stSidebar"]
-    .stNumberInput input,
-section[data-testid="stSidebar"]
-    .stSelectbox > div > div {
-    background: rgba(0,0,0,0.6) !important;
-    border-radius: 10px !important;
-    border: 1px solid rgba(0,255,153,0.35) !important; /* Giảm border */
-    color: #e9fff4 !important;
-    box-shadow: 0 0 0 1px rgba(0,255,153,0.20); /* Giảm shadow */
-}
+        section[data-testid="stSidebar"] label {
+            color: #e0fff4 !important;
+            font-weight: 600 !important;
+        }
 
-/* Nút sidebar */
-section[data-testid="stSidebar"] .stButton > button {
-    background: linear-gradient(135deg, #00ff99, #00e676, #00c853) !important;
-    color: #00140d !important;
-    font-weight: 900 !important;
-    border-radius: 999px !important;
-    border: none !important;
-    padding: 0.7rem 1.8rem !important;
-    box-shadow:
-        0 0 16px rgba(0,255,153,0.6), /* Giảm glow */
-        0 10px 25px rgba(0,0,0,0.9) !important; /* Giảm shadow */
-    transition: all 0.15s ease-out !important;
-    font-size: 0.98rem !important;
-}
+        section[data-testid="stSidebar"] .stSlider label {
+            font-size: 0.9rem !important;
+        }
 
-section[data-testid="stSidebar"] .stButton > button:hover {
-    transform: translateY(-1px) scale(1.02);
-    box-shadow:
-        0 0 22px rgba(0,255,153,0.8), /* Giảm glow */
-        0 14px 35px rgba(0,0,0,0.95) !important; /* Giảm shadow */
-}
+        /* Sidebar inputs */
+        section[data-testid="stSidebar"] 
+        .stTextInput > div > div > input,
+        section[data-testid="stSidebar"]
+        .stNumberInput input,
+        section[data-testid="stSidebar"]
+        .stSelectbox > div > div {
+            background: rgba(0,0,0,0.6) !important;
+            border-radius: 10px !important;
+            border: 1px solid rgba(0,255,153,0.4) !important;
+            color: #e9fff4 !important;
+            box-shadow: 0 0 0 1px rgba(0,255,153,0.24);
+        }
 
-/* ===========================
-   CORE CARDS / SECTIONS
-=========================== */
-.rc-card {
-    margin-bottom: 1.5rem;
-    position: relative;
-    padding: 1.25rem 1.5rem;
-    border-radius: 18px;
-    background: radial-gradient(circle at top left,
-                                 rgba(0,255,153,0.14), /* Giảm glow */
-                                 rgba(0,0,0,0.96));
-    border: 1px solid rgba(0,255,153,0.22); /* Giảm border */
-    box-shadow:
-        0 0 12px rgba(0,255,153,0.22), /* Giảm glow */
-        0 10px 22px rgba(0,0,0,0.9); /* Giảm shadow */
-}
+        /* Sidebar button */
+        section[data-testid="stSidebar"] .stButton > button {
+            background: linear-gradient(135deg, #00ff99, #00e676, #00c853) !important;
+            color: #00140d !important;
+            font-weight: 900 !important;
+            border-radius: 999px !important;
+            border: none !important;
+            padding: 0.7rem 1.8rem !important;
+            box-shadow:
+                0 0 18px rgba(0,255,153,0.65),
+                0 12px 30px rgba(0,0,0,0.9) !important;
+            transition: all 0.15s ease-out !important;
+            font-size: 0.98rem !important;
+        }
 
-/* Box kết quả chính - Sáng hơn và rực rỡ hơn */
-.result-box {
-    position: relative;
-    padding: 1.7rem 2.1rem;
-    border-radius: 20px;
-    background:
-        radial-gradient(circle at top left,
-            rgba(0,255,153,0.45), /* Tăng cường độ sáng */
-            rgba(0,0,0,0.96)),    /* Giảm đen ở góc */
-        radial-gradient(circle at bottom right,
-            rgba(0,255,204,0.28), /* Tăng cường độ sáng */
-            rgba(0,0,0,0.98));    /* Giảm đen ở góc */
-    color: #00130d !important;
-    border: 1px solid rgba(0,255,153,0.60); /* Tăng cường độ border */
-    box-shadow:
-        0 0 24px rgba(0,255,153,0.55), /* Tăng glow */
-        0 20px 48px rgba(0,0,0,0.98); /* Tăng shadow */
-}
+        section[data-testid="stSidebar"] .stButton > button:hover {
+            transform: translateY(-1px) scale(1.02);
+            box-shadow:
+                0 0 26px rgba(0,255,153,0.9),
+                0 16px 40px rgba(0,0,0,0.95) !important;
+        }
 
-.result-box b {
-    color: #00130d !important;
-}
+        /* =========================================================
+           CORE CARDS / SECTIONS - BRIGHTENED BACKGROUNDS
+        ========================================================= */
+        .rc-card {
+            margin-bottom: 1.5rem;
+        }
 
-/* Box giải thích */
-.explanation-box {
-    margin-top: 0.8rem;
-    padding: 1.2rem 1.5rem;
-    border-radius: 18px;
-    background: linear-gradient(135deg,
-                                 rgba(1, 20, 14, 0.98),
-                                 rgba(0, 0, 0, 0.98));
-    border-left: 4px solid #00e676;
-    border-right: 1px solid rgba(0,255,153,0.30); /* Giảm border */
-    box-shadow:
-        0 0 14px rgba(0,255,153,0.22), /* Giảm glow */
-        0 10px 22px rgba(0,0,0,0.9); /* Giảm shadow */
-}
+        .rc-card,
+        .result-box,
+        .explanation-box,
+        .top3-card,
+        .rc-risk-card {
+            position: relative;
+        }
 
-.explanation-box h4 {
-    margin-bottom: 0.5rem;
-    color: #a5ffdc !important;
-}
+        .rc-card::before,
+        .result-box::before,
+        .explanation-box::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 18px;
+            border: 1px solid rgba(0,255,153,0.25);
+            box-shadow:
+                0 0 14px rgba(0,255,153,0.25),
+                0 12px 26px rgba(0,0,0,0.9);
+            opacity: 0.9;
+            pointer-events: none;
+        }
 
-.explanation-box p,
-.explanation-box li {
-    color: #e0f2f1 !important;
-    font-weight: 500;
-}
+        .rc-card > *:not(.rc-card::before),
+        .result-box > *:not(.result-box::before),
+        .explanation-box > *:not(.explanation-box::before) {
+            position: relative;
+            z-index: 2;
+        }
 
-/* ===========================
-   TOOLTIP (TEXT + ICON)
-=========================== */
-.rc-tooltip {
-    text-decoration: underline dotted #00e676;
-    cursor: pointer;
-    position: relative;
-    font-weight: 600;
-    color: #aaffdd;
-}
+        .rc-card {
+            padding: 1.25rem 1.5rem;
+            background: radial-gradient(circle at top left,
+                        rgba(0,255,153,0.22),
+                        rgba(10,35,28,0.92)),
+                        linear-gradient(135deg,
+                        rgba(5,25,20,0.95),
+                        rgba(0,15,12,0.96));
+            border-radius: 18px;
+        }
 
-.rc-tooltip:hover::after {
-    content: attr(data-tip);
-    position: absolute;
-    left: 0;
-    bottom: -2.9rem;
-    background: rgba(0, 5, 4, 0.98);
-    padding: 9px 12px;
-    border-radius: 10px;
-    border: 1px solid rgba(0,255,153,0.50); /* Giảm border */
-    font-size: 0.84rem;
-    color: #d8fff0;
-    width: max-content;
-    max-width: 320px;
-    z-index: 999;
-    box-shadow:
-        0 0 12px rgba(0,255,153,0.4), /* Giảm glow */
-        0 16px 28px rgba(0,0,0,0.9); /* Giảm shadow */
-}
+        .result-box {
+            padding: 1.7rem 2.1rem;
+            border-radius: 20px;
+            background:
+                radial-gradient(circle at top left,
+                    rgba(0,255,153,0.48),
+                    rgba(15,50,40,0.90)),
+                radial-gradient(circle at bottom right,
+                    rgba(0,255,204,0.35),
+                    rgba(10,40,32,0.92));
+            color: #001a10 !important;
+        }
 
-/* Icon ? tooltip */
-.tooltip-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 6px;
-    background: radial-gradient(circle,
-                                 rgba(0,255,153,0.16), /* Giảm glow */
-                                 rgba(0, 36, 26, 0.95));
-    color: #a5ffdc;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    font-size: 12px;
-    cursor: help;
-    border: 1px solid rgba(0,255,153,0.55); /* Giảm border */
-    box-shadow:
-        0 0 7px rgba(0,255,153,0.3), /* Giảm glow */
-        0 0 14px rgba(0,255,153,0.35); /* Giảm glow */
-    position: relative;
-    font-weight: 700;
-}
+        .result-box b {
+            color: #001a10 !important;
+        }
 
-.tooltip-icon:hover {
-    background: radial-gradient(circle,
-                                 rgba(0,255,160,0.30), /* Giảm glow */
-                                 rgba(0, 40, 28, 0.95));
-}
+        .explanation-box {
+            margin-top: 0.8rem;
+            padding: 1.2rem 1.5rem;
+            border-radius: 18px;
+            background: linear-gradient(135deg,
+                        rgba(5, 35, 25, 0.92),
+                        rgba(8, 28, 22, 0.94));
+            border-left: 4px solid #00e676;
+        }
 
-.tooltip-icon:hover::after {
-    content: attr(data-tip);
-    position: absolute;
-    background: rgba(0, 8, 6, 0.98);
-    border: 1px solid rgba(0,255,153,0.55); /* Giảm border */
-    padding: 10px 14px;
-    border-radius: 10px;
-    color: #e0fff5;
-    width: 260px;
-    left: 22px;
-    bottom: -4px;
-    font-size: 0.82rem;
-    line-height: 1.35rem;
-    z-index: 999;
-    box-shadow:
-        0 0 18px rgba(0,255,153,0.5), /* Giảm glow */
-        0 16px 30px rgba(0,0,0,0.95); /* Giảm shadow */
-}
+        .explanation-box h4 {
+            margin-bottom: 0.5rem;
+            color: #a5ffdc !important;
+        }
 
-/* ===========================
-   TOP 3 CARDS – MEDAL GLOW
-=========================== */
-.top3-card {
-    position: relative;
-    padding: 1.1rem 1.1rem 1.0rem 1.1rem;
-    border-radius: 18px;
-    background: radial-gradient(circle at top left,
-                                 rgba(0,255,153,0.18), /* Sáng hơn một chút */
-                                 rgba(0,0,0,0.96));
-    border: 1px solid rgba(0,255,153,0.50); /* Dày hơn, rõ hơn */
-    box-shadow:
-        0 0 18px rgba(0,255,153,0.22), /* Tăng nhẹ glow */
-        0 16px 40px rgba(0,0,0,0.9);
-    text-align: center;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    transition: transform 0.18s ease-out,
-                box-shadow 0.18s ease-out,
-                border-color 0.18s ease-out;
-    margin-bottom: 1.2rem;
-}
+        .explanation-box p,
+        .explanation-box li {
+            color: #e0f2f1 !important;
+            font-weight: 500;
+        }
 
-.top1-card {
-    background: radial-gradient(circle at top left,
-                                 rgba(255,215,0,0.25), /* Sáng hơn một chút */
-                                 rgba(0,0,0,0.96));
-    border-color: rgba(255,215,0,0.85); /* Rõ hơn */
-    box-shadow:
-        0 0 24px rgba(255,215,0,0.7), /* Tăng glow */
-        0 20px 46px rgba(0,0,0,0.95);
-}
+        /* =========================================================
+           TOOLTIP (TEXT + ICON)
+        ========================================================= */
+        .rc-tooltip {
+            text-decoration: underline dotted #00e676;
+            cursor: pointer;
+            position: relative;
+            font-weight: 600;
+            color: #aaffdd;
+        }
 
-.top3-card:hover {
-    transform: translateY(-4px) scale(1.02);
-    border-color: rgba(0,255,200,0.95); /* Rõ hơn khi hover */
-    box-shadow:
-        0 0 26px rgba(0,255,180,0.95), /* Tăng glow */
-        0 22px 52px rgba(0,0,0,0.98);
-}
+        .rc-tooltip:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            left: 0;
+            bottom: -2.9rem;
+            background: rgba(0, 5, 4, 0.98);
+            padding: 9px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(0,255,153,0.55);
+            font-size: 0.84rem;
+            color: #d8fff0;
+            width: max-content;
+            max-width: 320px;
+            z-index: 999;
+            box-shadow:
+                0 0 14px rgba(0,255,153,0.45),
+                0 18px 30px rgba(0,0,0,0.9);
+        }
 
-.top3-title {
-    font-size: 1.05rem;
-    font-weight: 800;
-    color: #a5ffdc;
-}
+        .tooltip-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 6px;
+            background: radial-gradient(circle,
+                        rgba(0,255,153,0.18),
+                        rgba(0, 36, 26, 0.95));
+            color: #a5ffdc;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 12px;
+            cursor: help;
+            border: 1px solid rgba(0,255,153,0.6);
+            box-shadow:
+                0 0 8px rgba(0,255,153,0.35),
+                0 0 16px rgba(0,255,153,0.4);
+            position: relative;
+            font-weight: 700;
+        }
 
-.top1-title {
-    font-size: 1.12rem;
-    font-weight: 900;
-    color: #ffe680;
-    text-shadow:
-        0 0 10px rgba(255,210,0,0.7),
-        0 0 20px rgba(255,210,0,0.9);
-}
+        .tooltip-icon:hover {
+            background: radial-gradient(circle,
+                        rgba(0,255,160,0.35),
+                        rgba(0, 40, 28, 0.95));
+        }
 
-.top3-sub {
-    font-size: 0.92rem;
-    margin-top: 5px;
-    color: #e0f2f1;
-}
+        .tooltip-icon:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            background: rgba(0, 8, 6, 0.98);
+            border: 1px solid rgba(0,255,153,0.6);
+            padding: 10px 14px;
+            border-radius: 10px;
+            color: #e0fff5;
+            width: 260px;
+            left: 22px;
+            bottom: -4px;
+            font-size: 0.82rem;
+            line-height: 1.35rem;
+            z-index: 999;
+            box-shadow:
+                0 0 20px rgba(0,255,153,0.6),
+                0 18px 36px rgba(0,0,0,0.95);
+        }
 
-.badge-icc {
-    display: inline-block;
-    padding: 4px 11px;
-    border-radius: 999px;
-    background: linear-gradient(120deg, #00e676, #00bfa5);
-    color: #00130d;
-    font-weight: 700;
-    font-size: 0.86rem;
-}
+        /* =========================================================
+           TOP 3 CARDS – MEDAL GLOW - BRIGHTENED
+        ========================================================= */
+        .top3-card {
+            position: relative;
+            padding: 1.1rem 1.1rem 1.0rem 1.1rem;
+            border-radius: 18px;
+            background: radial-gradient(circle at top left,
+                        rgba(0,255,153,0.28),
+                        rgba(8,30,24,0.92));
+            border: 1px solid rgba(0,255,153,0.45);
+            box-shadow:
+                0 0 18px rgba(0,255,153,0.18),
+                0 16px 40px rgba(0,0,0,0.9);
+            text-align: center;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            transition: transform 0.18s ease-out,
+                        box-shadow 0.18s ease-out,
+                        border-color 0.18s ease-out;
+            margin-bottom: 1.2rem;
+        }
 
-/* ===========================
-   TABLE / DATAFRAME
-=========================== */
-div[data-testid="stDataFrame"] {
-    border-radius: 14px !important;
-    border: 1px solid rgba(0,255,153,0.35) !important; /* Tăng nhẹ border */
-    overflow: hidden !important;
-    box-shadow:
-        0 0 18px rgba(0,255,153,0.25), /* Tăng nhẹ glow */
-        0 18px 38px rgba(0,0,0,0.9) !important;
-    background: radial-gradient(circle at top,
-                                 rgba(0,255,153,0.18), /* Sáng hơn một chút */
-                                 rgba(0,0,0,0.96)) !important;
-}
+        .top1-card {
+            background: radial-gradient(circle at top left,
+                        rgba(255,215,0,0.32),
+                        rgba(20,25,10,0.92));
+            border-color: rgba(255,215,0,0.8);
+            box-shadow:
+                0 0 24px rgba(255,215,0,0.65),
+                0 20px 46px rgba(0,0,0,0.95);
+            animation: gold-pulse 2.6s ease-in-out infinite alternate;
+        }
 
-/* Metric */
-[data-testid="stMetricValue"] {
-    color: #76ff03 !important;
-    font-weight: 900 !important;
-    font-size: 1.08rem !important;
-}
+        @keyframes gold-pulse {
+            0% {
+                box-shadow:
+                    0 0 10px rgba(255,215,0,0.35),
+                    0 18px 40px rgba(0,0,0,0.9);
+            }
+            100% {
+                box-shadow:
+                    0 0 28px rgba(255,215,0,0.9),
+                    0 24px 54px rgba(0,0,0,0.98);
+            }
+        }
 
-[data-testid="stMetricLabel"] {
-    color: #e0f2f1 !important;
-    font-weight: 600 !important;
-}
+        .top3-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            border-color: rgba(0,255,200,0.9);
+            box-shadow:
+                0 0 24px rgba(0,255,180,0.9),
+                0 22px 52px rgba(0,0,0,0.98);
+        }
 
-/* ===========================
-   CHART FRAME – FIX PHÓNG TO & RESPONSIVE TỐT HƠN
-=========================== */
+        .top3-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #a5ffdc;
+        }
 
-/* Khung ngoài: card chứa chart */
-div[data-testid="stPlotlyChart"] {
-    padding: 0.8rem 0.9rem 0.6rem 0.9rem;
-    margin: 0.9rem 0 1.5rem 0;
-    background: radial-gradient(circle at top,
-                                 rgba(0,255,153,0.14), /* Sáng hơn một chút */
-                                 rgba(0,0,0,0.98));
-    border-radius: 18px;
-    border: 1px solid rgba(0,255,153,0.40); /* Dày hơn, rõ hơn */
-    box-shadow:
-        0 0 20px rgba(0,255,153,0.35), /* Tăng nhẹ glow */
-        0 18px 40px rgba(0,0,0,0.95);
-    overflow: hidden;                 /* tránh tràn khung */
-}
+        .top1-title {
+            font-size: 1.12rem;
+            font-weight: 900;
+            color: #ffe680;
+            text-shadow:
+                0 0 10px rgba(255,210,0,0.7),
+                0 0 20px rgba(255,210,0,0.9);
+        }
 
-/* Đảm bảo chart không vượt quá width card */
-div[data-testid="stPlotlyChart"] > div {
-    max-width: 100% !important;
-    height: auto !important; /* Plotly tự điều chỉnh chiều cao */
-    min-height: 350px; /* Chiều cao tối thiểu, tránh chart quá bé */
-}
+        .top3-sub {
+            font-size: 0.92rem;
+            margin-top: 5px;
+            color: #e0f2f1;
+        }
 
-/* Fix plotly tự set width lớn hơn container */
-div[data-testid="stPlotlyChart"] .js-plotly-plot,
-div[data-testid="stPlotlyChart"] .plotly,
-div[data-testid="stPlotlyChart"] svg {
-    max-width: 100% !important;
-    width: 100% !important;
-    height: auto !important; /* Plotly tự điều chỉnh chiều cao */
-}
+        .badge-icc {
+            display: inline-block;
+            padding: 4px 11px;
+            border-radius: 999px;
+            background: linear-gradient(120deg, #00e676, #00bfa5);
+            color: #00130d;
+            font-weight: 700;
+            font-size: 0.86rem;
+        }
 
-/* Trường hợp hiếm vẫn to: cho phép cuộn ngang nhẹ thay vì bị cắt */
-div[data-testid="stPlotlyChart"] .plot-container {
-    overflow-x: auto !important;
-}
+        .pill-badge {
+            display: inline-block;
+            padding: 3px 11px;
+            border-radius: 999px;
+            border: 1px solid rgba(0,255,153,0.65);
+            font-size: 0.82rem;
+            margin-top: 4px;
+            color: #c8ffec;
+        }
 
-/* ===========================
-   BUTTONS
-=========================== */
+        /* =========================================================
+           DATAFRAME / TABLE
+        ========================================================= */
+        div[data-testid="stDataFrame"] {
+            border-radius: 14px !important;
+            border: 1px solid rgba(0,255,153,0.32) !important;
+            overflow: hidden !important;
+            box-shadow:
+                0 0 18px rgba(0,255,153,0.22),
+                0 18px 38px rgba(0,0,0,0.9) !important;
+            background: radial-gradient(circle at top,
+                        rgba(0,255,153,0.16),
+                        rgba(0,0,0,0.96)) !important;
+        }
 
-/* Button chính */
-button[kind="primary"],
-.stButton > button[kind="primary"] {
-    background: radial-gradient(circle at 0% 0%,
-                                 #ffffff 0%, #d7fff4 24%, #00ffbf 55%, #00bfa5 100%) !important;
-    color: #00140d !important;
-    font-weight: 900 !important;
-    border-radius: 999px !important;
-    border: none !important;
-    padding: 0.9rem 1.9rem !important;
-    box-shadow:
-        0 0 20px rgba(0,255,153,0.80), /* Tăng nhẹ glow */
-        0 20px 46px rgba(0,0,0,0.95) !important;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    transition: all 0.16s ease-out !important;
-    font-size: 1.02rem !important;
-}
+        /* Metric */
+        [data-testid="stMetricValue"] {
+            color: #76ff03 !important;
+            font-weight: 900 !important;
+            font-size: 1.08rem !important;
+        }
 
-button[kind="primary"]:hover,
-.stButton > button[kind="primary"]:hover {
-    transform: translateY(-2px) scale(1.03);
-    box-shadow:
-        0 0 30px rgba(0,255,170,0.98), /* Tăng glow */
-        0 26px 60px rgba(0,0,0,0.98) !important;
-}
+        [data-testid="stMetricLabel"] {
+            color: #e0f2f1 !important;
+            font-weight: 600 !important;
+        }
 
-/* Download buttons */
-.stDownloadButton > button {
-    border-radius: 999px !important;
-    border: 1px solid rgba(0,255,153,0.75) !important; /* Rõ hơn */
-    background: radial-gradient(circle,
-                                 rgba(0,255,153,0.20), /* Sáng hơn */
-                                 rgba(0,0,0,0.96)) !important;
-    color: #e9fff4 !important;
-    font-weight: 700 !important;
-    box-shadow:
-        0 0 14px rgba(0,255,153,0.40), /* Tăng nhẹ glow */
-        0 14px 30px rgba(0,0,0,0.9) !important;
-}
+        /* =========================================================
+           CHART FRAME - FIXED ZOOM ISSUE
+        ========================================================= */
+        div[data-testid="stPlotlyChart"] {
+            padding: 0 !important;
+            margin: 0.9rem 0 1.5rem 0;
+            background: radial-gradient(circle at top,
+                        rgba(0,255,153,0.12),
+                        rgba(0,0,0,0.98));
+            border-radius: 18px;
+            border: 1px solid rgba(0,255,153,0.38);
+            box-shadow:
+                0 0 20px rgba(0,255,153,0.35),
+                0 18px 40px rgba(0,0,0,0.95);
+            overflow: hidden;
+        }
 
-.stDownloadButton > button:hover {
-    background: radial-gradient(circle,
-                                 rgba(0,255,153,0.40), /* Sáng hơn khi hover */
-                                 rgba(0,10,8,0.98)) !important;
-}
+        div[data-testid="stPlotlyChart"] > div {
+            width: 100% !important;
+            height: auto !important;
+        }
 
-/* ===========================
-   RESPONSIVE
-=========================== */
-@media (max-width: 900px) {
-    .rc-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .block-container {
-        padding-left: 0.7rem !important;
-        padding-right: 0.7rem !important;
-    }
-    .rc-badge {
-        margin-top: 0.4rem;
-    }
-    div[data-testid="stPlotlyChart"] {
-        padding: 0.6rem 0.5rem 0.6rem 0.5rem;
-    }
-}
-</style>
+        div[data-testid="stPlotlyChart"] .js-plotly-plot {
+            width: 100% !important;
+        }
+
+        /* =========================================================
+           MAIN ACTION BUTTON
+        ========================================================= */
+        button[kind="primary"],
+        .stButton > button[kind="primary"] {
+            background: radial-gradient(circle at 0% 0%,
+                        #ffffff 0%, #d7fff4 24%, #00ffbf 55%, #00bfa5 100%) !important;
+            color: #00140d !important;
+            font-weight: 900 !important;
+            border-radius: 999px !important;
+            border: none !important;
+            padding: 0.9rem 1.9rem !important;
+            box-shadow:
+                0 0 20px rgba(0,255,153,0.75),
+                0 20px 46px rgba(0,0,0,0.95) !important;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            transition: all 0.16s ease-out !important;
+            font-size: 1.02rem !important;
+        }
+
+        button[kind="primary"]:hover,
+        .stButton > button[kind="primary"]:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow:
+                0 0 30px rgba(0,255,170,0.95),
+                0 26px 60px rgba(0,0,0,0.98) !important;
+        }
+
+        /* =========================================================
+           DOWNLOAD BUTTONS
+        ========================================================= */
+        .stDownloadButton > button {
+            border-radius: 999px !important;
+            border: 1px solid rgba(0,255,153,0.7) !important;
+            background: radial-gradient(circle,
+                        rgba(0,255,153,0.18),
+                        rgba(0,0,0,0.96)) !important;
+            color: #e9fff4 !important;
+            font-weight: 700 !important;
+            box-shadow:
+                0 0 14px rgba(0,255,153,0.35),
+                0 14px 30px rgba(0,0,0,0.9) !important;
+        }
+
+        .stDownloadButton > button:hover {
+            background: radial-gradient(circle,
+                        rgba(0,255,153,0.35),
+                        rgba(0,10,8,0.98)) !important;
+        }
+
+        /* =========================================================
+           MOBILE RESPONSIVE
+        ========================================================= */
+        @media (max-width: 900px) {
+            .rc-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .block-container {
+                padding-left: 0.7rem !important;
+                padding-right: 0.7rem !important;
+            }
+            .rc-badge {
+                margin-top: 0.4rem;
+            }
+            div[data-testid="stPlotlyChart"] {
+                padding: 0 !important;
+            }
+        }
+        </style>
         """,
         unsafe_allow_html=True,
     )
