@@ -1638,14 +1638,14 @@ if params.use_fuzzy:
         <h4>📚 Giải thích về Fuzzy AHP:</h4>
         <ul>
             <li><b>Mục đích:</b> Xử lý bất định trong đánh giá chuyên gia</li>
-            <li><b>Phương pháp:</b> Chuyển trọng số crisp thành tam giác mờ (Low-Mid-High)</li>
+            <li><b>Phương pháp:</b> Trọng số → tam giác mờ (Low–Mid–High)</li>
             <li><b>Defuzzification:</b> Dùng phương pháp Centroid</li>
             <li><b>Ứng dụng:</b> Tăng độ tin cậy khi chuyên gia không chắc chắn</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
 
-    # Biểu đồ Fuzzy
+    # Biểu đồ Fuzzy tổng quan
     fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
     st.plotly_chart(fig_fuzzy, use_container_width=True)
 
@@ -1654,7 +1654,7 @@ if params.use_fuzzy:
     fuzzy_table = build_fuzzy_table(result.weights, params.fuzzy_uncertainty)
     st.dataframe(fuzzy_table, use_container_width=True)
 
-    # Highlight tiêu chí dao động mạnh nhất
+    # Tiêu chí dao động mạnh nhất
     most_unc, diff_map = most_uncertain_criterion(result.weights, params.fuzzy_uncertainty)
 
     st.markdown(
@@ -1667,11 +1667,12 @@ if params.use_fuzzy:
         """,
         unsafe_allow_html=True
     )
-    
-            # Heatmap Premium
-            st.subheader("🔥 Heatmap mức dao động Fuzzy (Premium Green)")
-            fig_heat = fuzzy_heatmap_premium(diff_map)
-            st.plotly_chart(fig_heat, use_container_width=True)
+
+    # Heatmap Premium (phải nằm TRONG if)
+    st.subheader("🔥 Heatmap mức dao động Fuzzy (Premium Green)")
+    fig_heat = fuzzy_heatmap_premium(diff_map)
+    st.plotly_chart(fig_heat, use_container_width=True)
+
         
         # Export
         st.markdown("---")
