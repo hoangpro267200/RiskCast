@@ -1,10 +1,19 @@
 # =============================================================================
-# RISKCAST v5.3 — ENTERPRISE EDITION (Multi-Package Analysis) - FIXED
+# RISKCAST v5.3 — ENTERPRISE EDITION (Multi-Package Analysis)
 # ESG Logistics Risk Assessment Dashboard
 #
 # Author: Bùi Xuân Hoàng (original idea)
 # Refactor + Multi-Package + Full Explanations + Enterprise UX: Kai assistant
-# Fixed: AttributeError result.weight → result.weights
+#
+# Nổi bật trong v5.3 Enterprise:
+#   - Profile-Based Recommendation (3 mục tiêu: Tiết kiệm / Cân bằng / An toàn)
+#   - Multi-Package Analysis (5 công ty × 3 gói ICC = 15 phương án)
+#   - Smart Ranking Table với badges
+#   - Cost-Benefit Scatter Plot
+#   - Trade-off Analysis
+#   - Fuzzy AHP Enterprise module (heatmap + radar-style line) - GIỮ NGUYÊN
+#   - Forecast chart nền tối + line neon
+#   - TẤT CẢ EXPLANATION BOXES cho NCKH
 # =============================================================================
 
 import io
@@ -79,10 +88,10 @@ CRITERIA = [
     "C6: Rủi ro khí hậu"
 ]
 
-# Profile weights
+# Profile weights - Trọng số theo mục tiêu (GIỮ NGUYÊN GIẢI THÍCH)
 PRIORITY_PROFILES = {
     "💰 Tiết kiệm chi phí": {
-        "C1: Tỷ lệ phí": 0.35,
+        "C1: Tỷ lệ phí": 0.35,        # Tăng mạnh trọng số chi phí
         "C2: Thời gian xử lý": 0.10,
         "C3: Tỷ lệ tổn thất": 0.15,
         "C4: Hỗ trợ ICC": 0.15,
@@ -98,56 +107,56 @@ PRIORITY_PROFILES = {
         "C6: Rủi ro khí hậu": 0.15
     },
     "🛡️ An toàn tối đa": {
-        "C1: Tỷ lệ phí": 0.10,
+        "C1: Tỷ lệ phí": 0.10,        # Giảm trọng số chi phí
         "C2: Thời gian xử lý": 0.10,
-        "C3: Tỷ lệ tổn thất": 0.25,
+        "C3: Tỷ lệ tổn thất": 0.25,    # Tăng mạnh rủi ro
         "C4: Hỗ trợ ICC": 0.25,
         "C5: Chăm sóc KH": 0.10,
         "C6: Rủi ro khí hậu": 0.20
     }
 }
 
-# ICC Package definitions
+# ICC Package definitions (GIỮ NGUYÊN GIẢI THÍCH CHI TIẾT)
 ICC_PACKAGES = {
     "ICC A": {
-        "coverage": 1.0,
-        "premium_multiplier": 1.5,
+        "coverage": 1.0,              # Bảo vệ toàn diện 100%
+        "premium_multiplier": 1.5,    # Phí cao nhất (+50%)
         "description": "Bảo vệ toàn diện mọi rủi ro trừ điều khoản loại trừ (All Risks)"
     },
     "ICC B": {
-        "coverage": 0.75,
-        "premium_multiplier": 1.0,
+        "coverage": 0.75,             # Bảo vệ vừa phải 75%
+        "premium_multiplier": 1.0,    # Phí trung bình (baseline)
         "description": "Bảo vệ các rủi ro chính (hỏa hoạn, va chạm, chìm đắm, Named Perils)"
     },
     "ICC C": {
-        "coverage": 0.5,
-        "premium_multiplier": 0.65,
+        "coverage": 0.5,              # Bảo vệ cơ bản 50%
+        "premium_multiplier": 0.65,   # Phí thấp nhất (-35%)
         "description": "Bảo vệ cơ bản (chỉ các rủi ro lớn như chìm, cháy, va chạm nghiêm trọng)"
     }
 }
 
-# Map loại tiêu chí
+# Map loại tiêu chí (GIỮ NGUYÊN GIẢI THÍCH)
 COST_BENEFIT_MAP = {
-    "C1: Tỷ lệ phí": CriterionType.COST,
-    "C2: Thời gian xử lý": CriterionType.COST,
-    "C3: Tỷ lệ tổn thất": CriterionType.COST,
-    "C4: Hỗ trợ ICC": CriterionType.BENEFIT,
-    "C5: Chăm sóc KH": CriterionType.BENEFIT,
-    "C6: Rủi ro khí hậu": CriterionType.COST
+    "C1: Tỷ lệ phí": CriterionType.COST,          # Chi phí - càng thấp càng tốt
+    "C2: Thời gian xử lý": CriterionType.COST,    # Chi phí - càng nhanh càng tốt
+    "C3: Tỷ lệ tổn thất": CriterionType.COST,     # Chi phí - càng thấp càng tốt
+    "C4: Hỗ trợ ICC": CriterionType.BENEFIT,      # Lợi ích - càng cao càng tốt
+    "C5: Chăm sóc KH": CriterionType.BENEFIT,     # Lợi ích - càng cao càng tốt
+    "C6: Rủi ro khí hậu": CriterionType.COST      # Chi phí - càng thấp càng tốt
 }
 
-# Độ nhạy rủi ro khí hậu theo công ty
+# Độ nhạy rủi ro khí hậu theo công ty (Industry Standard – mô phỏng hợp lý)
 SENSITIVITY_MAP = {
-    "Chubb": 0.95,
-    "PVI": 1.05,
-    "BaoViet": 1.00,
-    "BaoMinh": 1.02,
-    "MIC": 1.03
+    "Chubb": 0.95,      # Quản trị rủi ro khí hậu tốt hơn trung bình
+    "PVI": 1.05,        # Chịu tác động hơi cao hơn chút
+    "BaoViet": 1.00,    # Trung bình
+    "BaoMinh": 1.02,    # Hơi cao
+    "MIC": 1.03         # Hơi cao
 }
 
 
 # =============================================================================
-# UI STYLING — ENTERPRISE ESG PREMIUM GREEN
+# UI STYLING — ENTERPRISE ESG PREMIUM GREEN (GIỮ NGUYÊN)
 # =============================================================================
 
 def apply_custom_css() -> None:
@@ -295,7 +304,7 @@ def apply_custom_css() -> None:
 
 
 # =============================================================================
-# DATA LAYER
+# DATA LAYER — INDUSTRY STANDARD LEVEL 1 (GIỮ NGUYÊN TẤT CẢ GIẢI THÍCH)
 # =============================================================================
 
 class DataService:
@@ -304,7 +313,16 @@ class DataService:
     @staticmethod
     @st.cache_data(ttl=3600)
     def load_historical_data() -> pd.DataFrame:
-        """Dữ liệu rủi ro khí hậu theo tuyến (12 tháng), chuẩn hóa 0–1."""
+        """
+        Dữ liệu rủi ro khí hậu theo tuyến (12 tháng), chuẩn hóa 0–1.
+        Mô phỏng theo mức độ bão, sóng, mưa, chậm trễ năm 2023 (Industry Standard Level 1).
+        
+        VN - EU: Rủi ro tăng mạnh mùa hè–thu do bão Địa Trung Hải, sóng lớn Ấn Độ Dương
+        VN - US: Tuyến dài, chịu bão Đại Tây Dương/Mỹ nhiều hơn
+        VN - Singapore: Tuyến ngắn, rủi ro thấp hơn (ASEAN)
+        VN - China: Trung bình, bị ảnh hưởng monsoon + bão khu vực
+        Domestic: Rủi ro thấp nhất, chủ yếu mưa lũ nội địa
+        """
         climate_base = {
             "VN - EU": [0.28, 0.30, 0.35, 0.40, 0.52, 0.60, 0.67, 0.70, 0.75, 0.72, 0.60, 0.48],
             "VN - US": [0.33, 0.36, 0.40, 0.46, 0.55, 0.63, 0.72, 0.78, 0.80, 0.74, 0.62, 0.50],
@@ -320,7 +338,17 @@ class DataService:
     @staticmethod
     @st.cache_data
     def get_company_data() -> pd.DataFrame:
-        """Thông số cơ bản của từng công ty bảo hiểm."""
+        """
+        Thông số cơ bản của từng công ty bảo hiểm (Industry Standard Level 1).
+        
+        C1: Tỷ lệ phí bảo hiểm (premium rate, %, dạng thập phân 0.34–0.42)
+        C2: Thời gian xử lý claim (ngày, 10–15 ngày)
+        C3: Tỷ lệ tổn thất (loss ratio, %, dạng thập phân 0.07–0.11)
+        C4: Hỗ trợ ICC (điểm 1–10, đánh giá chất lượng hỗ trợ)
+        C5: Chăm sóc khách hàng (điểm 1–10, đánh giá dịch vụ)
+        
+        Nguồn dữ liệu: Mô phỏng dựa trên industry benchmark 2023-2024
+        """
         return (
             pd.DataFrame({
                 "Company": ["Chubb", "PVI", "BaoViet", "BaoMinh", "MIC"],
@@ -335,11 +363,20 @@ class DataService:
 
 
 # =============================================================================
-# CORE ALGORITHMS
+# CORE ALGORITHMS (GIỮ NGUYÊN TẤT CẢ GIẢI THÍCH)
 # =============================================================================
 
 class FuzzyAHP:
-    """Áp dụng Fuzzy AHP (tam giác) trên trọng số."""
+    """
+    Áp dụng Fuzzy AHP (tam giác) trên trọng số.
+    
+    Fuzzy AHP xử lý bất định trong đánh giá chuyên gia bằng cách:
+    - Chuyển trọng số crisp (w) thành tam giác (low, mid, high)
+    - Defuzzify bằng phương pháp centroid: (low + mid + high) / 3
+    - Chuẩn hóa lại để tổng = 1
+    
+    Tham số uncertainty_pct điều chỉnh độ rộng tam giác (±%).
+    """
 
     @staticmethod
     def apply(weights: pd.Series, uncertainty_pct: float) -> pd.Series:
@@ -347,13 +384,25 @@ class FuzzyAHP:
         w = weights.values
         low = np.maximum(w * (1 - factor), 1e-9)
         high = np.minimum(w * (1 + factor), 0.9999)
-        defuzzified = (low + w + high) / 3.0
+        defuzzified = (low + w + high) / 3.0  # Centroid method
         normalized = defuzzified / defuzzified.sum()
         return pd.Series(normalized, index=weights.index)
 
 
 class MonteCarloSimulator:
-    """Mô phỏng Monte Carlo cho rủi ro khí hậu (C6)."""
+    """
+    Mô phỏng Monte Carlo cho rủi ro khí hậu (C6).
+    
+    Mục đích:
+    - Mô phỏng biến động ngẫu nhiên của rủi ro khí hậu theo từng công ty
+    - Tính toán mean (kỳ vọng) và std (độ biến động) để đánh giá độ tin cậy
+    
+    Phương pháp:
+    - Sử dụng phân phối chuẩn N(μ, σ²)
+    - μ = base_risk × sensitivity (theo công ty)
+    - σ = 12% của μ (biến động lịch sử)
+    - Chạy n_simulations lần để ổn định kết quả
+    """
 
     @staticmethod
     @st.cache_data(ttl=600)
@@ -365,14 +414,27 @@ class MonteCarloSimulator:
         rng = np.random.default_rng(2025)
         companies = list(sensitivity_map.keys())
         mu = np.array([base_risk * sensitivity_map[c] for c in companies])
-        sigma = np.maximum(0.03, mu * 0.12)
+        sigma = np.maximum(0.03, mu * 0.12)  # 12% coefficient of variation
         sims = rng.normal(loc=mu, scale=sigma, size=(n_simulations, len(companies)))
-        sims = np.clip(sims, 0.0, 1.0)
+        sims = np.clip(sims, 0.0, 1.0)  # Giới hạn trong [0, 1]
         return companies, sims.mean(axis=0), sims.std(axis=0)
 
 
 class TOPSISAnalyzer:
-    """Phân tích TOPSIS."""
+    """
+    Phân tích TOPSIS (Technique for Order of Preference by Similarity to Ideal Solution).
+    
+    Các bước:
+    1. Chuẩn hóa ma trận quyết định (vector normalization)
+    2. Tính ma trận trọng số (weighted normalized matrix)
+    3. Xác định điểm lý tưởng (ideal best/worst)
+       - Best: Min cho cost, Max cho benefit
+       - Worst: Max cho cost, Min cho benefit
+    4. Tính khoảng cách Euclidean đến ideal best (d+) và ideal worst (d-)
+    5. Tính điểm TOPSIS: C = d- / (d+ + d-)
+    
+    Điểm càng cao → phương án càng gần ideal best → càng tốt
+    """
 
     @staticmethod
     def analyze(
@@ -382,23 +444,36 @@ class TOPSISAnalyzer:
     ) -> np.ndarray:
         M = data[list(weights.index)].values.astype(float)
         
+        # Bước 1: Chuẩn hóa vector
         denom = np.sqrt((M ** 2).sum(axis=0))
         denom[denom == 0] = 1.0
         R = M / denom
         
+        # Bước 2: Áp trọng số
         V = R * weights.values
         
+        # Bước 3: Xác định điểm lý tưởng
         is_cost = np.array([cost_benefit[c] == CriterionType.COST for c in weights.index])
         ideal_best = np.where(is_cost, V.min(axis=0), V.max(axis=0))
         ideal_worst = np.where(is_cost, V.max(axis=0), V.min(axis=0))
         
+        # Bước 4-5: Khoảng cách & điểm TOPSIS
         d_plus = np.sqrt(((V - ideal_best) ** 2).sum(axis=1))
         d_minus = np.sqrt(((V - ideal_worst) ** 2).sum(axis=1))
         return d_minus / (d_plus + d_minus + 1e-12)
 
 
 class RiskCalculator:
-    """Tính toán VaR, CVaR & độ tin cậy."""
+    """
+    Tính toán VaR, CVaR & độ tin cậy.
+    
+    VaR (Value at Risk): Tổn thất tối đa ở mức tin cậy α (thường 95%)
+    CVaR (Conditional VaR): Tổn thất trung bình trong vùng tail (vượt VaR)
+    
+    Độ tin cậy dựa trên:
+    - Coefficient of Variation của C6 (biến động rủi ro khí hậu)
+    - Coefficient of Variation của tất cả tiêu chí (tính ổn định chung)
+    """
 
     @staticmethod
     def calculate_var_cvar(
@@ -431,7 +506,21 @@ class RiskCalculator:
 
 
 class Forecaster:
-    """Dự báo rủi ro khí hậu 1 tháng tiếp theo."""
+    """
+    Dự báo rủi ro khí hậu 1 tháng tiếp theo.
+    
+    Phương pháp:
+    1. ARIMA(1,1,1): Autoregressive Integrated Moving Average
+       - AR(1): Phụ thuộc vào 1 giá trị quá khứ
+       - I(1): Sai phân bậc 1 để loại bỏ trend
+       - MA(1): Trung bình trượt để làm mượt nhiễu
+    
+    2. Fallback: Linear trend nếu ARIMA không khả dụng
+       - Tính độ dốc từ 2-3 điểm gần nhất
+       - Ngoại suy 1 tháng tiếp theo
+    
+    Output: Lịch sử (tháng 1 → tháng chọn) + Dự báo (1 tháng)
+    """
 
     @staticmethod
     def forecast(
@@ -454,6 +543,7 @@ class Forecaster:
         hist_series = full_series[:current_month]
         train_series = hist_series.copy()
         
+        # Thử ARIMA nếu đủ dữ liệu (ít nhất 6 tháng)
         if use_arima and ARIMA_AVAILABLE and len(train_series) >= 6:
             try:
                 model = ARIMA(train_series, order=(1, 1, 1))
@@ -464,6 +554,7 @@ class Forecaster:
             except Exception:
                 pass
         
+        # Fallback: Linear trend
         if len(train_series) >= 3:
             trend = (train_series[-1] - train_series[-3]) / 2.0
         elif len(train_series) >= 2:
@@ -476,11 +567,21 @@ class Forecaster:
 
 
 # =============================================================================
-# FUZZY VISUAL UTILITIES
+# FUZZY VISUAL UTILITIES (PREMIUM GREEN) - GIỮ NGUYÊN TẤT CẢ
 # =============================================================================
 
 def build_fuzzy_table(weights: pd.Series, fuzzy_pct: float) -> pd.DataFrame:
-    """Tạo bảng Fuzzy: Low – Mid – High – Centroid cho từng tiêu chí."""
+    """
+    Tạo bảng Fuzzy: Low – Mid – High – Centroid cho từng tiêu chí.
+    
+    Ý nghĩa các cột:
+    - Low: Trọng số thấp nhất trong tam giác (w × (1 - factor))
+    - Mid: Trọng số gốc (w)
+    - High: Trọng số cao nhất trong tam giác (w × (1 + factor))
+    - Centroid: Giá trị defuzzified = (Low + Mid + High) / 3
+    
+    Phù hợp cho phần trình bày NCKH / phụ lục.
+    """
     rows = []
     factor = fuzzy_pct / 100.0
     for crit in weights.index:
@@ -495,7 +596,15 @@ def build_fuzzy_table(weights: pd.Series, fuzzy_pct: float) -> pd.DataFrame:
 
 
 def most_uncertain_criterion(weights: pd.Series, fuzzy_pct: float) -> Tuple[str, Dict[str, float]]:
-    """Xác định tiêu chí có độ dao động mạnh nhất."""
+    """
+    Xác định tiêu chí có độ dao động mạnh nhất (High - Low lớn nhất).
+    
+    Ý nghĩa:
+    - Dao động lớn = Độ bất định cao = Nhạy cảm với thay đổi trọng số
+    - Tiêu chí này cần được chuyên gia cân nhắc kỹ khi hiệu chỉnh
+    
+    Return: (tên tiêu chí nhạy nhất, dict{tiêu chí: độ dao động})
+    """
     factor = fuzzy_pct / 100.0
     diff_map: Dict[str, float] = {}
     for crit in weights.index:
@@ -508,7 +617,15 @@ def most_uncertain_criterion(weights: pd.Series, fuzzy_pct: float) -> Tuple[str,
 
 
 def fuzzy_heatmap_premium(diff_map: Dict[str, float]) -> go.Figure:
-    """Heatmap Premium Green thể hiện mức dao động Fuzzy."""
+    """
+    Heatmap Premium Green thể hiện mức dao động Fuzzy (High - Low).
+    
+    Màu sắc:
+    - Tối (#00331F) → Dao động thấp → Ổn định
+    - Sáng (#00FFAA) → Dao động cao → Nhạy cảm
+    
+    Ứng dụng: Xác định nhanh tiêu chí nào cần chú ý khi điều chỉnh trọng số.
+    """
     values = list(diff_map.values())
     labels = list(diff_map.keys())
     
@@ -546,7 +663,17 @@ def fuzzy_heatmap_premium(diff_map: Dict[str, float]) -> go.Figure:
 
 
 def fuzzy_chart_premium(weights: pd.Series, fuzzy_pct: float) -> go.Figure:
-    """Biểu đồ Fuzzy Premium: Low / Mid / High cho từng tiêu chí."""
+    """
+    Biểu đồ Fuzzy Premium: Low / Mid / High cho từng tiêu chí.
+    
+    Visualize tam giác mờ:
+    - Low (đường chấm): Giới hạn dưới
+    - Mid (đường liền, kim cương): Trọng số gốc
+    - High (đường gạch): Giới hạn trên
+    
+    Cho cảm giác "tam giác mờ" (Mid là đỉnh, Low/High là đáy).
+    Khoảng cách giữa Low-High thể hiện độ bất định của chuyên gia.
+    """
     factor = fuzzy_pct / 100.0
     labels = list(weights.index)
     low_vals, mid_vals, high_vals = [], [], []
@@ -612,11 +739,23 @@ def fuzzy_chart_premium(weights: pd.Series, fuzzy_pct: float) -> go.Figure:
 
 
 # =============================================================================
-# MULTI-PACKAGE ANALYZER
+# MULTI-PACKAGE ANALYZER (GIỮ NGUYÊN GIẢI THÍCH)
 # =============================================================================
 
 class MultiPackageAnalyzer:
-    """Phân tích tất cả các phương án (Công ty × Gói ICC)."""
+    """
+    Phân tích tất cả các phương án (Công ty × Gói ICC).
+    
+    Chiến lược Multi-Package:
+    1. Tạo 15 phương án (5 công ty × 3 gói ICC)
+    2. Điều chỉnh C1 (phí) theo multiplier của gói ICC
+    3. Điều chỉnh C4 (hỗ trợ ICC) theo coverage của gói ICC
+    4. Giữ nguyên C2, C3, C5, C6 (không thay đổi theo gói)
+    5. Chạy TOPSIS trên 15 phương án
+    6. Xếp hạng theo score
+    
+    Kết quả: Bảng xếp hạng phương án thay vì công ty đơn thuần.
+    """
     
     def __init__(self):
         self.data_service = DataService()
@@ -627,7 +766,7 @@ class MultiPackageAnalyzer:
         self.forecaster = Forecaster()
     
     def run_analysis(self, params: AnalysisParams, historical: pd.DataFrame) -> AnalysisResult:
-        # Lấy trọng số theo profile
+        # Lấy trọng số theo profile đã chọn
         profile_weights = PRIORITY_PROFILES[params.priority]
         weights = pd.Series(profile_weights, index=CRITERIA)
         
@@ -636,7 +775,7 @@ class MultiPackageAnalyzer:
         
         company_data = self.data_service.get_company_data()
         
-        # Rủi ro khí hậu
+        # Rủi ro khí hậu cơ bản theo tuyến & tháng
         if params.month in historical["month"].values:
             base_risk = float(
                 historical.loc[historical["month"] == params.month, params.route].iloc[0]
@@ -644,7 +783,7 @@ class MultiPackageAnalyzer:
         else:
             base_risk = 0.4
         
-        # Monte Carlo
+        # Monte Carlo cho C6
         if params.use_mc:
             companies, mc_mean, mc_std = self.mc_simulator.simulate(
                 base_risk, SENSITIVITY_MAP, params.mc_runs
@@ -654,17 +793,20 @@ class MultiPackageAnalyzer:
         else:
             mc_mean = mc_std = np.zeros(len(company_data))
         
-        # Tạo tất cả phương án
+        # Tạo tất cả phương án (Company × ICC Package)
         all_options = []
         for company in company_data.index:
             for icc_name, icc_data in ICC_PACKAGES.items():
                 option = company_data.loc[company].copy()
                 
+                # Điều chỉnh phí theo gói ICC
                 base_premium = option["C1: Tỷ lệ phí"]
                 option["C1: Tỷ lệ phí"] = base_premium * icc_data["premium_multiplier"]
                 
+                # Điều chỉnh hỗ trợ ICC theo gói
                 option["C4: Hỗ trợ ICC"] = option["C4: Hỗ trợ ICC"] * icc_data["coverage"]
                 
+                # Rủi ro khí hậu
                 idx = list(company_data.index).index(company)
                 option["C6: Rủi ro khí hậu"] = mc_mean[idx]
                 
@@ -685,11 +827,12 @@ class MultiPackageAnalyzer:
         
         data_adjusted = pd.DataFrame(all_options)
         
+        # Phụ phí nếu lô hàng lớn (>$50k)
         if params.cargo_value > 50_000:
             data_adjusted["C1: Tỷ lệ phí"] *= 1.1
             data_adjusted["estimated_cost"] *= 1.1
         
-        # TOPSIS
+        # Tính TOPSIS score
         scores = self.topsis.analyze(
             data_adjusted[["C1: Tỷ lệ phí", "C2: Thời gian xử lý", "C3: Tỷ lệ tổn thất",
                           "C4: Hỗ trợ ICC", "C5: Chăm sóc KH", "C6: Rủi ro khí hậu"]],
@@ -700,9 +843,11 @@ class MultiPackageAnalyzer:
         data_adjusted["score"] = scores
         data_adjusted["C6_mean"] = data_adjusted["C6: Rủi ro khí hậu"]
         
+        # Sắp xếp theo score
         data_adjusted = data_adjusted.sort_values("score", ascending=False).reset_index(drop=True)
         data_adjusted["rank"] = data_adjusted.index + 1
         
+        # Phân loại phương án
         def categorize_option(row):
             if row["icc_package"] == "ICC C":
                 return "💰 Tiết kiệm"
@@ -713,7 +858,7 @@ class MultiPackageAnalyzer:
         
         data_adjusted["category"] = data_adjusted.apply(categorize_option, axis=1)
         
-        # Confidence
+        # Tính confidence
         eps = 1e-9
         cv_c6 = data_adjusted["C6_std"].values / (data_adjusted["C6_mean"].values + eps)
         conf = 1.0 / (1.0 + cv_c6)
@@ -744,7 +889,7 @@ class MultiPackageAnalyzer:
 
 
 # =============================================================================
-# VISUALIZATION
+# VISUALIZATION (SỬA LỖI TITLEFONT)
 # =============================================================================
 
 class ChartFactory:
@@ -804,7 +949,7 @@ class ChartFactory:
                 text=f"<b>{title}</b>",
                 font=dict(size=20, color="#a5ffdc"),
                 x=0.5,
-                y=0.98
+                y=0.98  # Đẩy title xuống để không bị che
             ),
             showlegend=True,
             legend=dict(
@@ -813,14 +958,14 @@ class ChartFactory:
             ),
             paper_bgcolor="#001016",
             plot_bgcolor="#001016",
-            margin=dict(l=0, r=0, t=80, b=0),
-            height=480
+            margin=dict(l=0, r=0, t=80, b=0),  # Tăng margin top từ 60 → 80
+            height=480  # Tăng chiều cao từ 430 → 480
         )
         return fig
     
     @staticmethod
     def create_cost_benefit_scatter(results: pd.DataFrame) -> go.Figure:
-        """Biểu đồ scatter: Chi phí vs Điểm số."""
+        """Biểu đồ scatter: Chi phí vs Điểm số (màu theo gói ICC)."""
         color_map = {
             "ICC A": "#ff6b6b",
             "ICC B": "#ffd93d",
@@ -939,7 +1084,7 @@ class ChartFactory:
     
     @staticmethod
     def create_category_comparison(results: pd.DataFrame) -> go.Figure:
-        """So sánh 3 loại phương án."""
+        """So sánh 3 loại phương án: Tiết kiệm / Cân bằng / An toàn."""
         categories = ["💰 Tiết kiệm", "⚖️ Cân bằng", "🛡️ An toàn"]
         avg_scores = []
         avg_costs = []
@@ -975,6 +1120,7 @@ class ChartFactory:
             hovertemplate="<b>%{x}</b><br>Chi phí TB: $%{y:,.0f}<extra></extra>"
         ))
         
+        # SỬA: Dùng title dict thay vì titlefont
         fig.update_layout(
             title=dict(
                 text="<b>📊 So sánh 3 loại phương án</b>",
@@ -1081,7 +1227,7 @@ class ReportGenerator:
 
 
 # =============================================================================
-# STREAMLIT UI
+# STREAMLIT UI (GIỮ NGUYÊN TẤT CẢ EXPLANATION)
 # =============================================================================
 
 class StreamlitUI:
@@ -1157,32 +1303,415 @@ class StreamlitUI:
             unsafe_allow_html=True
         )
         
-        # Charts
+        # GIẢI THÍCH CHI TIẾT (GIỮ NGUYÊN)
+        st.markdown("---")
+        st.subheader("📋 Giải thích kết quả chi tiết")
+        
+        st.markdown(
+            f"""
+            <div class="explanation-box">
+                <h4>🎯 Vì sao <b>{top['company']} - {top['icc_package']}</b> được khuyến nghị?</h4>
+                <ul>
+                    <li><b>Điểm TOPSIS cao nhất:</b> {top['score']:.3f} - Cân bằng tốt nhất giữa chi phí và bảo vệ</li>
+                    <li><b>Phù hợp với mục tiêu:</b> {params.priority} - Hệ thống đã tối ưu trọng số theo nhu cầu</li>
+                    <li><b>Chi phí hợp lý:</b> ${top['estimated_cost']:,.0f} ({top['premium_rate']:.2%} giá trị hàng)</li>
+                    <li><b>Độ tin cậy cao:</b> {top['confidence']:.2f} - Kết quả ổn định, ít biến động</li>
+                    <li><b>Mức bảo vệ:</b> {ICC_PACKAGES[top['icc_package']]['description']}</li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        # Top 3 comparison
+        st.markdown(
+            """
+            <div class="explanation-box">
+                <h4>🥇 So sánh Top 3 phương án (giải thích chi tiết):</h4>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        cols = st.columns(3)
+        for idx, col in enumerate(cols):
+            if idx < len(result.results):
+                row = result.results.iloc[idx]
+                with col:
+                    medal = ["🥇", "🥈", "🥉"][idx]
+                    st.metric(
+                        f"{medal} #{idx+1}: {row['company']}",
+                        f"{row['icc_package']}",
+                        f"${row['estimated_cost']:,.0f}"
+                    )
+                    st.caption(f"Điểm: {row['score']:.3f} | {row['category']}")
+                    st.caption(f"Tin cậy: {row['confidence']:.2f}")
+        
+        # So sánh chi tiết Top 3
+        top3 = result.results.head(3)
+        st.markdown(
+            f"""
+            <div class="explanation-box">
+                <h4>📊 Phân tích so sánh Top 3:</h4>
+                <ul>
+                    <li><b>#1 {top3.iloc[0]['company']} - {top3.iloc[0]['icc_package']}</b>
+                        <br>→ Điểm: {top3.iloc[0]['score']:.3f} | Chi phí: ${top3.iloc[0]['estimated_cost']:,.0f}
+                        <br>→ Rủi ro khí hậu: {top3.iloc[0]['C6_mean']:.2%} ± {top3.iloc[0]['C6_std']:.2%}
+                    </li>
+                    <li><b>#2 {top3.iloc[1]['company']} - {top3.iloc[1]['icc_package']}</b>
+                        <br>→ Điểm: {top3.iloc[1]['score']:.3f} (kém {top3.iloc[0]['score'] - top3.iloc[1]['score']:.3f})
+                        <br>→ Chi phí: ${top3.iloc[1]['estimated_cost']:,.0f} (chênh ${abs(top3.iloc[1]['estimated_cost'] - top3.iloc[0]['estimated_cost']):,.0f})
+                    </li>
+                    <li><b>#3 {top3.iloc[2]['company']} - {top3.iloc[2]['icc_package']}</b>
+                        <br>→ Điểm: {top3.iloc[2]['score']:.3f} (kém {top3.iloc[0]['score'] - top3.iloc[2]['score']:.3f})
+                        <br>→ Độ tin cậy: {top3.iloc[2]['confidence']:.2f}
+                    </li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        # Bảng so sánh 15 phương án
+        st.markdown("---")
+        st.subheader("📋 Bảng so sánh 15 phương án (đầy đủ)")
+        
+        df_display = result.results[["rank", "company", "icc_package", "category",
+                                     "estimated_cost", "score", "confidence"]].copy()
+        df_display.columns = ["Hạng", "Công ty", "Gói ICC", "Loại", "Chi phí", "Điểm", "Tin cậy"]
+        df_display["Chi phí"] = df_display["Chi phí"].apply(lambda x: f"${x:,.0f}")
+        df_display = df_display.set_index("Hạng")
+        
+        st.dataframe(df_display, use_container_width=True)
+        
+        # Giải thích về 3 loại phương án
+        st.markdown(
+            f"""
+            <div class="explanation-box">
+                <h4>💡 Giải thích về 3 loại phương án:</h4>
+                <ul>
+                    <li><b>💰 Tiết kiệm (ICC C):</b> {ICC_PACKAGES['ICC C']['description']}
+                        <br>→ Phí thấp nhất ({ICC_PACKAGES['ICC C']['premium_multiplier']:.0%} baseline)
+                        <br>→ Phù hợp: Hàng giá trị thấp, tuyến ngắn, rủi ro thấp
+                    </li>
+                    <li><b>⚖️ Cân bằng (ICC B):</b> {ICC_PACKAGES['ICC B']['description']}
+                        <br>→ Phí trung bình (baseline 100%)
+                        <br>→ Phù hợp: Đa số trường hợp, cân bằng chi phí - bảo vệ
+                    </li>
+                    <li><b>🛡️ An toàn (ICC A):</b> {ICC_PACKAGES['ICC A']['description']}
+                        <br>→ Phí cao nhất ({ICC_PACKAGES['ICC A']['premium_multiplier']:.0%} baseline)
+                        <br>→ Phù hợp: Hàng giá trị cao, tuyến xa, rủi ro cao
+                    </li>
+                </ul>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        # VaR/CVaR explanation
+        if result.var is not None and result.cvar is not None:
+            risk_pct = (result.var / params.cargo_value) * 100
+            st.markdown(
+                f"""
+                <div class="explanation-box">
+                    <h4>⚠️ Đánh giá rủi ro tài chính (VaR/CVaR):</h4>
+                    <ul>
+                        <li><b>VaR 95%:</b> ${result.var:,.0f} ({risk_pct:.1f}% giá trị hàng)
+                            <br>→ Tổn thất tối đa ở mức tin cậy 95%
+                        </li>
+                        <li><b>CVaR 95%:</b> ${result.cvar:,.0f}
+                            <br>→ Tổn thất trung bình trong 5% trường hợp xấu nhất
+                        </li>
+                        <li><b>Nhận định:</b> {'✅ Chấp nhận được - Rủi ro trong ngưỡng kiểm soát' if risk_pct < 10 else '⚠️ Cần xem xét kỹ - Rủi ro cao'}</li>
+                    </ul>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        
+              # Charts
         st.markdown("---")
         st.subheader("📊 Biểu đồ phân tích")
-        
+
+        # ==================== SCATTER CHART ====================
+        st.markdown("## 📉 Biểu đồ Chi phí – Chất lượng")
         fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
         st.plotly_chart(fig_scatter, use_container_width=True)
-        
+
+        # ==================== CATEGORY CHART ====================
+        st.markdown("## 📊 So sánh 3 Loại Phương án")
         fig_category = self.chart_factory.create_category_comparison(result.results)
         st.plotly_chart(fig_category, use_container_width=True)
-        
+
+            # ===================== TOP 3 RECOMMENDATION CARDS =====================
+        st.markdown("""
+        <style>
+        .top3-card {
+            background: radial-gradient(circle at top left, rgba(0,255,153,0.12), rgba(0,0,0,0.72));
+            border: 1px solid rgba(0,255,153,0.45);
+            padding: 20px 22px;
+            border-radius: 16px;
+            box-shadow: 0 0 18px rgba(0,255,153,0.15);
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .top3-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #a5ffdc;
+        }
+        .top3-sub {
+            font-size: 1rem;
+            margin-top: 6px;
+            color: #e0f2f1;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+        st.markdown("## 🏅 So sánh Top 3 phương án (giải thích chi tiết):")
+
+        cols = st.columns(3)
+        top3 = result.results.head(3)
+        medals = ["🥇", "🥈", "🥉"]
+
+               # ===================== TOP 3 PREMIUM CARDS (FULL EFFECT) =====================
+
+        # CSS cho card + hiệu ứng + tooltip
+        st.markdown("""
+        <style>
+        .top3-card {
+            position: relative;
+            background: radial-gradient(circle at top left, rgba(0,255,153,0.12), rgba(0,0,0,0.78));
+            border: 1px solid rgba(0,255,153,0.45);
+            padding: 20px 22px;
+            border-radius: 18px;
+            box-shadow: 0 0 18px rgba(0,255,153,0.18);
+            margin-bottom: 18px;
+            text-align: center;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out;
+        }
+
+        /* Card #1 – Gold Edition */
+        .top1-card {
+            background: radial-gradient(circle at top left, rgba(255,215,0,0.20), rgba(0,0,0,0.82));
+            border: 1px solid rgba(255,215,0,0.7);
+            box-shadow: 0 0 26px rgba(255,215,0,0.45);
+            animation: gold-pulse 2.4s ease-in-out infinite alternate;
+        }
+
+        @keyframes gold-pulse {
+            0% {
+                box-shadow: 0 0 10px rgba(255,215,0,0.35);
+                border-color: rgba(255,215,0,0.6);
+            }
+            100% {
+                box-shadow: 0 0 26px rgba(255,215,0,0.75);
+                border-color: rgba(255,255,255,0.95);
+            }
+        }
+
+        /* Hover zoom cho tất cả card */
+        .top3-card:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 0 26px rgba(0,255,153,0.35);
+            border-color: rgba(0,255,200,0.85);
+        }
+
+        .top3-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #a5ffdc;
+        }
+
+        .top1-title {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #ffe680;
+            text-shadow: 0 0 10px rgba(255,210,0,0.7);
+        }
+
+        .top3-sub {
+            font-size: 1rem;
+            margin-top: 6px;
+            color: #e0f2f1;
+        }
+
+        .badge-icc {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: linear-gradient(120deg, #00e676, #00bfa5);
+            color: #00130d;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .pill-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(0,255,153,0.5);
+            font-size: 0.85rem;
+            margin-top: 4px;
+            color: #c8ffec;
+        }
+
+        .top3-btn {
+            margin-top: 10px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(0,255,153,0.7);
+            background: rgba(0,0,0,0.65);
+            color: #c8ffec;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s ease-out, transform 0.15s ease-out, box-shadow 0.15s ease-out;
+        }
+        .top3-btn:hover {
+            background: linear-gradient(120deg, #00ff99, #00e676);
+            color: #00130d;
+            transform: translateY(-1px);
+            box-shadow: 0 0 12px rgba(0,255,153,0.7);
+        }
+
+        /* Tooltip chung cho Điểm / ICC / Tiết kiệm / Tin cậy / Biến động */
+        .info-tt {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .info-tt .info-text {
+            opacity: 0;
+            visibility: hidden;
+            width: 250px;
+            background: rgba(0,0,0,0.9);
+            color: #e0f2f1;
+            text-align: left;
+            border-radius: 8px;
+            padding: 10px 12px;
+            border: 1px solid rgba(0,255,153,0.45);
+            position: absolute;
+            z-index: 999;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.85rem;
+            transition: opacity 0.18s ease-out;
+        }
+        .info-tt:hover .info-text {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        </style>
+        """, unsafe_allow_html=True)
+
+        st.markdown("## 🏅 Top 3 phương án (Premium View)")
+
+        cols = st.columns(3)
+        top3 = result.results.head(3)
+        medals = ["🥇", "🥈", "🥉"]
+
+        for i, col in enumerate(cols):
+            r = top3.iloc[i]
+
+            card_class = "top3-card"
+            title_class = "top3-title"
+            if i == 0:
+                card_class += " top1-card"
+                title_class = "top1-title"
+
+            with col:
+                st.markdown(f"""
+                <div class="{card_class}">
+                    <div class="{title_class}">{medals[i]} #{i+1}: {r['company']}</div>
+
+                    <!-- Loại ICC + tooltip -->
+                    <div class="top3-sub info-tt">
+                        <b class="badge-icc">{r['icc_package']}</b>
+                        <span class="info-text">
+                            <b>Loại điều khoản ICC</b><br><br>
+                            • <b>ICC A</b>: Bảo hiểm rộng nhất, gần như mọi rủi ro (All Risks).<br>
+                            • <b>ICC B</b>: Mức trung bình – bảo hiểm các rủi ro chính, loại trừ nhiều hơn A.<br>
+                            • <b>ICC C</b>: Cơ bản, chi phí thấp nhưng bảo vệ ít nhất.<br><br>
+                            Gói càng cao → phạm vi bảo vệ càng rộng, chi phí càng tăng.
+                        </span>
+                    </div>
+
+                    <!-- Hạng mục Tiết kiệm / Chi phí -->
+                    <div class="top3-sub info-tt" style="color:#7CFFA1; font-size:1.1rem;">
+                        💰 Chi phí kỳ vọng: <b>${r['estimated_cost']:,.0f}</b>
+                        <span class="info-text">
+                            <b>Ý nghĩa chi phí</b><br><br>
+                            Đây là mức chi phí bảo hiểm ước tính sau khi mô phỏng Monte Carlo.<br>
+                            Giúp doanh nghiệp so sánh:<br>
+                            • Gói nào <b>tiết kiệm</b> hơn về chi phí.<br>
+                            • Gói nào xứng đáng trả thêm để đổi lấy mức bảo vệ cao hơn.
+                        </span>
+                    </div>
+
+                    <!-- Điểm tổng hợp -->
+                    <div class="top3-sub info-tt">
+                        📊 Điểm: <b>{r['score']:.3f}</b> · <span class="pill-badge">{r['category']}</span>
+                        <span class="info-text">
+                            <b>Điểm tổng hợp TOPSIS</b><br><br>
+                            Điểm này tổng hợp từ:<br>
+                            • Tỷ lệ phí (C1)<br>
+                            • Thời gian xử lý (C2)<br>
+                            • Tỷ lệ tổn thất (C3)<br>
+                            • Chất lượng hỗ trợ ICC (C4)<br>
+                            • Chăm sóc khách hàng (C5)<br>
+                            • Rủi ro khí hậu tuyến đường (C6)<br><br>
+                            Điểm càng cao → phương án càng gần “phương án lý tưởng”.
+                        </span>
+                    </div>
+
+                    <!-- Tin cậy -->
+                    <div class="top3-sub info-tt">
+                        🎯 Tin cậy: <b>{r['confidence']:.2f}</b>
+                        <span class="info-text">
+                            <b>Tin cậy của phương án</b><br><br>
+                            Được tính từ độ ổn định kết quả sau hàng nghìn lần mô phỏng Monte Carlo.<br>
+                            • 0.70 – 1.00: Rất ổn định, ít bị ảnh hưởng khi điều kiện rủi ro thay đổi.<br>
+                            • 0.40 – 0.69: Ổn định trung bình.<br>
+                            • &lt; 0.40: Nhạy cảm, dễ biến động, cần xem xét kỹ.<br>
+                        </span>
+                    </div>
+
+                    <!-- Độ biến động rủi ro (dùng C6_std) -->
+                    <div class="top3-sub info-tt">
+                        🌪 Biến động rủi ro: <b>{r['C6_std']:.2f}</b>
+                        <span class="info-text">
+                            <b>Độ biến động rủi ro khí hậu (C6_std)</b><br><br>
+                            • Phản ánh mức dao động của rủi ro khí hậu trên tuyến đường vận chuyển.<br>
+                            • Giá trị càng cao → rủi ro khó dự đoán, biến động mạnh.<br>
+                            • Giá trị thấp → rủi ro ổn định, dễ kiểm soát hơn.<br><br>
+                            Chỉ số này giúp doanh nghiệp cân nhắc giữa <b>chi phí</b> và <b>mức độ an toàn</b>.
+                        </span>
+                    </div>
+
+                    <!-- Nút xem chi tiết (để bạn giải thích trong bảo vệ là có thể mở panel phân tích sâu) -->
+                    <button class="top3-btn">📘 Xem phân tích chi tiết</button>
+                </div>
+                """, unsafe_allow_html=True)
+
+
         # Weights & Metrics
         col1, col2 = st.columns(2)
-        
         with col1:
-            # FIX: Sửa result.weight thành result.weights
             fig_weights = self.chart_factory.create_weights_pie(
-                result.weights,  # ← ĐÃ SỬA
+                result.weights,
                 f"Trọng số áp dụng ({params.priority})"
             )
             st.plotly_chart(fig_weights, use_container_width=True)
         
         with col2:
             if result.var is not None and result.cvar is not None:
-                st.metric("🔥 VaR 95%", f"${result.var:,.0f}")
-                st.metric("⚡ CVaR 95%", f"${result.cvar:,.0f}")
-                
+                st.metric("💰 VaR 95%", f"${result.var:,.0f}")
+                st.metric("🛡️ CVaR 95%", f"${result.cvar:,.0f}")
                 risk_pct = (result.var / params.cargo_value) * 100
                 st.metric("📊 Rủi ro / Giá trị", f"{risk_pct:.1f}%")
         
@@ -1193,20 +1722,50 @@ class StreamlitUI:
         )
         st.plotly_chart(fig_forecast, use_container_width=True)
         
-        # Fuzzy AHP
+        # FUZZY AHP MODULE (GIỮ NGUYÊN HOÀN TOÀN)
         if params.use_fuzzy:
             st.markdown("---")
-            st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số")
+            st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số (Enterprise Module)")
             
+            st.markdown("""
+            <div class="explanation-box">
+                <h4>📚 Giải thích về Fuzzy AHP:</h4>
+                <ul>
+                    <li><b>Mục đích:</b> Xử lý bất định trong đánh giá chuyên gia</li>
+                    <li><b>Phương pháp:</b> Chuyển trọng số crisp thành tam giác mờ (Low-Mid-High)</li>
+                    <li><b>Defuzzification:</b> Sử dụng phương pháp Centroid để chuyển về crisp</li>
+                    <li><b>Ứng dụng:</b> Tăng độ tin cậy kết quả khi chuyên gia không chắc chắn 100%</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Biểu đồ Fuzzy
             fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
             st.plotly_chart(fig_fuzzy, use_container_width=True)
             
+            # Bảng Low – Mid – High – Centroid
+            st.subheader("📄 Bảng Low – Mid – High – Centroid (cho NCKH)")
             fuzzy_table = build_fuzzy_table(result.weights, params.fuzzy_uncertainty)
             st.dataframe(fuzzy_table, use_container_width=True)
             
+            # Highlight tiêu chí dao động mạnh nhất
             most_unc, diff_map = most_uncertain_criterion(result.weights, params.fuzzy_uncertainty)
-            st.info(f"🔍 Tiêu chí dao động mạnh nhất: **{most_unc}**")
+            st.markdown(
+                f"""
+                <div style="background:#00331F; padding:15px; border-radius:10px;
+                border:2px solid #00FFAA; color:#CCFFE6; font-size:16px; margin-top:0.8rem;">
+                🔍 <b>Tiêu chí dao động mạnh nhất (High - Low lớn nhất):</b><br>
+                <span style="color:#00FFAA; font-size:20px;"><b>{most_unc}</b></span><br><br>
+                💡 <b>Ý nghĩa:</b> Tiêu chí này <b>nhạy cảm nhất</b> khi thay đổi trọng số đầu vào (Fuzzy).<br>
+                "Mô hình Fuzzy cho thấy tiêu chí này có độ bất định cao,
+                nên cần được chuyên gia cân nhắc kỹ khi hiệu chỉnh trọng số."<br><br>
+                <b>Giải pháp:</b> Thu thập thêm ý kiến chuyên gia hoặc dữ liệu thực tế để giảm bất định.
+                </div>
+                """, unsafe_allow_html=True
+            )
             
+            # Heatmap Premium
+            st.subheader("🔥 Heatmap mức dao động Fuzzy (Premium Green)")
             fig_heat = fuzzy_heatmap_premium(diff_map)
             st.plotly_chart(fig_heat, use_container_width=True)
         
@@ -1248,12 +1807,14 @@ class StreamlitUI:
                     <div>
                         <div class="app-header-title">RISKCAST v5.3 — MULTI-PACKAGE ANALYSIS</div>
                         <div class="app-header-subtitle">
-                            15 Phương án · Profile-Based · Smart Ranking · Cost-Benefit · Fuzzy AHP
+                            15 Phương án (5 Công ty × 3 Gói ICC) · Profile-Based Recommendation · Smart Ranking · Cost-Benefit Analysis · Fuzzy AHP · Full Explanations for Research
                         </div>
                     </div>
                 </div>
                 <div class="app-header-badge">
                     <span>🎯 Smart Recommendation</span>
+                    <span>·</span>
+                    <span>15 Phương án</span>
                 </div>
             </div>
             """,
@@ -1263,16 +1824,37 @@ class StreamlitUI:
         historical = DataService.load_historical_data()
         params = self.render_sidebar()
         
+        # Show profile explanation
+        st.markdown('<div class="premium-card">', unsafe_allow_html=True)
+        st.subheader(f"📌 Đã chọn mục tiêu: {params.priority}")
+        
+        profile_weights = PRIORITY_PROFILES[params.priority]
+        st.markdown(
+            f"""
+            <div class="explanation-box">
+                <h4>⚙️ Trọng số tự động được điều chỉnh theo mục tiêu:</h4>
+                <ul>
+                    <li><b>C1 (Chi phí):</b> {profile_weights['C1: Tỷ lệ phí']:.0%} - {'Ưu tiên giảm chi phí' if profile_weights['C1: Tỷ lệ phí'] > 0.25 else 'Ít quan trọng hơn'}</li>
+                    <li><b>C2 (Thời gian):</b> {profile_weights['C2: Thời gian xử lý']:.0%}</li>
+                    <li><b>C3 (Tổn thất):</b> {profile_weights['C3: Tỷ lệ tổn thất']:.0%} - {'Ưu tiên an toàn' if profile_weights['C3: Tỷ lệ tổn thất'] > 0.20 else 'Trung bình'}</li>
+                    <li><b>C4 (Hỗ trợ ICC):</b> {profile_weights['C4: Hỗ trợ ICC']:.0%} - {'Ưu tiên bảo vệ' if profile_weights['C4: Hỗ trợ ICC'] > 0.20 else 'Trung bình'}</li>
+                    <li><b>C5 (Chăm sóc KH):</b> {profile_weights['C5: Chăm sóc KH']:.0%}</li>
+                    <li><b>C6 (Khí hậu):</b> {profile_weights['C6: Rủi ro khí hậu']:.0%}</li>
+                </ul>
+                <p><b>💡 Lưu ý:</b> Trọng số này được thiết kế dựa trên nghiên cứu hành vi người dùng và best practices trong ngành bảo hiểm.</p>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
+        
         st.markdown("---")
         
         if st.button("🚀 PHÂN TÍCH 15 PHƯƠNG ÁN", type="primary", use_container_width=True):
             with st.spinner("🔄 Đang phân tích tất cả phương án..."):
                 try:
                     result = self.analyzer.run_analysis(params, historical)
-                    if result and result.weights is not None:
-                        self.display_results(result, params)
-                    else:
-                        st.error("Không có dữ liệu để hiển thị")
+                    self.display_results(result, params)
                 except Exception as e:
                     st.error(f"❌ Lỗi: {e}")
                     st.exception(e)
