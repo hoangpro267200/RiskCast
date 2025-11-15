@@ -191,29 +191,6 @@ def apply_enterprise_css():
         margin-top: 0.6rem;
     }
 
-    /* 🔥 CHART CARD — ULTRA PREMIUM NEON GLOW */
-    div[data-testid="stPlotlyChart"] {
-        background: linear-gradient(145deg, #00271A, #001A12);
-        padding: 18px 18px 14px 18px;
-        border-radius: 22px;
-        border: 2.7px solid #00FFCC;
-        box-shadow:
-            0 0 22px rgba(0,255,200,0.55),
-            0 0 38px rgba(0,255,153,0.30),
-            inset 0 0 14px rgba(0,255,150,0.18);
-        margin-bottom: 1.8rem;
-        transition: all 0.18s ease-out;
-    }
-
-    div[data-testid="stPlotlyChart"]:hover {
-        border-color: #5CFFD9;
-        transform: translateY(-3px) scale(1.015);
-        box-shadow:
-            0 0 34px rgba(0,255,200,0.75),
-            0 0 55px rgba(0,255,153,0.45),
-            inset 0 0 18px rgba(0,255,150,0.28);
-    }
-
     /* EXPLANATION BOX */
     .explanation-box {
         background: rgba(5,25,20,0.95);
@@ -234,6 +211,194 @@ def apply_enterprise_css():
         color: #e0f2f1 !important;
         font-weight: 500;
         margin: 0.22rem 0;
+    }
+
+    /* TEXT TOOLTIP (old style – vẫn giữ để reuse) */
+    .rc-tooltip {
+        text-decoration: underline dotted #00e676;
+        cursor: pointer;
+        position: relative;
+        font-weight: 600;
+        color: #aaffdd;
+    }
+
+    .rc-tooltip:hover::after {
+        content: attr(data-tip);
+        position: absolute;
+        left: 0;
+        bottom: -2.8rem;
+        background: rgba(0,0,0,0.96);
+        padding: 9px 11px;
+        border-radius: 8px;
+        border: 1px solid rgba(0,255,153,0.4);
+        font-size: 0.85rem;
+        color: #d8fff0;
+        width: max-content;
+        max-width: 320px;
+        z-index: 999;
+        box-shadow: 0 0 14px rgba(0,255,153,0.25);
+    }
+
+    /* ENTERPRISE ICON TOOLTIP v5.5 */
+    .tooltip-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 6px;
+        background: rgba(0,255,153,0.15);
+        color: #a5ffdc;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        text-align: center;
+        font-size: 12px;
+        cursor: help;
+        border: 1px solid rgba(0,255,153,0.4);
+        font-weight: 700;
+        box-shadow: 0 0 8px rgba(0,255,153,0.25);
+        position: relative;
+    }
+
+    .tooltip-icon:hover {
+        background: rgba(0,255,153,0.3);
+        border-color: #00ff99;
+    }
+
+    .tooltip-icon:hover::after {
+        content: attr(data-tip);
+        position: absolute;
+        background: rgba(0,20,15,0.98);
+        border: 1px solid rgba(0,255,153,0.45);
+        padding: 10px 14px;
+        border-radius: 10px;
+        color: #d8fff0;
+        width: 260px;
+        left: 22px;
+        bottom: -4px;
+        font-size: 0.82rem;
+        line-height: 1.35rem;
+        z-index: 999;
+        box-shadow: 0 0 18px rgba(0,255,153,0.35);
+    }
+
+    /* DATAFRAME */
+    div[data-testid="stDataFrame"] {
+        border-radius: 12px !important;
+        border: 1px solid rgba(0,255,153,0.25) !important;
+        overflow: hidden !important;
+        box-shadow: 0 0 16px rgba(0,0,0,0.45) !important;
+    }
+
+    [data-testid="stMetricValue"] {
+        color: #76ff03 !important;
+        font-weight: 900 !important;
+        font-size: 1.05rem !important;
+    }
+
+    [data-testid="stMetricLabel"] {
+        color: #e0f2f1 !important;
+        font-weight: 600 !important;
+    }
+
+    /* TOP3 CARDS */
+    .top3-card {
+        position: relative;
+        background: radial-gradient(circle at top left, rgba(0,255,153,0.12), rgba(0,0,0,0.78));
+        border: 1px solid rgba(0,255,153,0.45);
+        padding: 18px 18px;
+        border-radius: 18px;
+        box-shadow: 0 0 18px rgba(0,255,153,0.18);
+        margin-bottom: 18px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out;
+    }
+
+    .top1-card {
+        background: radial-gradient(circle at top left, rgba(255,215,0,0.18), rgba(0,0,0,0.88));
+        border: 1px solid rgba(255,215,0,0.7);
+        box-shadow: 0 0 26px rgba(255,215,0,0.45);
+        animation: gold-pulse 2.4s ease-in-out infinite alternate;
+    }
+
+    @keyframes gold-pulse {
+        0% { box-shadow: 0 0 10px rgba(255,215,0,0.35); border-color: rgba(255,215,0,0.6); }
+        100% { box-shadow: 0 0 26px rgba(255,215,0,0.8); border-color: rgba(255,255,255,0.9); }
+    }
+
+    .top3-card:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 0 26px rgba(0,255,153,0.35);
+        border-color: rgba(0,255,200,0.85);
+    }
+
+    .top3-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #a5ffdc;
+    }
+
+    .top1-title {
+        font-size: 1.15rem;
+        font-weight: 900;
+        color: #ffe680;
+        text-shadow: 0 0 10px rgba(255,210,0,0.7);
+    }
+
+    .top3-sub {
+        font-size: 0.92rem;
+        margin-top: 6px;
+        color: #e0f2f1;
+    }
+
+    .badge-icc {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: linear-gradient(120deg, #00e676, #00bfa5);
+        color: #00130d;
+        font-weight: 700;
+        font-size: 0.88rem;
+    }
+
+    .pill-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(0,255,153,0.5);
+        font-size: 0.82rem;
+        margin-top: 4px;
+        color: #c8ffec;
+    }
+
+    /* RISK METRICS CARD (VaR / CVaR / Risk Ratio) */
+    .rc-risk-card h4 {
+        margin-top: 0;
+        margin-bottom: 0.8rem;
+        color: #a5ffdc;
+        font-weight: 800;
+    }
+
+    .rc-risk-metrics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.4rem;
+    }
+
+    .rc-risk-item {
+        min-width: 150px;
+    }
+
+    .rc-risk-label {
+        font-size: 0.9rem;
+        color: #e0f2f1;
+    }
+
+    .rc-risk-value {
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: #76ff03;
     }
 
     /* MOBILE */
@@ -531,12 +696,6 @@ def most_uncertain_criterion(weights: pd.Series, fuzzy_pct: float) -> Tuple[str,
 
 
 def fuzzy_heatmap_premium(diff_map: Dict[str, float]) -> go.Figure:
-    # -------------------------------------------------------------------------
-    # 🌡️ Heatmap mức dao động Fuzzy
-    # - Màu đậm → tiêu chí biến động mạnh
-    # - Màu nhạt → tiêu chí ổn định
-    # 👉 Dùng để xác định tiêu chí có độ bất định cao nhất trong đánh giá
-    # -------------------------------------------------------------------------
     values = list(diff_map.values())
     labels = list(diff_map.keys())
 
@@ -574,15 +733,6 @@ def fuzzy_heatmap_premium(diff_map: Dict[str, float]) -> go.Figure:
 
 
 def fuzzy_chart_premium(weights: pd.Series, fuzzy_pct: float) -> go.Figure:
-    # -------------------------------------------------------------------------
-    # 🎯 Biểu đồ Fuzzy AHP — Thể hiện mức độ bất định (Low–Mid–High)
-    # - Trục X: 6 tiêu chí đánh giá bảo hiểm (C1–C6)
-    # - Trục Y: Giá trị trọng số tương ứng
-    # - Low: Trọng số thấp nhất theo tỉ lệ bất định
-    # - Mid: Trọng số gốc (chuyên gia đưa ra)
-    # - High: Trọng số cao nhất theo tỉ lệ bất định
-    # 👉 Biểu đồ dùng để xem tiêu chí nào nhạy cảm nhất khi thay đổi nhận định
-    # -------------------------------------------------------------------------
     factor = fuzzy_pct / 100.0
     labels = list(weights.index)
     low_vals, mid_vals, high_vals = [], [], []
@@ -807,12 +957,6 @@ class ChartFactory:
 
     @staticmethod
     def create_weights_pie(weights: pd.Series, title: str) -> go.Figure:
-        # -------------------------------------------------------------------------
-        # 📘 Biểu đồ trọng số 6 tiêu chí
-        # - Dùng biểu đồ tròn để xem mức quan trọng của từng tiêu chí
-        # - Nếu bật Fuzzy → trọng số đã được hiệu chỉnh Low–Mid–High (centroid)
-        # 👉 Có thể dùng trong báo cáo để giải thích "vì sao mô hình ra kết quả này"
-        # -------------------------------------------------------------------------
         colors = ['#00e676', '#69f0ae', '#b9f6ca', '#00bfa5', '#1de9b6', '#64ffda']
         labels_full = list(weights.index)
         labels_short = [c.split(':')[0] for c in labels_full]
@@ -850,13 +994,6 @@ class ChartFactory:
 
     @staticmethod
     def create_cost_benefit_scatter(results: pd.DataFrame) -> go.Figure:
-        # -------------------------------------------------------------------------
-        # 💰📈 Biểu đồ Chi phí – Chất lượng
-        # - Mỗi điểm = 1 phương án (công ty × gói ICC)
-        # - Trục X: Chi phí ước tính (USD)
-        # - Trục Y: Điểm TOPSIS (0–1)
-        # - Mục tiêu: điểm cao + chi phí thấp = lựa chọn tối ưu
-        # -------------------------------------------------------------------------
         color_map = {
             "ICC A": "#ff6b6b",
             "ICC B": "#ffd93d",
@@ -896,13 +1033,6 @@ class ChartFactory:
 
     @staticmethod
     def create_top_recommendations_bar(results: pd.DataFrame) -> go.Figure:
-        # -------------------------------------------------------------------------
-        # 🏆 Top 5 phương án bảo hiểm tốt nhất
-        # - Thanh ngang biểu thị điểm TOPSIS
-        # - Màu càng đậm → điểm càng cao
-        # - Hiển thị tên công ty + gói ICC
-        # 👉 Giúp người dùng xem nhanh 5 lựa chọn tốt nhất
-        # -------------------------------------------------------------------------
         df = results.head(5).copy()
         df["label"] = df["company"] + " - " + df["icc_package"]
 
@@ -935,12 +1065,6 @@ class ChartFactory:
         route: str,
         selected_month: int
     ) -> go.Figure:
-        # -------------------------------------------------------------------------
-        # 🌦️ Dự báo rủi ro khí hậu theo tháng
-        # - Đường xanh: dữ liệu rủi ro khí hậu lịch sử theo tuyến (route)
-        # - Điểm vàng: giá trị dự báo tháng kế tiếp (ARIMA hoặc trendline)
-        # 👉 Giúp đánh giá rủi ro môi trường trong thời gian gần
-        # -------------------------------------------------------------------------
         hist_len = len(historical)
         months_hist = list(range(1, hist_len + 1))
         next_month = selected_month % 12 + 1
@@ -991,15 +1115,6 @@ class ChartFactory:
 
     @staticmethod
     def create_category_comparison(results: pd.DataFrame) -> go.Figure:
-        # -------------------------------------------------------------------------
-        # 📊 So sánh 3 nhóm phương án
-        # - Nhóm 1: 💰 Tiết kiệm (ICC C)
-        # - Nhóm 2: ⚖️ Cân bằng (ICC B)
-        # - Nhóm 3: 🛡️ An toàn (ICC A)
-        # Trục trái: Điểm TOPSIS trung bình của từng loại
-        # Trục phải: Chi phí trung bình của từng loại
-        # 👉 Dùng để xem nhóm nào phù hợp nhất với mục tiêu của doanh nghiệp
-        # -------------------------------------------------------------------------
         categories = ["💰 Tiết kiệm", "⚖️ Cân bằng", "🛡️ An toàn"]
         avg_scores = []
         avg_costs = []
@@ -1121,7 +1236,7 @@ class ReportGenerator:
             if var is not None and cvar is not None:
                 pdf.ln(4)
                 pdf.set_font("Arial", "B", 11)
-                pdf.cell(0, 6, f"VaR 95%: ${var:,.0f}    |    CVaR 95%: ${cvar:,.0f}", 0, 1)
+                pdf.cell(0, 6, f"VaR 95%: ${var:,.0f}   |   CVaR 95%: ${cvar:,.0f}", 0, 1)
 
             return pdf.output(dest="S").encode("latin1")
         except Exception as e:
@@ -1300,12 +1415,7 @@ và xa phương án tệ nhất (ideal worst). Điểm càng cao càng tốt.">i
             unsafe_allow_html=True
         )
 
-        # -------------------------------------------------------------------------
-        # 🥇🥈🥉 Thẻ Premium Top 3
-        # - Hiển thị 3 phương án tốt nhất theo điểm TOPSIS
-        # - Gồm: Công ty, gói ICC, chi phí, điểm, độ tin cậy, rủi ro khí hậu
-        # 👉 Dùng cho presentation: dễ đọc, dễ so sánh, chuyên nghiệp
-        # -------------------------------------------------------------------------
+        # Top 3 Premium Cards
         st.markdown("## 🏅 Top 3 phương án (Premium View)")
 
         cols = st.columns(3)
@@ -1396,11 +1506,11 @@ CVaR 95%: tổn thất trung bình trong 5% trường hợp xấu nhất.">i</sp
                 unsafe_allow_html=True
             )
 
-        # Charts section
+                # Charts section
         st.markdown("---")
-        st.subheader("📊 Biểu đồ phân tích")
+        st.subheader("Biểu đồ phân tích")
 
-        # Biểu đồ 1: Phân tán Chi phí vs Chất lượng (Cost-Benefit)
+        # Biểu đồ 1: Chi phí – Chất lượng (Cost–Benefit)
         st.markdown("""
         <h4 style='display:flex;align-items:center;gap:6px;'>
         📉 Chi phí – Chất lượng (Cost–Benefit)
@@ -1412,7 +1522,7 @@ Trục X: chi phí ước tính; Trục Y: điểm TOPSIS.
         fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
         st.plotly_chart(fig_scatter, use_container_width=True)
 
-        # Biểu đồ 2: So sánh 3 loại phương án (Tiết kiệm, Cân bằng, An toàn)
+        # Biểu đồ 2: So sánh 3 loại phương án
         st.markdown("""
         <h4 style='display:flex;align-items:center;gap:6px;'>
         📊 So sánh 3 loại phương án
@@ -1423,7 +1533,7 @@ của 3 nhóm: Tiết kiệm (ICC C), Cân bằng (ICC B), An toàn (ICC A).">i<
         fig_category = self.chart_factory.create_category_comparison(result.results)
         st.plotly_chart(fig_category, use_container_width=True)
 
-        # Biểu đồ 3: Top 5 phương án tốt nhất (dạng bar ngang)
+        # Biểu đồ 3: Top 5 phương án tốt nhất
         st.markdown("""
         <h4 style='display:flex;align-items:center;gap:6px;'>
         🏆 Top 5 phương án tốt nhất
@@ -1433,7 +1543,7 @@ của 3 nhóm: Tiết kiệm (ICC C), Cân bằng (ICC B), An toàn (ICC A).">i<
         fig_top5 = self.chart_factory.create_top_recommendations_bar(result.results)
         st.plotly_chart(fig_top5, use_container_width=True)
 
-        # Biểu đồ 4: Biểu đồ tròn thể hiện trọng số các tiêu chí
+        # Biểu đồ 4: Trọng số tiêu chí
         st.markdown("""
         <h4 style='display:flex;align-items:center;gap:6px;'>
         📘 Trọng số tiêu chí
@@ -1447,7 +1557,7 @@ Nếu bật Fuzzy AHP, mỗi trọng số được mở rộng thành tam giác 
         )
         st.plotly_chart(fig_weights, use_container_width=True)
 
-        # Biểu đồ 5: Biểu đồ đường dự báo rủi ro khí hậu
+        # Biểu đồ 5: Dự báo rủi ro khí hậu
         st.markdown("""
         <h4 style='display:flex;align-items:center;gap:6px;'>
         📉 Dự báo rủi ro khí hậu theo tháng
@@ -1483,7 +1593,6 @@ mô hình dự báo giá trị tháng kế tiếp (ARIMA hoặc xu hướng tuy�
                 unsafe_allow_html=True
             )
 
-            # Biểu đồ 6: Phân tích tam giác mờ (Low-Mid-High) của Fuzzy AHP
             fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
             st.plotly_chart(fig_fuzzy, use_container_width=True)
 
@@ -1502,7 +1611,6 @@ mô hình dự báo giá trị tháng kế tiếp (ARIMA hoặc xu hướng tuy�
                 unsafe_allow_html=True
             )
 
-            # Biểu đồ 7: Heatmap thể hiện mức độ dao động (bất định) của các trọng số
             st.subheader("🔥 Heatmap mức dao động Fuzzy (Premium Green)")
             fig_heat = fuzzy_heatmap_premium(diff_map)
             st.plotly_chart(fig_heat, use_container_width=True)
