@@ -1506,95 +1506,72 @@ CVaR 95%: tổn thất trung bình trong 5% trường hợp xấu nhất.">i</sp
                 unsafe_allow_html=True
             )
 
-        # Charts section
+                # Charts section
         st.markdown("---")
-        st.subheader("📊 Biểu đồ phân tích")
+        st.subheader("Biểu đồ phân tích")
 
-        col_scatter, col_cat = st.columns(2)
-        with col_scatter:
-            st.markdown("""
-            <h4 style='display:flex;align-items:center;gap:6px;'>
-            📉 Chi phí – Chất lượng (Cost–Benefit)
-            <span class="tooltip-icon" data-tip="Mỗi điểm là một phương án bảo hiểm (công ty × gói ICC).
-Trục X: chi phí ước tính; Trục Y: điểm TOPSIS. 
+        # Biểu đồ 1: Chi phí – Chất lượng (Cost–Benefit)
+        st.markdown("""
+        <h4 style='display:flex;align-items:center;gap:6px;'>
+        📉 Chi phí – Chất lượng (Cost–Benefit)
+        <span class="tooltip-icon" data-tip="Mỗi điểm là một phương án bảo hiểm (công ty × gói ICC).
+Trục X: chi phí ước tính; Trục Y: điểm TOPSIS.
 Điểm càng cao và chi phí càng thấp → phương án càng hấp dẫn.">i</span>
-            </h4>
-            """, unsafe_allow_html=True)
-            fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
-            st.plotly_chart(fig_scatter, use_container_width=True)
+        </h4>
+        """, unsafe_allow_html=True)
+        fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
+        st.plotly_chart(fig_scatter, use_container_width=True)
 
-        with col_cat:
-            st.markdown("""
-            <h4 style='display:flex;align-items:center;gap:6px;'>
-            📊 So sánh 3 loại phương án
-            <span class="tooltip-icon" data-tip="So sánh trung bình điểm TOPSIS và trung bình chi phí 
+        # Biểu đồ 2: So sánh 3 loại phương án
+        st.markdown("""
+        <h4 style='display:flex;align-items:center;gap:6px;'>
+        📊 So sánh 3 loại phương án
+        <span class="tooltip-icon" data-tip="So sánh trung bình điểm TOPSIS và trung bình chi phí
 của 3 nhóm: Tiết kiệm (ICC C), Cân bằng (ICC B), An toàn (ICC A).">i</span>
-            </h4>
-            """, unsafe_allow_html=True)
-            fig_category = self.chart_factory.create_category_comparison(result.results)
-            st.plotly_chart(fig_category, use_container_width=True)
+        </h4>
+        """, unsafe_allow_html=True)
+        fig_category = self.chart_factory.create_category_comparison(result.results)
+        st.plotly_chart(fig_category, use_container_width=True)
 
-        st.markdown("#### 🏆 Top 5 phương án tốt nhất")
+        # Biểu đồ 3: Top 5 phương án tốt nhất
+        st.markdown("""
+        <h4 style='display:flex;align-items:center;gap:6px;'>
+        🏆 Top 5 phương án tốt nhất
+        <span class="tooltip-icon" data-tip="Biểu đồ ngang hiển thị 5 phương án có điểm TOPSIS cao nhất.">i</span>
+        </h4>
+        """, unsafe_allow_html=True)
         fig_top5 = self.chart_factory.create_top_recommendations_bar(result.results)
         st.plotly_chart(fig_top5, use_container_width=True)
 
-        # Weights + Forecast + Risk metrics
-        st.markdown("---")
-        col_w1, col_w2 = st.columns(2)
-
-        with col_w1:
-            st.markdown("""
-            <h4 style='display:flex;align-items:center;gap:6px;'>
-            📘 Trọng số tiêu chí
-            <span class="tooltip-icon" data-tip="Trọng số được xác định theo hồ sơ ưu tiên (Tiết kiệm / Cân bằng / An toàn).
+        # Biểu đồ 4: Trọng số tiêu chí
+        st.markdown("""
+        <h4 style='display:flex;align-items:center;gap:6px;'>
+        📘 Trọng số tiêu chí
+        <span class="tooltip-icon" data-tip="Trọng số được xác định theo hồ sơ ưu tiên (Tiết kiệm / Cân bằng / An toàn).
 Nếu bật Fuzzy AHP, mỗi trọng số được mở rộng thành tam giác mờ (Low–Mid–High).">i</span>
-            </h4>
-            """, unsafe_allow_html=True)
-            fig_weights = self.chart_factory.create_weights_pie(
-                result.weights,
-                "Trọng số tiêu chí (sau khi áp dụng Fuzzy AHP)" if params.use_fuzzy else "Trọng số tiêu chí"
-            )
-            st.plotly_chart(fig_weights, use_container_width=True)
+        </h4>
+        """, unsafe_allow_html=True)
+        fig_weights = self.chart_factory.create_weights_pie(
+            result.weights,
+            "Trọng số tiêu chí (sau khi áp dụng Fuzzy AHP)" if params.use_fuzzy else "Trọng số tiêu chí"
+        )
+        st.plotly_chart(fig_weights, use_container_width=True)
 
-        with col_w2:
-            st.markdown("""
-            <h4 style='display:flex;align-items:center;gap:6px;'>
-            📉 Dự báo rủi ro khí hậu theo tháng
-            <span class="tooltip-icon" data-tip="Từ dữ liệu lịch sử rủi ro khí hậu theo tuyến, 
+        # Biểu đồ 5: Dự báo rủi ro khí hậu
+        st.markdown("""
+        <h4 style='display:flex;align-items:center;gap:6px;'>
+        📉 Dự báo rủi ro khí hậu theo tháng
+        <span class="tooltip-icon" data-tip="Từ dữ liệu lịch sử rủi ro khí hậu theo tuyến,
 mô hình dự báo giá trị tháng kế tiếp (ARIMA hoặc xu hướng tuyến tính).">i</span>
-            </h4>
-            """, unsafe_allow_html=True)
-            fig_forecast = self.chart_factory.create_forecast_chart(
-                result.historical, result.forecast, params.route, params.month
-            )
-            st.plotly_chart(fig_forecast, use_container_width=True)
-
-        # Risk metrics card full-width
-        if result.var is not None and result.cvar is not None:
-            risk_pct = (result.var / params.cargo_value) * 100
-            st.markdown(
-                f"""
-                <div class="rc-card rc-risk-card">
-                    <h4>⚠️ Đánh giá rủi ro tài chính (Quick View)</h4>
-                    <div class="rc-risk-metrics">
-                        <div class="rc-risk-item">
-                            <div class="rc-risk-label">💰 VaR 95%</div>
-                            <div class="rc-risk-value">${result.var:,.0f}</div>
-                        </div>
-                        <div class="rc-risk-item">
-                            <div class="rc-risk-label">🛡️ CVaR 95%</div>
-                            <div class="rc-risk-value">${result.cvar:,.0f}</div>
-                        </div>
-                        <div class="rc-risk-item">
-                            <div class="rc-risk-label">📊 Rủi ro / Giá trị</div>
-                            <div class="rc-risk-value">{risk_pct:.1f}%</div>
-                        </div>
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
+        </h4>
+        """, unsafe_allow_html=True)
+        fig_forecast = self.chart_factory.create_forecast_chart(
+            result.historical, result.forecast, params.route, params.month
+        )
+        st.plotly_chart(fig_forecast, use_container_width=True)
+        
+        
+        
         # Fuzzy AHP
         if params.use_fuzzy:
             st.markdown("---")
