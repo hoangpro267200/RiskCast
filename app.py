@@ -46,637 +46,604 @@ def apply_enterprise_css():
     st.markdown(
         """
         <style>
-        /* =========================================================
-           GLOBAL RESET + TYPO
-        ========================================================= */
-        * {
-            text-rendering: optimizeLegibility !important;
-            -webkit-font-smoothing: antialiased !important;
-            scroll-behavior: smooth;
-        }
+        /
+/* =========================================================
+   RISKCAST ULTRA LUXURY NEON v3.2
+   Author: Kai assistant for Bùi Xuân Hoàng
+   Theme: Luxury Black + Bright Neon Green
+   - Nâng độ sáng nền ~25%
+   - Giảm glow nhẹ cho chuyên nghiệp
+   - FIX chart Plotly bị phóng to / tràn khung
+========================================================= */
 
-        html, body {
-            background: #020608 !important;
-        }
+/* ===========================
+   GLOBAL RESET + TYPO
+=========================== */
+* {
+    text-rendering: optimizeLegibility !important;
+    -webkit-font-smoothing: antialiased !important;
+    scroll-behavior: smooth;
+}
 
-        .stApp {
-            background: radial-gradient(circle at top,
-                        #041619 0%,
-                        #020608 40%,
-                        #000000 100%) !important;
-            color: #e9fff4 !important;
-            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif !important;
-            font-size: 16px !important;
-        }
+html, body {
+    background: #05090B !important;
+}
 
-        .block-container {
-            padding-top: 1.4rem !important;
-            padding-bottom: 3.4rem !important;
-            max-width: 1500px !important;
-        }
+/* App background – sáng hơn một chút */
+.stApp {
+    background: radial-gradient(circle at top,
+                #0B2224 0%,
+                #041617 38%,
+                #000000 100%) !important;
+    color: #e9fff4 !important;
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif !important;
+    font-size: 16px !important;
+}
 
-        h1, h2, h3, h4, h5 {
-            font-weight: 800 !important;
-            letter-spacing: 0.02em;
-            color: #eafff8 !important;
-        }
+/* Giới hạn độ rộng nội dung chính */
+.block-container {
+    padding-top: 1.4rem !important;
+    padding-bottom: 3.4rem !important;
+    max-width: 1500px !important;
+}
 
-        /* =========================================================
-           LUXURY GLOW UTILITIES
-        ========================================================= */
-        .neon-text {
-            background: linear-gradient(90deg, #eafff8, #9dffd0, #e0fff7);
-            -webkit-background-clip: text;
-            color: transparent;
-        }
+h1, h2, h3, h4, h5 {
+    font-weight: 800 !important;
+    letter-spacing: 0.02em;
+    color: #eafff8 !important;
+}
 
-        .neon-soft {
-            text-shadow: 0 0 14px rgba(0,255,153,0.45);
-        }
+/* ===========================
+   NEON UTILITIES
+=========================== */
+.neon-text {
+    background: linear-gradient(90deg, #eafff8, #9dffd0, #e0fff7);
+    -webkit-background-clip: text;
+    color: transparent;
+}
 
-        .neon-hard {
-            text-shadow:
-                0 0 4px rgba(0,255,153,0.9),
-                0 0 10px rgba(0,255,153,0.8),
-                0 0 25px rgba(0,255,153,0.7);
-        }
+/* giảm glow 1 xíu cho đỡ gắt */
+.neon-soft {
+    text-shadow: 0 0 12px rgba(0,255,153,0.40);
+}
 
-        .glow-ring {
-            box-shadow:
-                0 0 0 1px rgba(0,255,153,0.25),
-                0 0 20px rgba(0,255,153,0.25),
-                0 0 40px rgba(0,255,153,0.30);
-        }
+.neon-hard {
+    text-shadow:
+        0 0 4px rgba(0,255,153,0.85),
+        0 0 10px rgba(0,255,153,0.75),
+        0 0 22px rgba(0,255,153,0.65);
+}
 
-        .glass {
-            background: linear-gradient(135deg,
-                rgba(6, 24, 20, 0.94),
-                rgba(0, 0, 0, 0.98)) !important;
-            border-radius: 18px;
-            border: 1px solid rgba(0,255,153,0.22);
-            box-shadow:
-                0 16px 40px rgba(0,0,0,0.85),
-                0 0 30px rgba(0,255,153,0.22);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-        }
+.glow-ring {
+    box-shadow:
+        0 0 0 1px rgba(0,255,153,0.22),
+        0 0 18px rgba(0,255,153,0.22),
+        0 0 38px rgba(0,255,153,0.28);
+}
 
-        /* =========================================================
-           HEADER – ULTRA LUXURY
-        ========================================================= */
-        .rc-header {
-            position: relative;
-            padding: 1.3rem 1.7rem;
-            margin-bottom: 2.1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1.6rem;
-            overflow: hidden;
-        }
+/* Glass panel tổng quát */
+.glass {
+    background: linear-gradient(135deg,
+        rgba(6, 24, 20, 0.92),
+        rgba(0, 0, 0, 0.96)) !important;
+    border-radius: 18px;
+    border: 1px solid rgba(0,255,153,0.20);
+    box-shadow:
+        0 14px 36px rgba(0,0,0,0.85),
+        0 0 26px rgba(0,255,153,0.20);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
 
-        .rc-header::before {
-            content: "";
-            position: absolute;
-            inset: -1px;
-            border-radius: 22px;
-            background: radial-gradient(circle at 10% 0%,
-                        rgba(0,255,153,0.16) 0%,
-                        transparent 45%),
-                        radial-gradient(circle at 90% 100%,
-                        rgba(0,255,204,0.18) 0%,
-                        transparent 55%);
-            opacity: 0.85;
-            pointer-events: none;
-        }
+/* ===========================
+   HEADER – ULTRA LUXURY
+=========================== */
+.rc-header {
+    position: relative;
+    padding: 1.3rem 1.7rem;
+    margin-bottom: 2.1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.6rem;
+    overflow: hidden;
+    border-radius: 22px;
+    background: radial-gradient(circle at 10% 0%,
+                rgba(0,255,153,0.16) 0%,
+                rgba(0,0,0,0.98) 55%);
+    box-shadow:
+        0 0 0 1px rgba(0,255,153,0.35),
+        0 18px 46px rgba(0,0,0,0.95);
+}
 
-        .rc-header::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-radius: 22px;
-            border: 1px solid rgba(0,255,153,0.45);
-            box-shadow:
-                0 0 0 1px rgba(0,255,153,0.25),
-                0 0 18px rgba(0,255,153,0.55),
-                0 18px 45px rgba(0,0,0,0.95);
-            pointer-events: none;
-        }
+.rc-header-left {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 1.3rem;
+}
 
-        .rc-header-left {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            align-items: center;
-            gap: 1.3rem;
-        }
+/* Logo khiên RISKCAST */
+.rc-logo {
+    width: 82px;
+    height: 82px;
+    border-radius: 22px;
+    background:
+        radial-gradient(circle at 30% 20%,
+            #ffffff 0%, #d7fff4 14%, #9affdf 34%, transparent 60%),
+        radial-gradient(circle at 70% 80%,
+            #00ffcc 0%, #00e6aa 35%, #00664a 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.8rem;
+    color: #00140d;
+    border: 3px solid #c4ffea;
+    box-shadow:
+        0 0 12px rgba(0,255,153,0.75),
+        0 0 34px rgba(0,255,153,0.80);
+    text-shadow:
+        0 0 4px rgba(0,0,0,0.55),
+        0 0 16px rgba(0,255,153,0.95);
+}
 
-        .rc-logo {
-            width: 82px;
-            height: 82px;
-            border-radius: 22px;
-            background:
-                radial-gradient(circle at 30% 20%,
-                    #ffffff 0%, #d7fff4 14%, #9affdf 34%, transparent 60%),
-                radial-gradient(circle at 70% 80%,
-                    #00ffcc 0%, #00e6aa 35%, #00664a 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            font-size: 1.8rem;
-            color: #00140d;
-            border: 3px solid #c4ffea;
-            box-shadow:
-                0 0 12px rgba(0,255,153,0.75),
-                0 0 38px rgba(0,255,153,0.85);
-            text-shadow:
-                0 0 4px rgba(0,0,0,0.55),
-                0 0 16px rgba(0,255,153,0.95);
-        }
+/* Tiêu đề */
+.rc-title {
+    font-size: 1.55rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: linear-gradient(90deg,
+                #f4fff9,
+                #c2ffe0,
+                #e2fff7);
+    -webkit-background-clip: text;
+    color: transparent;
+}
 
-        .rc-title {
-            font-size: 1.55rem;
-            font-weight: 900;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            background: linear-gradient(90deg,
-                        #f4fff9,
-                        #c2ffe0,
-                        #e2fff7);
-            -webkit-background-clip: text;
-            color: transparent;
-        }
+.rc-subtitle {
+    margin-top: 4px;
+    font-size: 0.95rem;
+    color: #c4ffea;
+    opacity: 0.95;
+    font-weight: 500;
+}
 
-        .rc-subtitle {
-            margin-top: 4px;
-            font-size: 0.95rem;
-            color: #c4ffea;
-            opacity: 0.95;
-            font-weight: 500;
-        }
+/* Badge Enterprise */
+.rc-badge {
+    position: relative;
+    z-index: 2;
+    background: linear-gradient(135deg, #00ff99, #00e676, #00bfa5);
+    padding: 0.7rem 1.5rem;
+    border-radius: 999px;
+    color: #00140c;
+    font-weight: 800;
+    font-size: 0.92rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow:
+        0 0 18px rgba(0,255,153,0.7),
+        0 14px 36px rgba(0,0,0,0.9);
+    white-space: nowrap;
+}
 
-        .rc-badge {
-            position: relative;
-            z-index: 2;
-            background: linear-gradient(135deg, #00ff99, #00e676, #00bfa5);
-            padding: 0.7rem 1.5rem;
-            border-radius: 999px;
-            color: #00140c;
-            font-weight: 800;
-            font-size: 0.92rem;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            box-shadow:
-                0 0 18px rgba(0,255,153,0.7),
-                0 14px 36px rgba(0,0,0,0.9);
-            white-space: nowrap;
-        }
+/* ===========================
+   SIDEBAR – BRIGHT PREMIUM GREEN
+=========================== */
+section[data-testid="stSidebar"] {
+    background: radial-gradient(circle at top,
+                #06251D 0%,
+                #04110F 45%,
+                #000000 100%) !important;
+    border-right: 1px solid rgba(0,255,153,0.26);
+    box-shadow: 10px 0 30px rgba(0,0,0,0.85);
+}
 
-        /* =========================================================
-           SIDEBAR – LUXURY PANEL
-        ========================================================= */
-        section[data-testid="stSidebar"] {
-            background: radial-gradient(circle at top,
-                        #031914 0%,
-                        #020806 45%,
-                        #000000 100%) !important;
-            border-right: 1px solid rgba(0,255,153,0.26);
-            box-shadow: 10px 0 30px rgba(0,0,0,0.85);
-        }
+section[data-testid="stSidebar"] > div {
+    padding-top: 0.5rem;
+}
 
-        section[data-testid="stSidebar"] > div {
-            padding-top: 0.5rem;
-        }
+section[data-testid="stSidebar"] h1,
+section[data-testid="stSidebar"] h2,
+section[data-testid="stSidebar"] h3 {
+    color: #c8ffec !important;
+    font-weight: 800 !important;
+}
 
-        section[data-testid="stSidebar"] h1,
-        section[data-testid="stSidebar"] h2,
-        section[data-testid="stSidebar"] h3 {
-            color: #c8ffec !important;
-            font-weight: 800 !important;
-        }
+section[data-testid="stSidebar"] label {
+    color: #e0fff4 !important;
+    font-weight: 600 !important;
+}
 
-        section[data-testid="stSidebar"] label {
-            color: #e0fff4 !important;
-            font-weight: 600 !important;
-        }
+/* Input trong sidebar */
+section[data-testid="stSidebar"]
+    .stTextInput > div > div > input,
+section[data-testid="stSidebar"]
+    .stNumberInput input,
+section[data-testid="stSidebar"]
+    .stSelectbox > div > div {
+    background: rgba(0,0,0,0.6) !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(0,255,153,0.40) !important;
+    color: #e9fff4 !important;
+    box-shadow: 0 0 0 1px rgba(0,255,153,0.22);
+}
 
-        section[data-testid="stSidebar"] .stSlider label {
-            font-size: 0.9rem !important;
-        }
+/* Nút sidebar */
+section[data-testid="stSidebar"] .stButton > button {
+    background: linear-gradient(135deg, #00ff99, #00e676, #00c853) !important;
+    color: #00140d !important;
+    font-weight: 900 !important;
+    border-radius: 999px !important;
+    border: none !important;
+    padding: 0.7rem 1.8rem !important;
+    box-shadow:
+        0 0 18px rgba(0,255,153,0.65),
+        0 12px 30px rgba(0,0,0,0.9) !important;
+    transition: all 0.15s ease-out !important;
+    font-size: 0.98rem !important;
+}
 
-        /* Sidebar inputs */
-        section[data-testid="stSidebar"] 
-        .stTextInput > div > div > input,
-        section[data-testid="stSidebar"]
-        .stNumberInput input,
-        section[data-testid="stSidebar"]
-        .stSelectbox > div > div {
-            background: rgba(0,0,0,0.6) !important;
-            border-radius: 10px !important;
-            border: 1px solid rgba(0,255,153,0.4) !important;
-            color: #e9fff4 !important;
-            box-shadow: 0 0 0 1px rgba(0,255,153,0.24);
-        }
+section[data-testid="stSidebar"] .stButton > button:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow:
+        0 0 26px rgba(0,255,153,0.9),
+        0 16px 40px rgba(0,0,0,0.95) !important;
+}
 
-        /* Sidebar button */
-        section[data-testid="stSidebar"] .stButton > button {
-            background: linear-gradient(135deg, #00ff99, #00e676, #00c853) !important;
-            color: #00140d !important;
-            font-weight: 900 !important;
-            border-radius: 999px !important;
-            border: none !important;
-            padding: 0.7rem 1.8rem !important;
-            box-shadow:
-                0 0 18px rgba(0,255,153,0.65),
-                0 12px 30px rgba(0,0,0,0.9) !important;
-            transition: all 0.15s ease-out !important;
-            font-size: 0.98rem !important;
-        }
+/* ===========================
+   CORE CARDS / SECTIONS
+=========================== */
+.rc-card {
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding: 1.25rem 1.5rem;
+    border-radius: 18px;
+    background: radial-gradient(circle at top left,
+                rgba(0,255,153,0.16),
+                rgba(0,0,0,0.96));
+    border: 1px solid rgba(0,255,153,0.25);
+    box-shadow:
+        0 0 14px rgba(0,255,153,0.25),
+        0 12px 26px rgba(0,0,0,0.9);
+}
 
-        section[data-testid="stSidebar"] .stButton > button:hover {
-            transform: translateY(-1px) scale(1.02);
-            box-shadow:
-                0 0 26px rgba(0,255,153,0.9),
-                0 16px 40px rgba(0,0,0,0.95) !important;
-        }
+/* Box kết quả chính */
+.result-box {
+    position: relative;
+    padding: 1.7rem 2.1rem;
+    border-radius: 20px;
+    background:
+        radial-gradient(circle at top left,
+            rgba(0,255,153,0.35),
+            rgba(0,0,0,0.98)),
+        radial-gradient(circle at bottom right,
+            rgba(0,255,204,0.22),
+            rgba(0,0,0,1));
+    color: #00130d !important;
+    border: 1px solid rgba(0,255,153,0.50);
+    box-shadow:
+        0 0 20px rgba(0,255,153,0.45),
+        0 18px 44px rgba(0,0,0,0.98);
+}
 
-        /* =========================================================
-           CORE CARDS / SECTIONS
-        ========================================================= */
-        .rc-card {
-            margin-bottom: 1.5rem;
-        }
+.result-box b {
+    color: #00130d !important;
+}
 
-        .rc-card,
-        .result-box,
-        .explanation-box,
-        .top3-card,
-        .rc-risk-card {
-            position: relative;
-        }
+/* Box giải thích */
+.explanation-box {
+    margin-top: 0.8rem;
+    padding: 1.2rem 1.5rem;
+    border-radius: 18px;
+    background: linear-gradient(135deg,
+                rgba(1, 20, 14, 0.98),
+                rgba(0, 0, 0, 0.98));
+    border-left: 4px solid #00e676;
+    border-right: 1px solid rgba(0,255,153,0.35);
+    box-shadow:
+        0 0 16px rgba(0,255,153,0.25),
+        0 10px 26px rgba(0,0,0,0.9);
+}
 
-        .rc-card::before,
-        .result-box::before,
-        .explanation-box::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-radius: 18px;
-            border: 1px solid rgba(0,255,153,0.25);
-            box-shadow:
-                0 0 14px rgba(0,255,153,0.25),
-                0 12px 26px rgba(0,0,0,0.9);
-            opacity: 0.9;
-            pointer-events: none;
-        }
+.explanation-box h4 {
+    margin-bottom: 0.5rem;
+    color: #a5ffdc !important;
+}
 
-        .rc-card > *:not(.rc-card::before),
-        .result-box > *:not(.result-box::before),
-        .explanation-box > *:not(.explanation-box::before) {
-            position: relative;
-            z-index: 2;
-        }
+.explanation-box p,
+.explanation-box li {
+    color: #e0f2f1 !important;
+    font-weight: 500;
+}
 
-        .rc-card {
-            padding: 1.25rem 1.5rem;
-            background: radial-gradient(circle at top left,
-                        rgba(0,255,153,0.16),
-                        transparent 55%),
-                        radial-gradient(circle at bottom right,
-                        rgba(0,128,96,0.35),
-                        rgba(0,0,0,0.98));
-            border-radius: 18px;
-        }
+/* ===========================
+   TOOLTIP (TEXT + ICON)
+=========================== */
+.rc-tooltip {
+    text-decoration: underline dotted #00e676;
+    cursor: pointer;
+    position: relative;
+    font-weight: 600;
+    color: #aaffdd;
+}
 
-        .result-box {
-            padding: 1.7rem 2.1rem;
-            border-radius: 20px;
-            background:
-                radial-gradient(circle at top left,
-                    rgba(0,255,153,0.35),
-                    rgba(0,0,0,0.98)),
-                radial-gradient(circle at bottom right,
-                    rgba(0,255,204,0.22),
-                    rgba(0,0,0,1));
-            color: #00130d !important;
-        }
+.rc-tooltip:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 0;
+    bottom: -2.9rem;
+    background: rgba(0, 5, 4, 0.98);
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,255,153,0.55);
+    font-size: 0.84rem;
+    color: #d8fff0;
+    width: max-content;
+    max-width: 320px;
+    z-index: 999;
+    box-shadow:
+        0 0 14px rgba(0,255,153,0.45),
+        0 18px 30px rgba(0,0,0,0.9);
+}
 
-        .result-box b {
-            color: #00130d !important;
-        }
+/* Icon ? tooltip */
+.tooltip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    background: radial-gradient(circle,
+                rgba(0,255,153,0.18),
+                rgba(0, 36, 26, 0.95));
+    color: #a5ffdc;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    cursor: help;
+    border: 1px solid rgba(0,255,153,0.6);
+    box-shadow:
+        0 0 8px rgba(0,255,153,0.35),
+        0 0 16px rgba(0,255,153,0.4);
+    position: relative;
+    font-weight: 700;
+}
 
-        .explanation-box {
-            margin-top: 0.8rem;
-            padding: 1.2rem 1.5rem;
-            border-radius: 18px;
-            background: linear-gradient(135deg,
-                        rgba(1, 20, 14, 0.98),
-                        rgba(0, 0, 0, 0.98));
-            border-left: 4px solid #00e676;
-        }
+.tooltip-icon:hover {
+    background: radial-gradient(circle,
+                rgba(0,255,160,0.35),
+                rgba(0, 40, 28, 0.95));
+}
 
-        .explanation-box h4 {
-            margin-bottom: 0.5rem;
-            color: #a5ffdc !important;
-        }
+.tooltip-icon:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    background: rgba(0, 8, 6, 0.98);
+    border: 1px solid rgba(0,255,153,0.6);
+    padding: 10px 14px;
+    border-radius: 10px;
+    color: #e0fff5;
+    width: 260px;
+    left: 22px;
+    bottom: -4px;
+    font-size: 0.82rem;
+    line-height: 1.35rem;
+    z-index: 999;
+    box-shadow:
+        0 0 20px rgba(0,255,153,0.6),
+        0 18px 36px rgba(0,0,0,0.95);
+}
 
-        .explanation-box p,
-        .explanation-box li {
-            color: #e0f2f1 !important;
-            font-weight: 500;
-        }
+/* ===========================
+   TOP 3 CARDS – MEDAL GLOW
+=========================== */
+.top3-card {
+    position: relative;
+    padding: 1.1rem 1.1rem 1.0rem 1.1rem;
+    border-radius: 18px;
+    background: radial-gradient(circle at top left,
+                rgba(0,255,153,0.16),
+                rgba(0,0,0,0.96));
+    border: 1px solid rgba(0,255,153,0.45);
+    box-shadow:
+        0 0 18px rgba(0,255,153,0.18),
+        0 16px 40px rgba(0,0,0,0.9);
+    text-align: center;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transition: transform 0.18s ease-out,
+                box-shadow 0.18s ease-out,
+                border-color 0.18s ease-out;
+    margin-bottom: 1.2rem;
+}
 
-        /* =========================================================
-           TOOLTIP (TEXT + ICON)
-        ========================================================= */
-        .rc-tooltip {
-            text-decoration: underline dotted #00e676;
-            cursor: pointer;
-            position: relative;
-            font-weight: 600;
-            color: #aaffdd;
-        }
+.top1-card {
+    background: radial-gradient(circle at top left,
+                rgba(255,215,0,0.22),
+                rgba(0,0,0,0.96));
+    border-color: rgba(255,215,0,0.8);
+    box-shadow:
+        0 0 24px rgba(255,215,0,0.65),
+        0 20px 46px rgba(0,0,0,0.95);
+}
 
-        .rc-tooltip:hover::after {
-            content: attr(data-tip);
-            position: absolute;
-            left: 0;
-            bottom: -2.9rem;
-            background: rgba(0, 5, 4, 0.98);
-            padding: 9px 12px;
-            border-radius: 10px;
-            border: 1px solid rgba(0,255,153,0.55);
-            font-size: 0.84rem;
-            color: #d8fff0;
-            width: max-content;
-            max-width: 320px;
-            z-index: 999;
-            box-shadow:
-                0 0 14px rgba(0,255,153,0.45),
-                0 18px 30px rgba(0,0,0,0.9);
-        }
+.top3-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    border-color: rgba(0,255,200,0.9);
+    box-shadow:
+        0 0 24px rgba(0,255,180,0.9),
+        0 22px 52px rgba(0,0,0,0.98);
+}
 
-        .tooltip-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-left: 6px;
-            background: radial-gradient(circle,
-                        rgba(0,255,153,0.18),
-                        rgba(0, 36, 26, 0.95));
-            color: #a5ffdc;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 12px;
-            cursor: help;
-            border: 1px solid rgba(0,255,153,0.6);
-            box-shadow:
-                0 0 8px rgba(0,255,153,0.35),
-                0 0 16px rgba(0,255,153,0.4);
-            position: relative;
-            font-weight: 700;
-        }
+.top3-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #a5ffdc;
+}
 
-        .tooltip-icon:hover {
-            background: radial-gradient(circle,
-                        rgba(0,255,160,0.35),
-                        rgba(0, 40, 28, 0.95));
-        }
+.top1-title {
+    font-size: 1.12rem;
+    font-weight: 900;
+    color: #ffe680;
+    text-shadow:
+        0 0 10px rgba(255,210,0,0.7),
+        0 0 20px rgba(255,210,0,0.9);
+}
 
-        .tooltip-icon:hover::after {
-            content: attr(data-tip);
-            position: absolute;
-            background: rgba(0, 8, 6, 0.98);
-            border: 1px solid rgba(0,255,153,0.6);
-            padding: 10px 14px;
-            border-radius: 10px;
-            color: #e0fff5;
-            width: 260px;
-            left: 22px;
-            bottom: -4px;
-            font-size: 0.82rem;
-            line-height: 1.35rem;
-            z-index: 999;
-            box-shadow:
-                0 0 20px rgba(0,255,153,0.6),
-                0 18px 36px rgba(0,0,0,0.95);
-        }
+.top3-sub {
+    font-size: 0.92rem;
+    margin-top: 5px;
+    color: #e0f2f1;
+}
 
-        /* =========================================================
-           TOP 3 CARDS – MEDAL GLOW
-        ========================================================= */
-        .top3-card {
-            position: relative;
-            padding: 1.1rem 1.1rem 1.0rem 1.1rem;
-            border-radius: 18px;
-            background: radial-gradient(circle at top left,
-                        rgba(0,255,153,0.16),
-                        rgba(0,0,0,0.96));
-            border: 1px solid rgba(0,255,153,0.45);
-            box-shadow:
-                0 0 18px rgba(0,255,153,0.18),
-                0 16px 40px rgba(0,0,0,0.9);
-            text-align: center;
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            transition: transform 0.18s ease-out,
-                        box-shadow 0.18s ease-out,
-                        border-color 0.18s ease-out;
-            margin-bottom: 1.2rem;
-        }
+.badge-icc {
+    display: inline-block;
+    padding: 4px 11px;
+    border-radius: 999px;
+    background: linear-gradient(120deg, #00e676, #00bfa5);
+    color: #00130d;
+    font-weight: 700;
+    font-size: 0.86rem;
+}
 
-        .top1-card {
-            background: radial-gradient(circle at top left,
-                        rgba(255,215,0,0.22),
-                        rgba(0,0,0,0.96));
-            border-color: rgba(255,215,0,0.8);
-            box-shadow:
-                0 0 24px rgba(255,215,0,0.65),
-                0 20px 46px rgba(0,0,0,0.95);
-            animation: gold-pulse 2.6s ease-in-out infinite alternate;
-        }
+/* ===========================
+   TABLE / DATAFRAME
+=========================== */
+div[data-testid="stDataFrame"] {
+    border-radius: 14px !important;
+    border: 1px solid rgba(0,255,153,0.32) !important;
+    overflow: hidden !important;
+    box-shadow:
+        0 0 18px rgba(0,255,153,0.22),
+        0 18px 38px rgba(0,0,0,0.9) !important;
+    background: radial-gradient(circle at top,
+                rgba(0,255,153,0.16),
+                rgba(0,0,0,0.96)) !important;
+}
 
-        @keyframes gold-pulse {
-            0% {
-                box-shadow:
-                    0 0 10px rgba(255,215,0,0.35),
-                    0 18px 40px rgba(0,0,0,0.9);
-            }
-            100% {
-                box-shadow:
-                    0 0 28px rgba(255,215,0,0.9),
-                    0 24px 54px rgba(0,0,0,0.98);
-            }
-        }
+/* Metric */
+[data-testid="stMetricValue"] {
+    color: #76ff03 !important;
+    font-weight: 900 !important;
+    font-size: 1.08rem !important;
+}
 
-        .top3-card:hover {
-            transform: translateY(-4px) scale(1.02);
-            border-color: rgba(0,255,200,0.9);
-            box-shadow:
-                0 0 24px rgba(0,255,180,0.9),
-                0 22px 52px rgba(0,0,0,0.98);
-        }
+[data-testid="stMetricLabel"] {
+    color: #e0f2f1 !important;
+    font-weight: 600 !important;
+}
 
-        .top3-title {
-            font-size: 1.05rem;
-            font-weight: 800;
-            color: #a5ffdc;
-        }
+/* ===========================
+   CHART FRAME – FIX PHÓNG TO
+=========================== */
 
-        .top1-title {
-            font-size: 1.12rem;
-            font-weight: 900;
-            color: #ffe680;
-            text-shadow:
-                0 0 10px rgba(255,210,0,0.7),
-                0 0 20px rgba(255,210,0,0.9);
-        }
+/* Khung ngoài: card chứa chart */
+div[data-testid="stPlotlyChart"] {
+    padding: 0.8rem 0.9rem 0.6rem 0.9rem;
+    margin: 0.9rem 0 1.5rem 0;
+    background: radial-gradient(circle at top,
+                rgba(0,255,153,0.12),
+                rgba(0,0,0,0.98));
+    border-radius: 18px;
+    border: 1px solid rgba(0,255,153,0.38);
+    box-shadow:
+        0 0 20px rgba(0,255,153,0.30),
+        0 18px 40px rgba(0,0,0,0.95);
+    overflow: hidden;              /* tránh tràn khung */
+}
 
-        .top3-sub {
-            font-size: 0.92rem;
-            margin-top: 5px;
-            color: #e0f2f1;
-        }
+/* Đảm bảo chart không vượt quá width card */
+div[data-testid="stPlotlyChart"] > div {
+    max-width: 100% !important;
+}
 
-        .badge-icc {
-            display: inline-block;
-            padding: 4px 11px;
-            border-radius: 999px;
-            background: linear-gradient(120deg, #00e676, #00bfa5);
-            color: #00130d;
-            font-weight: 700;
-            font-size: 0.86rem;
-        }
+/* Fix plotly tự set width lớn hơn container */
+div[data-testid="stPlotlyChart"] .js-plotly-plot,
+div[data-testid="stPlotlyChart"] .plotly,
+div[data-testid="stPlotlyChart"] svg {
+    max-width: 100% !important;
+    width: 100% !important;
+}
 
-        .pill-badge {
-            display: inline-block;
-            padding: 3px 11px;
-            border-radius: 999px;
-            border: 1px solid rgba(0,255,153,0.65);
-            font-size: 0.82rem;
-            margin-top: 4px;
-            color: #c8ffec;
-        }
+/* Trường hợp hiếm vẫn to: cho phép cuộn ngang nhẹ thay vì bị cắt */
+div[data-testid="stPlotlyChart"] .plot-container {
+    overflow-x: auto !important;
+}
 
-        /* =========================================================
-           DATAFRAME / TABLE
-        ========================================================= */
-        div[data-testid="stDataFrame"] {
-            border-radius: 14px !important;
-            border: 1px solid rgba(0,255,153,0.32) !important;
-            overflow: hidden !important;
-            box-shadow:
-                0 0 18px rgba(0,255,153,0.22),
-                0 18px 38px rgba(0,0,0,0.9) !important;
-            background: radial-gradient(circle at top,
-                        rgba(0,255,153,0.16),
-                        rgba(0,0,0,0.96)) !important;
-        }
+/* ===========================
+   BUTTONS
+=========================== */
 
-        /* Metric */
-        [data-testid="stMetricValue"] {
-            color: #76ff03 !important;
-            font-weight: 900 !important;
-            font-size: 1.08rem !important;
-        }
+/* Button chính */
+button[kind="primary"],
+.stButton > button[kind="primary"] {
+    background: radial-gradient(circle at 0% 0%,
+                #ffffff 0%, #d7fff4 24%, #00ffbf 55%, #00bfa5 100%) !important;
+    color: #00140d !important;
+    font-weight: 900 !important;
+    border-radius: 999px !important;
+    border: none !important;
+    padding: 0.9rem 1.9rem !important;
+    box-shadow:
+        0 0 20px rgba(0,255,153,0.75),
+        0 20px 46px rgba(0,0,0,0.95) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    transition: all 0.16s ease-out !important;
+    font-size: 1.02rem !important;
+}
 
-        [data-testid="stMetricLabel"] {
-            color: #e0f2f1 !important;
-            font-weight: 600 !important;
-        }
+button[kind="primary"]:hover,
+.stButton > button[kind="primary"]:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow:
+        0 0 30px rgba(0,255,170,0.95),
+        0 26px 60px rgba(0,0,0,0.98) !important;
+}
 
-        /* =========================================================
-           CHART FRAME (FIX PHÓNG TO + NEON BORDER)
-        ========================================================= */
-        div[data-testid="stPlotlyChart"] {
-            padding: 0.8rem 0.9rem 0.6rem 0.9rem;
-            margin: 0.9rem 0 1.5rem 0;
-            background: radial-gradient(circle at top,
-                        rgba(0,255,153,0.12),
-                        rgba(0,0,0,0.98));
-            border-radius: 18px;
-            border: 1px solid rgba(0,255,153,0.38);
-            box-shadow:
-                0 0 20px rgba(0,255,153,0.35),
-                0 18px 40px rgba(0,0,0,0.95);
-        }
+/* Download buttons */
+.stDownloadButton > button {
+    border-radius: 999px !important;
+    border: 1px solid rgba(0,255,153,0.7) !important;
+    background: radial-gradient(circle,
+                rgba(0,255,153,0.18),
+                rgba(0,0,0,0.96)) !important;
+    color: #e9fff4 !important;
+    font-weight: 700 !important;
+    box-shadow:
+        0 0 14px rgba(0,255,153,0.35),
+        0 14px 30px rgba(0,0,0,0.9) !important;
+}
 
-        div[data-testid="stPlotlyChart"] > div {
-            max-width: 100% !important;
-        }
+.stDownloadButton > button:hover {
+    background: radial-gradient(circle,
+                rgba(0,255,153,0.35),
+                rgba(0,10,8,0.98)) !important;
+}
 
-        /* =========================================================
-           MAIN ACTION BUTTON
-        ========================================================= */
-        button[kind="primary"],
-        .stButton > button[kind="primary"] {
-            background: radial-gradient(circle at 0% 0%,
-                        #ffffff 0%, #d7fff4 24%, #00ffbf 55%, #00bfa5 100%) !important;
-            color: #00140d !important;
-            font-weight: 900 !important;
-            border-radius: 999px !important;
-            border: none !important;
-            padding: 0.9rem 1.9rem !important;
-            box-shadow:
-                0 0 20px rgba(0,255,153,0.75),
-                0 20px 46px rgba(0,0,0,0.95) !important;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            transition: all 0.16s ease-out !important;
-            font-size: 1.02rem !important;
-        }
+/* ===========================
+   RESPONSIVE
+=========================== */
+@media (max-width: 900px) {
+    .rc-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .block-container {
+        padding-left: 0.7rem !important;
+        padding-right: 0.7rem !important;
+    }
+    .rc-badge {
+        margin-top: 0.4rem;
+    }
+    div[data-testid="stPlotlyChart"] {
+        padding: 0.6rem 0.5rem 0.6rem 0.5rem;
+    }
+}
 
-        button[kind="primary"]:hover,
-        .stButton > button[kind="primary"]:hover {
-            transform: translateY(-2px) scale(1.03);
-            box-shadow:
-                0 0 30px rgba(0,255,170,0.95),
-                0 26px 60px rgba(0,0,0,0.98) !important;
-        }
-
-        /* =========================================================
-           DOWNLOAD BUTTONS
-        ========================================================= */
-        .stDownloadButton > button {
-            border-radius: 999px !important;
-            border: 1px solid rgba(0,255,153,0.7) !important;
-            background: radial-gradient(circle,
-                        rgba(0,255,153,0.18),
-                        rgba(0,0,0,0.96)) !important;
-            color: #e9fff4 !important;
-            font-weight: 700 !important;
-            box-shadow:
-                0 0 14px rgba(0,255,153,0.35),
-                0 14px 30px rgba(0,0,0,0.9) !important;
-        }
-
-        .stDownloadButton > button:hover {
-            background: radial-gradient(circle,
-                        rgba(0,255,153,0.35),
-                        rgba(0,10,8,0.98)) !important;
-        }
-
-        /* =========================================================
-           MOBILE RESPONSIVE
-        ========================================================= */
-        @media (max-width: 900px) {
-            .rc-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .block-container {
-                padding-left: 0.7rem !important;
-                padding-right: 0.7rem !important;
-            }
-            .rc-badge {
-                margin-top: 0.4rem;
-            }
-            div[data-testid="stPlotlyChart"] {
-                padding: 0.6rem 0.5rem 0.6rem 0.5rem;
-            }
-        }
         </style>
         """,
         unsafe_allow_html=True,
