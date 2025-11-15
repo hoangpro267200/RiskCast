@@ -1645,7 +1645,7 @@ if params.use_fuzzy:
     </div>
     """, unsafe_allow_html=True)
 
-    # Biểu đồ Fuzzy tổng quan
+    # Biểu đồ Fuzzy tổng
     fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
     st.plotly_chart(fig_fuzzy, use_container_width=True)
 
@@ -1668,27 +1668,27 @@ if params.use_fuzzy:
         unsafe_allow_html=True
     )
 
-    # Heatmap Premium (phải nằm TRONG if)
+    # Heatmap Premium
     st.subheader("🔥 Heatmap mức dao động Fuzzy (Premium Green)")
     fig_heat = fuzzy_heatmap_premium(diff_map)
     st.plotly_chart(fig_heat, use_container_width=True)
 
-        
-        # Export
-        st.markdown("---")
-        st.subheader("📥 Xuất báo cáo")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            excel_data = self.report_gen.generate_excel(result.results, result.weights)
-            st.download_button(
-                "📊 Tải Excel",
-                data=excel_data,
-                file_name=f"riskcast_v53_{params.route.replace(' - ', '_')}.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True
-            )
-        
+# ===================== EXPORT =====================
+
+st.markdown("---")
+st.subheader("📥 Xuất báo cáo")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    excel_data = self.report_gen.generate_excel(result.results, result.weights)
+    st.download_button(
+        "📄 Tải Excel",
+        data=excel_data,
+        file_name=f"riskcast_v53_{params.route.replace(' ', '_')}.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
         with col2:
             pdf_data = self.report_gen.generate_pdf(result.results, params, result.var, result.cvar)
             if pdf_data:
