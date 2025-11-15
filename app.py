@@ -1688,7 +1688,7 @@ col1, col2 = st.columns(2)
 
 with col1:
     fig_weights = chart_factory.create_weights_pie(
-        result.weight,
+        result.weights,  # ← dùng weights (có 's')
         f"Trọng số áp dụng ({params.priority})"
     )
     st.plotly_chart(fig_weights, use_container_width=True)
