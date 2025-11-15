@@ -169,7 +169,7 @@ def apply_enterprise_css():
         box-shadow: 0 12px 26px rgba(0,0,0,0.85), 0 0 22px rgba(0,255,153,0.8) !important;
     }
 
-    /* GENERIC CARD */
+    /* CARD */
     .rc-card {
         background: linear-gradient(135deg, rgba(10,25,21,0.75), rgba(5,15,12,0.9));
         padding: 1.2rem 1.4rem;
@@ -177,22 +177,6 @@ def apply_enterprise_css():
         border: 1px solid rgba(0,255,153,0.18);
         box-shadow: 0 6px 20px rgba(0,0,0,0.5);
         margin-bottom: 1.3rem;
-    }
-
-    /* CHART CONTAINER – SHARP CORNER (B STYLE) */
-    .rc-chart-box {
-        background: linear-gradient(135deg, #001611, #000b09);
-        padding: 1.3rem 1.6rem 1.6rem 1.6rem;
-        border-radius: 8px;
-        border: 1px solid rgba(0,255,153,0.28);
-        box-shadow: 0 10px 24px rgba(0,0,0,0.75);
-        margin-bottom: 1.6rem;
-        overflow: hidden !important;
-    }
-
-    .rc-chart-box:hover {
-        border-color: rgba(0,255,153,0.6);
-        box-shadow: 0 14px 30px rgba(0,0,0,0.9);
     }
 
     /* RESULT BOX */
@@ -737,7 +721,7 @@ def fuzzy_heatmap_premium(diff_map: Dict[str, float]) -> go.Figure:
         ),
         paper_bgcolor="#001a12",
         plot_bgcolor="#001a12",
-        margin=dict(l=60, r=60, t=90, b=60),
+        margin=dict(l=40, r=40, t=80, b=40),
         coloraxis_colorbar=dict(
             title="Dao động",
             tickfont=dict(color="#CCFFE6")
@@ -800,10 +784,8 @@ def fuzzy_chart_premium(weights: pd.Series, fuzzy_pct: float) -> go.Figure:
             bordercolor="#00e676",
             borderwidth=1
         ),
-        margin=dict(l=70, r=50, t=90, b=80),
-        font=dict(size=13, color="#e6fff7"),
-        autosize=True,
-        height=430
+        margin=dict(l=40, r=40, t=80, b=80),
+        font=dict(size=13, color="#e6fff7")
     )
     fig.update_xaxes(showgrid=False, tickangle=-20)
     fig.update_yaxes(
@@ -954,13 +936,12 @@ class ChartFactory:
             font=dict(size=15, color="#e6fff7"),
             plot_bgcolor="#001016",
             paper_bgcolor="#000c11",
-            margin=dict(l=70, r=60, t=80, b=70),
+            margin=dict(l=70, r=40, t=80, b=70),
             legend=dict(
                 bgcolor="rgba(0,0,0,0.3)",
                 bordercolor="#00e676",
                 borderwidth=1
-            ),
-            autosize=True
+            )
         )
         fig.update_xaxes(
             showgrid=True,
@@ -1006,9 +987,8 @@ class ChartFactory:
             ),
             paper_bgcolor="#001016",
             plot_bgcolor="#001016",
-            margin=dict(l=0, r=0, t=70, b=0),
-            height=430,
-            autosize=True
+            margin=dict(l=0, r=0, t=80, b=0),
+            height=480
         )
         return fig
 
@@ -1048,18 +1028,7 @@ class ChartFactory:
         fig.update_yaxes(title="<b>Điểm TOPSIS</b>", range=[0, 1])
 
         fig = ChartFactory._apply_theme(fig, "💰 Chi phí vs Chất lượng (Cost-Benefit Analysis)")
-
-        fig.update_layout(
-            height=480,
-            autosize=True,
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=1.02,
-                xanchor="right",
-                x=1
-            )
-        )
+        fig.update_layout(height=480, autosize=False)
         return fig
 
     @staticmethod
@@ -1086,7 +1055,7 @@ class ChartFactory:
         fig.update_yaxes(title="<b>Phương án</b>")
 
         fig = ChartFactory._apply_theme(fig, "🏆 Top 5 Phương án Tốt nhất")
-        fig.update_layout(height=440, autosize=True)
+        fig.update_layout(height=440)
         return fig
 
     @staticmethod
@@ -1141,7 +1110,7 @@ class ChartFactory:
             tickformat=".0%"
         )
 
-        fig.update_layout(height=450, autosize=True)
+        fig.update_layout(height=450, autosize=False)
         return fig
 
     @staticmethod
@@ -1204,16 +1173,11 @@ class ChartFactory:
             legend=dict(
                 bgcolor="rgba(0,0,0,0.3)",
                 bordercolor="#00e676",
-                borderwidth=1,
-                orientation="h",
-                yanchor="bottom",
-                y=1.02,
-                xanchor="right",
-                x=1
+                borderwidth=1
             ),
-            margin=dict(l=60, r=70, t=80, b=70),
+            margin=dict(l=60, r=60, t=80, b=60),
             height=480,
-            autosize=True
+            autosize=False
         )
 
         return fig
@@ -1349,7 +1313,7 @@ class StreamlitUI:
             st.header("🎯 Mục tiêu của bạn")
             priority = st.selectbox(
                 "Chọn mục tiêu ưu tiên",
-                list(PRIORITY_PROFILES.keys()>,
+                list(PRIORITY_PROFILES.keys()),
                 help="Hệ thống sẽ tự động điều chỉnh trọng số theo mục tiêu bạn chọn"
             )
 
@@ -1556,10 +1520,8 @@ Trục X: chi phí ước tính; Trục Y: điểm TOPSIS.
 Điểm càng cao và chi phí càng thấp → phương án càng hấp dẫn.">i</span>
             </h4>
             """, unsafe_allow_html=True)
-            st.markdown('<div class="rc-chart-box">', unsafe_allow_html=True)
             fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
             st.plotly_chart(fig_scatter, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
 
         with col_cat:
             st.markdown("""
@@ -1569,16 +1531,12 @@ Trục X: chi phí ước tính; Trục Y: điểm TOPSIS.
 của 3 nhóm: Tiết kiệm (ICC C), Cân bằng (ICC B), An toàn (ICC A).">i</span>
             </h4>
             """, unsafe_allow_html=True)
-            st.markdown('<div class="rc-chart-box">', unsafe_allow_html=True)
             fig_category = self.chart_factory.create_category_comparison(result.results)
             st.plotly_chart(fig_category, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown("#### 🏆 Top 5 phương án tốt nhất")
-        st.markdown('<div class="rc-chart-box">', unsafe_allow_html=True)
         fig_top5 = self.chart_factory.create_top_recommendations_bar(result.results)
         st.plotly_chart(fig_top5, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
 
         # Weights + Forecast + Risk metrics
         st.markdown("---")
@@ -1592,13 +1550,11 @@ của 3 nhóm: Tiết kiệm (ICC C), Cân bằng (ICC B), An toàn (ICC A).">i<
 Nếu bật Fuzzy AHP, mỗi trọng số được mở rộng thành tam giác mờ (Low–Mid–High).">i</span>
             </h4>
             """, unsafe_allow_html=True)
-            st.markdown('<div class="rc-chart-box">', unsafe_allow_html=True)
             fig_weights = self.chart_factory.create_weights_pie(
                 result.weights,
                 "Trọng số tiêu chí (sau khi áp dụng Fuzzy AHP)" if params.use_fuzzy else "Trọng số tiêu chí"
             )
             st.plotly_chart(fig_weights, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
 
         with col_w2:
             st.markdown("""
@@ -1608,12 +1564,10 @@ Nếu bật Fuzzy AHP, mỗi trọng số được mở rộng thành tam giác 
 mô hình dự báo giá trị tháng kế tiếp (ARIMA hoặc xu hướng tuyến tính).">i</span>
             </h4>
             """, unsafe_allow_html=True)
-            st.markdown('<div class="rc-chart-box">', unsafe_allow_html=True)
             fig_forecast = self.chart_factory.create_forecast_chart(
                 result.historical, result.forecast, params.route, params.month
             )
             st.plotly_chart(fig_forecast, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
 
         # Risk metrics card full-width
         if result.var is not None and result.cvar is not None:
@@ -1662,10 +1616,8 @@ mô hình dự báo giá trị tháng kế tiếp (ARIMA hoặc xu hướng tuy�
                 unsafe_allow_html=True
             )
 
-            st.markdown('<div class="rc-chart-box">', unsafe_allow_html=True)
             fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
             st.plotly_chart(fig_fuzzy, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
 
             fuzzy_table = build_fuzzy_table(result.weights, params.fuzzy_uncertainty)
             st.dataframe(fuzzy_table, use_container_width=True)
@@ -1683,10 +1635,8 @@ mô hình dự báo giá trị tháng kế tiếp (ARIMA hoặc xu hướng tuy�
             )
 
             st.subheader("🔥 Heatmap mức dao động Fuzzy (Premium Green)")
-            st.markdown('<div class="rc-chart-box">', unsafe_allow_html=True)
             fig_heat = fuzzy_heatmap_premium(diff_map)
             st.plotly_chart(fig_heat, use_container_width=True)
-            st.markdown('</div>', unsafe_allow_html=True)
 
         # Export
         st.markdown("---")
