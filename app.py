@@ -1,5 +1,5 @@
 # =============================================================================
-# RISKCAST v5.3 — ENTERPRISE EDITION (Multi-Package Analysis)
+# RISKCAST v5.4 — ENTERPRISE EDITION (Layout FIX + Shield Logo)
 # ESG Logistics Risk Assessment Dashboard
 #
 # Author: Bùi Xuân Hoàng (original idea)
@@ -37,14 +37,14 @@ except ImportError:
 
 def app_config():
     st.set_page_config(
-        page_title="RISKCAST v5.3 — Multi-Package Analysis",
+        page_title="RISKCAST v5.4 — Multi-Package Analysis",
         page_icon="🛡️",
         layout="wide"
     )
 
 
 def apply_enterprise_css():
-    """Premium Green · Mixed Enterprise (A3 style)."""
+    """Premium Green · Mixed Enterprise."""
     st.markdown("""
     <style>
     * {
@@ -82,22 +82,25 @@ def apply_enterprise_css():
     .rc-header-left {
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 1.2rem;
     }
 
+    /* RC shield logo – dual tone */
     .rc-logo {
-        width: 64px;
-        height: 64px;
-        border-radius: 16px;
-        background: radial-gradient(circle at 30% 30%, #9fffc8 0%, #00c676 45%, #003624 100%);
+        width: 78px;
+        height: 78px;
+        border-radius: 18px;
+        background: radial-gradient(circle at 40% 35%,
+            #ffffff 0%, #d7fff4 14%, #7affd4 32%, #00e6a7 55%, #003826 100%);
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 900;
-        font-size: 1.45rem;
-        color: #002215;
-        border: 2px solid #c4ffea;
-        box-shadow: 0 0 16px rgba(0,255,153,0.35);
+        font-size: 1.75rem;
+        color: #001c12;
+        border: 3px solid #c4ffea;
+        box-shadow: 0 0 22px rgba(0,255,153,0.65);
+        text-shadow: 0 0 10px rgba(255,255,255,0.9);
     }
 
     .rc-title {
@@ -327,10 +330,40 @@ def apply_enterprise_css():
         color: #c8ffec;
     }
 
+    /* RISK METRICS CARD (VaR / CVaR / Risk Ratio) */
+    .rc-risk-card h4 {
+        margin-top: 0;
+        margin-bottom: 0.8rem;
+        color: #a5ffdc;
+        font-weight: 800;
+    }
+
+    .rc-risk-metrics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.4rem;
+    }
+
+    .rc-risk-item {
+        min-width: 150px;
+    }
+
+    .rc-risk-label {
+        font-size: 0.9rem;
+        color: #e0f2f1;
+    }
+
+    .rc-risk-value {
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: #76ff03;
+    }
+
     /* MOBILE */
     @media (max-width: 900px) {
         .rc-header { flex-direction: column; align-items: flex-start; }
         .block-container { padding-left: 0.6rem !important; padding-right: 0.6rem !important; }
+        .rc-risk-metrics { flex-direction: column; }
     }
 
     </style>
@@ -952,7 +985,9 @@ class ChartFactory:
         fig.update_xaxes(title="<b>Chi phí ước tính ($)</b>")
         fig.update_yaxes(title="<b>Điểm TOPSIS</b>", range=[0, 1])
 
-        return ChartFactory._apply_theme(fig, "💰 Chi phí vs Chất lượng (Cost-Benefit Analysis)")
+        fig = ChartFactory._apply_theme(fig, "💰 Chi phí vs Chất lượng (Cost-Benefit Analysis)")
+        fig.update_layout(height=480)  # FIX: đồng bộ chiều cao hàng 1
+        return fig
 
     @staticmethod
     def create_top_recommendations_bar(results: pd.DataFrame) -> go.Figure:
@@ -977,7 +1012,9 @@ class ChartFactory:
         fig.update_xaxes(title="<b>Điểm TOPSIS</b>", range=[0, 1])
         fig.update_yaxes(title="<b>Phương án</b>")
 
-        return ChartFactory._apply_theme(fig, "🏆 Top 5 Phương án Tốt nhất")
+        fig = ChartFactory._apply_theme(fig, "🏆 Top 5 Phương án Tốt nhất")
+        fig.update_layout(height=440)
+        return fig
 
     @staticmethod
     def create_forecast_chart(
@@ -1031,6 +1068,7 @@ class ChartFactory:
             tickformat=".0%"
         )
 
+        fig.update_layout(height=480)  # FIX: đồng bộ chiều cao hàng 2
         return fig
 
     @staticmethod
@@ -1098,6 +1136,7 @@ class ChartFactory:
             margin=dict(l=60, r=60, t=80, b=60)
         )
 
+        fig.update_layout(height=480)  # FIX: đồng bộ chiều cao hàng 1
         return fig
 
 
@@ -1118,7 +1157,7 @@ class ReportGenerator:
             pdf.add_page()
 
             pdf.set_font("Arial", "B", 16)
-            pdf.cell(0, 10, "RISKCAST v5.3 - Multi-Package Analysis", 0, 1, "C")
+            pdf.cell(0, 10, "RISKCAST v5.4 - Multi-Package Analysis", 0, 1, "C")
             pdf.ln(4)
 
             pdf.set_font("Arial", "", 11)
@@ -1195,7 +1234,7 @@ class StreamlitUI:
                 <div class="rc-header-left">
                     <div class="rc-logo">RC</div>
                     <div>
-                        <div class="rc-title">RISKCAST v5.3 — MULTI-PACKAGE ANALYSIS</div>
+                        <div class="rc-title">RISKCAST v5.4 — MULTI-PACKAGE ANALYSIS</div>
                         <div class="rc-subtitle">
                             15 phương án (5 Công ty × 3 Gói ICC) · 
                             <span class="rc-tooltip" data-tip="Hệ thống tự điều chỉnh trọng số theo mục tiêu (Tiết kiệm / Cân bằng / An toàn)">Profile-based recommendation</span> ·
@@ -1403,7 +1442,7 @@ class StreamlitUI:
             unsafe_allow_html=True
         )
 
-        # VaR/CVaR
+        # VaR/CVaR explanation
         if result.var is not None and result.cvar is not None:
             risk_pct = (result.var / params.cargo_value) * 100
             st.markdown(
@@ -1443,7 +1482,7 @@ class StreamlitUI:
         fig_top5 = self.chart_factory.create_top_recommendations_bar(result.results)
         st.plotly_chart(fig_top5, use_container_width=True)
 
-        # Weights + VaR metrics
+        # Weights + Forecast + Risk metrics
         st.markdown("---")
         col_w1, col_w2 = st.columns(2)
 
@@ -1461,11 +1500,31 @@ class StreamlitUI:
             )
             st.plotly_chart(fig_forecast, use_container_width=True)
 
-            if result.var is not None and result.cvar is not None:
-                st.metric("💰 VaR 95%", f"${result.var:,.0f}")
-                st.metric("🛡️ CVaR 95%", f"${result.cvar:,.0f}")
-                risk_pct = (result.var / params.cargo_value) * 100
-                st.metric("📊 Rủi ro / Giá trị", f"{risk_pct:.1f}%")
+        # Risk metrics card full-width (FIX layout)
+        if result.var is not None and result.cvar is not None:
+            risk_pct = (result.var / params.cargo_value) * 100
+            st.markdown(
+                f"""
+                <div class="rc-card rc-risk-card">
+                    <h4>⚠️ Đánh giá rủi ro tài chính (Quick View)</h4>
+                    <div class="rc-risk-metrics">
+                        <div class="rc-risk-item">
+                            <div class="rc-risk-label">💰 VaR 95%</div>
+                            <div class="rc-risk-value">${result.var:,.0f}</div>
+                        </div>
+                        <div class="rc-risk-item">
+                            <div class="rc-risk-label">🛡️ CVaR 95%</div>
+                            <div class="rc-risk-value">${result.cvar:,.0f}</div>
+                        </div>
+                        <div class="rc-risk-item">
+                            <div class="rc-risk-label">📊 Rủi ro / Giá trị</div>
+                            <div class="rc-risk-value">{risk_pct:.1f}%</div>
+                        </div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
         # Fuzzy AHP
         if params.use_fuzzy:
@@ -1479,7 +1538,7 @@ class StreamlitUI:
                     <ul>
                         <li>Sử dụng <b>tam giác mờ (Low – Mid – High)</b> để biểu diễn sự không chắc chắn trong ý kiến chuyên gia.</li>
                         <li>Trọng số cuối cùng được tính bằng 
-                            <span class="rc-tooltip" data-tip="(Low + Mid + High) / 3">phương pháp centroid</span> 
+                            <span class="rc-tooltip" data-tip="(Low + Mid + High) / 3">(Low + Mid + High) / 3</span> 
                             rồi chuẩn hóa lại.</li>
                         <li>Giúp mô hình <b>mềm dẻo hơn</b>, không phụ thuộc duy nhất vào một bộ trọng số cứng.</li>
                     </ul>
@@ -1521,7 +1580,7 @@ class StreamlitUI:
             st.download_button(
                 "📊 Tải Excel (kết quả + trọng số)",
                 data=excel_data,
-                file_name=f"riskcast_v53_{params.route.replace(' ', '_')}.xlsx",
+                file_name=f"riskcast_v54_{params.route.replace(' ', '_')}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True
             )
@@ -1532,7 +1591,7 @@ class StreamlitUI:
                 st.download_button(
                     "📄 Tải PDF (tóm tắt báo cáo)",
                     data=pdf_data,
-                    file_name=f"riskcast_v53_{params.route.replace(' - ', '_')}.pdf",
+                    file_name=f"riskcast_v54_{params.route.replace(' - ', '_')}.pdf",
                     mime="application/pdf",
                     use_container_width=True
                 )
