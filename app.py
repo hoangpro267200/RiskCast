@@ -1627,7 +1627,7 @@ fig_forecast = chart_factory.create_forecast_chart(
 
 st.plotly_chart(fig_forecast, use_container_width=True)
 
-# ===================== FUZZY AHP MODULE =====================
+# ===================== FUZZY AHP =====================
 
 if params.use_fuzzy:
     st.markdown("---")
@@ -1638,29 +1638,23 @@ if params.use_fuzzy:
         <h4>📚 Giải thích về Fuzzy AHP:</h4>
         <ul>
             <li><b>Mục đích:</b> Xử lý bất định trong đánh giá chuyên gia</li>
-            <li><b>Phương pháp:</b> Trọng số → tam giác mờ (Low–Mid–High)</li>
-            <li><b>Defuzzification:</b> Dùng phương pháp Centroid</li>
-            <li><b>Ứng dụng:</b> Tăng độ tin cậy khi chuyên gia không chắc chắn</li>
+            <li><b>Phương pháp:</b> Chuyển trọng số thành tam giác mờ</li>
+            <li><b>Defuzzification:</b> Centroid</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
 
-    # Biểu đồ Fuzzy tổng
     fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
     st.plotly_chart(fig_fuzzy, use_container_width=True)
 
-    # Bảng Low – Mid – High – Centroid
-    st.subheader("📋 Bảng Low – Mid – High – Centroid (cho NCKH)")
     fuzzy_table = build_fuzzy_table(result.weights, params.fuzzy_uncertainty)
     st.dataframe(fuzzy_table, use_container_width=True)
 
-    # Tiêu chí dao động mạnh nhất
     most_unc, diff_map = most_uncertain_criterion(result.weights, params.fuzzy_uncertainty)
-
     st.markdown(
         f"""
         <div style="background:#00331F; padding:15px; border-radius:10px;
-        border:2px solid #00FFAA; color:#CCFFE6; font-size:16px;">
+        border:2px solid #00FFAA; color:#CCFFE6;">
             <b>🔍 Tiêu chí dao động mạnh nhất:</b> {most_unc}<br>
             <small>Độ chênh lệch (Low → High): {diff_map[most_unc]:.4f}</small>
         </div>
@@ -1668,7 +1662,6 @@ if params.use_fuzzy:
         unsafe_allow_html=True
     )
 
-    # Heatmap Premium
     st.subheader("🔥 Heatmap mức dao động Fuzzy (Premium Green)")
     fig_heat = fuzzy_heatmap_premium(diff_map)
     st.plotly_chart(fig_heat, use_container_width=True)
