@@ -300,6 +300,19 @@ def apply_enterprise_css():
         font-weight: 600 !important;
     }
 
+    /* PLOTLY CONTAINER – FIX VIỀN / OVERFLOW */
+    div[data-testid="stPlotlyChart"] {
+        border-radius: 16px !important;
+        overflow: hidden !important;
+        padding: 0.2rem 0.4rem 0.25rem 0.4rem !important;
+        background: #001016 !important;
+        box-shadow: 0 0 16px rgba(0,0,0,0.6);
+    }
+
+    div[data-testid="stPlotlyChart"] > div {
+        border-radius: 16px !important;
+    }
+
     /* TOP3 CARDS */
     .top3-card {
         position: relative;
@@ -719,8 +732,8 @@ def fuzzy_heatmap_premium(diff_map: Dict[str, float]) -> go.Figure:
             font=dict(size=22, color="#CCFFE6"),
             x=0.5
         ),
-        paper_bgcolor="#001a12",
-        plot_bgcolor="#001a12",
+        paper_bgcolor="#001016",
+        plot_bgcolor="#001016",
         margin=dict(l=40, r=40, t=80, b=40),
         coloraxis_colorbar=dict(
             title="Dao động",
@@ -777,15 +790,16 @@ def fuzzy_chart_premium(weights: pd.Series, fuzzy_pct: float) -> go.Figure:
             font=dict(size=22, color="#e6fff7"),
             x=0.5
         ),
-        paper_bgcolor="#001a12",
-        plot_bgcolor="#001a12",
+        paper_bgcolor="#001016",
+        plot_bgcolor="#001016",
         legend=dict(
             bgcolor="rgba(0,0,0,0.35)",
             bordercolor="#00e676",
             borderwidth=1
         ),
-        margin=dict(l=40, r=40, t=80, b=80),
-        font=dict(size=13, color="#e6fff7")
+        margin=dict(l=50, r=40, t=80, b=80),
+        font=dict(size=13, color="#e6fff7"),
+        height=430
     )
     fig.update_xaxes(showgrid=False, tickangle=-20)
     fig.update_yaxes(
@@ -935,8 +949,8 @@ class ChartFactory:
             ),
             font=dict(size=15, color="#e6fff7"),
             plot_bgcolor="#001016",
-            paper_bgcolor="#000c11",
-            margin=dict(l=70, r=40, t=80, b=70),
+            paper_bgcolor="#001016",
+            margin=dict(l=60, r=80, t=80, b=70),
             legend=dict(
                 bgcolor="rgba(0,0,0,0.3)",
                 bordercolor="#00e676",
@@ -987,8 +1001,8 @@ class ChartFactory:
             ),
             paper_bgcolor="#001016",
             plot_bgcolor="#001016",
-            margin=dict(l=0, r=0, t=80, b=0),
-            height=480
+            margin=dict(l=10, r=10, t=80, b=10),
+            height=430
         )
         return fig
 
@@ -1028,7 +1042,7 @@ class ChartFactory:
         fig.update_yaxes(title="<b>Điểm TOPSIS</b>", range=[0, 1])
 
         fig = ChartFactory._apply_theme(fig, "💰 Chi phí vs Chất lượng (Cost-Benefit Analysis)")
-        fig.update_layout(height=480, autosize=False)
+        fig.update_layout(height=480)
         return fig
 
     @staticmethod
@@ -1110,7 +1124,7 @@ class ChartFactory:
             tickformat=".0%"
         )
 
-        fig.update_layout(height=450, autosize=False)
+        fig.update_layout(height=450)
         return fig
 
     @staticmethod
@@ -1167,7 +1181,7 @@ class ChartFactory:
                 side="right",
                 tickfont=dict(color="#ffeb3b")
             ),
-            paper_bgcolor="#000c11",
+            paper_bgcolor="#001016",
             plot_bgcolor="#001016",
             font=dict(color="#e6fff7"),
             legend=dict(
@@ -1175,9 +1189,8 @@ class ChartFactory:
                 bordercolor="#00e676",
                 borderwidth=1
             ),
-            margin=dict(l=60, r=60, t=80, b=60),
-            height=480,
-            autosize=False
+            margin=dict(l=60, r=80, t=80, b=60),
+            height=480
         )
 
         return fig
@@ -1236,7 +1249,7 @@ class ReportGenerator:
             if var is not None and cvar is not None:
                 pdf.ln(4)
                 pdf.set_font("Arial", "B", 11)
-                pdf.cell(0, 6, f"VaR 95%: ${var:,.0f}    |    CVaR 95%: ${cvar:,.0f}", 0, 1)
+                pdf.cell(0, 6, f"VaR 95%: ${var:,.0f}   |   CVaR 95%: ${cvar:,.0f}", 0, 1)
 
             return pdf.output(dest="S").encode("latin1")
         except Exception as e:
@@ -1509,9 +1522,6 @@ CVaR 95%: tổn thất trung bình trong 5% trường hợp xấu nhất.">i</sp
         # Charts section
         st.markdown("---")
         st.subheader("📊 Biểu đồ phân tích")
-        
-        # Thẻ mở .rc-card để bọc cặp biểu đồ đầu tiên
-        st.markdown('<div class="rc-card" style="padding-bottom: 2rem;">', unsafe_allow_html=True)
 
         col_scatter, col_cat = st.columns(2)
         with col_scatter:
@@ -1537,20 +1547,12 @@ của 3 nhóm: Tiết kiệm (ICC C), Cân bằng (ICC B), An toàn (ICC A).">i<
             fig_category = self.chart_factory.create_category_comparison(result.results)
             st.plotly_chart(fig_category, use_container_width=True)
 
-        # Thẻ đóng .rc-card
-        st.markdown('</div>', unsafe_allow_html=True)
-
-
         st.markdown("#### 🏆 Top 5 phương án tốt nhất")
         fig_top5 = self.chart_factory.create_top_recommendations_bar(result.results)
         st.plotly_chart(fig_top5, use_container_width=True)
 
         # Weights + Forecast + Risk metrics
         st.markdown("---")
-        
-        # Thẻ mở .rc-card để bọc cặp biểu đồ thứ hai
-        st.markdown('<div class="rc-card" style="padding-bottom: 2rem;">', unsafe_allow_html=True)
-        
         col_w1, col_w2 = st.columns(2)
 
         with col_w1:
@@ -1579,9 +1581,6 @@ mô hình dự báo giá trị tháng kế tiếp (ARIMA hoặc xu hướng tuy�
                 result.historical, result.forecast, params.route, params.month
             )
             st.plotly_chart(fig_forecast, use_container_width=True)
-            
-        # Thẻ đóng .rc-card
-        st.markdown('</div>', unsafe_allow_html=True)
 
         # Risk metrics card full-width
         if result.var is not None and result.cvar is not None:
@@ -1599,7 +1598,7 @@ mô hình dự báo giá trị tháng kế tiếp (ARIMA hoặc xu hướng tuy�
                             <div class="rc-risk-label">🛡️ CVaR 95%</div>
                             <div class="rc-risk-value">${result.cvar:,.0f}</div>
                         </div>
-                        <div class="rc-risk-item">
+                            <div class="rc-risk-item">
                             <div class="rc-risk-label">📊 Rủi ro / Giá trị</div>
                             <div class="rc-risk-value">{risk_pct:.1f}%</div>
                         </div>
