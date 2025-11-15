@@ -44,16 +44,19 @@ def app_config():
 
 
 def apply_enterprise_css():
-    """Premium Green · Mixed Enterprise."""
+    """Premium Green · Enterprise Ultra v5.6."""
     st.markdown("""
     <style>
+    /* ================================
+       GLOBAL
+       ================================ */
     * {
         text-rendering: optimizeLegibility !important;
         -webkit-font-smoothing: antialiased !important;
     }
 
     .stApp {
-        background: #0e1613 !important;
+        background: #0d1613 !important;
         color: #e9fff4 !important;
         font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif !important;
         font-size: 1rem !important;
@@ -65,18 +68,23 @@ def apply_enterprise_css():
         max-width: 1500px !important;
     }
 
-    /* HEADER */
+    /* ================================
+       HEADER · Enterprise Ultra
+       ================================ */
     .rc-header {
-        padding: 1.2rem 1.6rem;
-        border-radius: 18px;
-        background: linear-gradient(135deg, rgba(18,44,36,0.9), rgba(5,15,12,0.98));
+        padding: 1.25rem 1.8rem;
+        border-radius: 20px;
+        background: linear-gradient(145deg, #0f221c, #081410);
         border: 1px solid rgba(0,255,153,0.22);
-        box-shadow: 0 10px 26px rgba(0,0,0,0.55);
-        margin-bottom: 1.8rem;
+        box-shadow:
+            0 8px 26px rgba(0,0,0,0.65),
+            inset 0 0 24px rgba(0,255,153,0.12);
+        margin-bottom: 2rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 1.4rem;
+        backdrop-filter: blur(4px);
     }
 
     .rc-header-left {
@@ -85,59 +93,63 @@ def apply_enterprise_css():
         gap: 1.2rem;
     }
 
-    /* RC shield logo – dual tone */
     .rc-logo {
-        width: 78px;
-        height: 78px;
-        border-radius: 18px;
+        width: 82px;
+        height: 82px;
+        border-radius: 22px;
         background: radial-gradient(circle at 40% 35%,
-            #ffffff 0%, #d7fff4 14%, #7affd4 32%, #00e6a7 55%, #003826 100%);
+            #ffffff 0%, #d7fff4 12%, #8affdf 28%, #00e6a7 52%, #003826 100%);
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 900;
-        font-size: 1.75rem;
+        font-size: 1.8rem;
         color: #001c12;
         border: 3px solid #c4ffea;
-        box-shadow: 0 0 22px rgba(0,255,153,0.65);
-        text-shadow: 0 0 10px rgba(255,255,255,0.9);
+        box-shadow:
+            0 0 28px rgba(0,255,153,0.75),
+            inset 0 0 14px rgba(255,255,255,0.45);
     }
 
     .rc-title {
-        font-size: 1.55rem;
+        font-size: 1.6rem;
         font-weight: 900;
-        letter-spacing: 0.03em;
-        background: linear-gradient(90deg, #eafff8, #beffdd, #d2fff0);
+        background: linear-gradient(90deg, #eafff8, #c6ffe4, #d2fff0);
         -webkit-background-clip: text;
         color: transparent;
+        letter-spacing: 0.04em;
         text-transform: uppercase;
     }
 
     .rc-subtitle {
         margin-top: 2px;
-        font-size: 0.93rem;
+        font-size: 0.95rem;
         opacity: 0.92;
         color: #c4ffea;
         font-weight: 500;
     }
 
     .rc-badge {
-        background: linear-gradient(120deg, #00e676, #00bfa5);
-        padding: 0.55rem 1.1rem;
+        background: linear-gradient(125deg, #00ffb0, #00d499);
+        padding: 0.55rem 1.25rem;
         border-radius: 999px;
         color: #00140c;
-        font-weight: 700;
-        font-size: 0.9rem;
-        letter-spacing: 0.02em;
-        box-shadow: 0 0 14px rgba(0,255,153,0.55);
+        font-weight: 800;
+        font-size: 0.92rem;
+        letter-spacing: 0.03em;
+        box-shadow:
+            0 0 20px rgba(0,255,153,0.55),
+            inset 0 0 12px rgba(0,255,153,0.25);
         white-space: nowrap;
     }
 
-    /* SIDEBAR */
+    /* ================================
+       SIDEBAR
+       ================================ */
     section[data-testid="stSidebar"] {
         background: #0a1a15 !important;
         border-right: 1px solid rgba(0,255,153,0.24);
-        box-shadow: 8px 0 22px rgba(0,0,0,0.7);
+        box-shadow: 10px 0 26px rgba(0,0,0,0.7);
     }
 
     section[data-testid="stSidebar"] h1,
@@ -152,6 +164,7 @@ def apply_enterprise_css():
         font-weight: 600 !important;
     }
 
+    /* BUTTON */
     .stButton > button {
         background: linear-gradient(120deg, #00ff99, #00e676, #00bfa5) !important;
         color: #00140d !important;
@@ -159,87 +172,55 @@ def apply_enterprise_css():
         border-radius: 999px !important;
         border: none !important;
         padding: 0.6rem 1.7rem !important;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.7), 0 0 14px rgba(0,255,153,0.55) !important;
+        box-shadow:
+            0 8px 20px rgba(0,0,0,0.7),
+            0 0 14px rgba(0,255,153,0.55) !important;
         transition: all 0.12s ease-out !important;
         font-size: 0.97rem !important;
     }
 
     .stButton > button:hover {
-        transform: translateY(-1px) scale(1.02);
-        box-shadow: 0 12px 26px rgba(0,0,0,0.85), 0 0 22px rgba(0,255,153,0.8) !important;
+        transform: translateY(-1px) scale(1.03);
+        box-shadow:
+            0 12px 28px rgba(0,0,0,0.85),
+            0 0 22px rgba(0,255,153,0.75) !important;
     }
 
-    /* CARD */
+    /* ================================
+       CARD
+       ================================ */
     .rc-card {
         background: linear-gradient(135deg, rgba(10,25,21,0.75), rgba(5,15,12,0.9));
-        padding: 1.2rem 1.4rem;
-        border-radius: 16px;
-        border: 1px solid rgba(0,255,153,0.18);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.5);
-        margin-bottom: 1.3rem;
+        padding: 1.3rem 1.6rem;
+        border-radius: 18px;
+        border: 1px solid rgba(0,255,153,0.20);
+        box-shadow:
+            0 6px 20px rgba(0,0,0,0.5),
+            inset 0 0 18px rgba(0,255,153,0.08);
+        margin-bottom: 1.4rem;
+        backdrop-filter: blur(4px);
     }
 
-    /* RESULT BOX */
+    /* ================================
+       RESULT BOX
+       ================================ */
     .result-box {
         background: radial-gradient(circle at top left,#00ff99,#00bfa5);
         color: #00130d !important;
-        padding: 1.6rem 2rem;
-        border-radius: 18px;
+        padding: 1.7rem 2.2rem;
+        border-radius: 20px;
         font-weight: 800;
-        box-shadow: 0 0 22px rgba(0, 255, 153, 0.7), 0 18px 40px rgba(0, 0, 0, 0.9);
+        box-shadow:
+            0 0 28px rgba(0,255,153,0.8),
+            0 18px 40px rgba(0,0,0,0.9),
+            inset 0 0 18px rgba(255,255,255,0.2);
         border: 2px solid #b9f6ca;
-        margin-top: 0.6rem;
-    }
-
-    /* EXPLANATION BOX */
-    .explanation-box {
-        background: rgba(5,25,20,0.95);
-        border-left: 4px solid #00e676;
-        padding: 1.1rem 1.4rem;
-        border-radius: 12px;
         margin-top: 0.7rem;
-        box-shadow: 0 0 16px rgba(0,0,0,0.7);
     }
 
-    .explanation-box h4 {
-        color: #a5ffdc !important;
-        font-weight: 800;
-        margin-bottom: 0.4rem;
-    }
-
-    .explanation-box li {
-        color: #e0f2f1 !important;
-        font-weight: 500;
-        margin: 0.22rem 0;
-    }
-
-    /* TEXT TOOLTIP (old style – vẫn giữ để reuse) */
-    .rc-tooltip {
-        text-decoration: underline dotted #00e676;
-        cursor: pointer;
-        position: relative;
-        font-weight: 600;
-        color: #aaffdd;
-    }
-
-    .rc-tooltip:hover::after {
-        content: attr(data-tip);
-        position: absolute;
-        left: 0;
-        bottom: -2.8rem;
-        background: rgba(0,0,0,0.96);
-        padding: 9px 11px;
-        border-radius: 8px;
-        border: 1px solid rgba(0,255,153,0.4);
-        font-size: 0.85rem;
-        color: #d8fff0;
-        width: max-content;
-        max-width: 320px;
-        z-index: 999;
-        box-shadow: 0 0 14px rgba(0,255,153,0.25);
-    }
-
-    /* ENTERPRISE ICON TOOLTIP v5.5 */
+    /* ================================
+       TOOLTIP (icon)
+       ================================ */
     .tooltip-icon {
         display: inline-flex;
         align-items: center;
@@ -281,33 +262,30 @@ def apply_enterprise_css():
         box-shadow: 0 0 18px rgba(0,255,153,0.35);
     }
 
-    /* DATAFRAME */
+    /* ================================
+       DATAFRAME
+       ================================ */
     div[data-testid="stDataFrame"] {
         border-radius: 12px !important;
         border: 1px solid rgba(0,255,153,0.25) !important;
         overflow: hidden !important;
-        box-shadow: 0 0 16px rgba(0,0,0,0.45) !important;
+        box-shadow:
+            0 0 16px rgba(0,0,0,0.45),
+            inset 0 0 12px rgba(0,255,153,0.10) !important;
     }
 
-    [data-testid="stMetricValue"] {
-        color: #76ff03 !important;
-        font-weight: 900 !important;
-        font-size: 1.05rem !important;
-    }
-
-    [data-testid="stMetricLabel"] {
-        color: #e0f2f1 !important;
-        font-weight: 600 !important;
-    }
-
-    /* TOP3 CARDS */
+    /* ================================
+       TOP 3 CARDS
+       ================================ */
     .top3-card {
         position: relative;
         background: radial-gradient(circle at top left, rgba(0,255,153,0.12), rgba(0,0,0,0.78));
         border: 1px solid rgba(0,255,153,0.45);
         padding: 18px 18px;
         border-radius: 18px;
-        box-shadow: 0 0 18px rgba(0,255,153,0.18);
+        box-shadow:
+            0 0 18px rgba(0,255,153,0.18),
+            inset 0 0 16px rgba(0,255,153,0.05);
         margin-bottom: 18px;
         text-align: center;
         backdrop-filter: blur(10px);
@@ -318,78 +296,34 @@ def apply_enterprise_css():
     .top1-card {
         background: radial-gradient(circle at top left, rgba(255,215,0,0.18), rgba(0,0,0,0.88));
         border: 1px solid rgba(255,215,0,0.7);
-        box-shadow: 0 0 26px rgba(255,215,0,0.45);
+        box-shadow:
+            0 0 26px rgba(255,215,0,0.45),
+            inset 0 0 18px rgba(255,255,255,0.15);
         animation: gold-pulse 2.4s ease-in-out infinite alternate;
     }
 
     @keyframes gold-pulse {
-        0% { box-shadow: 0 0 10px rgba(255,215,0,0.35); border-color: rgba(255,215,0,0.6); }
-        100% { box-shadow: 0 0 26px rgba(255,215,0,0.8); border-color: rgba(255,255,255,0.9); }
+        0% { 
+            box-shadow: 0 0 12px rgba(255,215,0,0.35); 
+            border-color: rgba(255,215,0,0.6); 
+        }
+        100% { 
+            box-shadow: 0 0 28px rgba(255,215,0,0.8); 
+            border-color: rgba(255,255,255,0.9); 
+        }
     }
 
     .top3-card:hover {
         transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 0 26px rgba(0,255,153,0.35);
+        box-shadow:
+            0 0 28px rgba(0,255,153,0.35),
+            inset 0 0 12px rgba(0,255,153,0.12);
         border-color: rgba(0,255,200,0.85);
     }
 
-    .top3-title {
-        font-size: 1.1rem;
-        font-weight: 800;
-        color: #a5ffdc;
-    }
-
-    .top1-title {
-        font-size: 1.15rem;
-        font-weight: 900;
-        color: #ffe680;
-        text-shadow: 0 0 10px rgba(255,210,0,0.7);
-    }
-
-    .top3-sub {
-        font-size: 0.92rem;
-        margin-top: 6px;
-        color: #e0f2f1;
-    }
-
-    .badge-icc {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 999px;
-        background: linear-gradient(120deg, #00e676, #00bfa5);
-        color: #00130d;
-        font-weight: 700;
-        font-size: 0.88rem;
-    }
-
-    .pill-badge {
-        display: inline-block;
-        padding: 3px 10px;
-        border-radius: 999px;
-        border: 1px solid rgba(0,255,153,0.5);
-        font-size: 0.82rem;
-        margin-top: 4px;
-        color: #c8ffec;
-    }
-
-    /* RISK METRICS CARD (VaR / CVaR / Risk Ratio) */
-    .rc-risk-card h4 {
-        margin-top: 0;
-        margin-bottom: 0.8rem;
-        color: #a5ffdc;
-        font-weight: 800;
-    }
-
-    .rc-risk-metrics {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1.4rem;
-    }
-
-    .rc-risk-item {
-        min-width: 150px;
-    }
-
+    /* ================================
+       RISK METRIC LABELS
+       ================================ */
     .rc-risk-label {
         font-size: 0.9rem;
         color: #e0f2f1;
@@ -401,7 +335,41 @@ def apply_enterprise_css():
         color: #76ff03;
     }
 
-    /* MOBILE */
+    /* ================================
+       CHARTS — ULTRA NEON v5.6
+       ================================ */
+    div[data-testid="stPlotlyChart"] {
+        background: linear-gradient(160deg, #002018, #000F0A);
+        padding: 18px 18px 16px 18px !important;
+        border-radius: 20px !important;
+
+        border: 3px solid #00FFCC !important;
+
+        box-shadow:
+            0 0 38px rgba(0,255,190,0.55),
+            0 0 68px rgba(0,255,160,0.35),
+            0 0 95px rgba(0,255,120,0.25),
+            inset 0 0 22px rgba(0,255,150,0.25);
+
+        margin-bottom: 1.8rem !important;
+        transition: all 0.22s ease-out !important;
+    }
+
+    div[data-testid="stPlotlyChart"]:hover {
+        border-color: #A0FFE9 !important;
+
+        box-shadow:
+            0 0 55px rgba(0,255,200,0.85),
+            0 0 110px rgba(0,255,160,0.55),
+            0 0 150px rgba(0,255,130,0.45),
+            inset 0 0 30px rgba(0,255,150,0.35);
+
+        transform: translateY(-4px) scale(1.02);
+    }
+
+    /* ================================
+       RESPONSIVE
+       ================================ */
     @media (max-width: 900px) {
         .rc-header { flex-direction: column; align-items: flex-start; }
         .block-container { padding-left: 0.6rem !important; padding-right: 0.6rem !important; }
