@@ -1687,7 +1687,7 @@ else:
 col1, col2 = st.columns(2)
 
 with col1:
-    fig_weights = self.chart_factory.create_weights_pie(
+    fig_weights = chart_factory.create_weights_pie(
         result.weight,
         f"Trọng số áp dụng ({params.priority})"
     )
@@ -1701,7 +1701,6 @@ with col2:
         risk_pct = (result.var / params.cargo_value) * 100
         st.metric("📊 Rủi ro / Giá trị", f"{risk_pct:.1f}%")
 
-        
         # Forecast
         st.markdown("---")
         fig_forecast = self.chart_factory.create_forecast_chart(
