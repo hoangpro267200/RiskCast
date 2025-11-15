@@ -46,7 +46,6 @@ def apply_enterprise_css():
     st.markdown(
         """
         <style>
-        /
 /* =========================================================
    RISKCAST ULTRA LUXURY NEON v3.2
    Author: Kai assistant for Bùi Xuân Hoàng
