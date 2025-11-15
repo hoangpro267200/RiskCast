@@ -1754,6 +1754,90 @@ class ReportGenerator:
 
 
 # =============================================================================
+# PREMIUM COMPARISON TABLES (Top 3 / Top 5 / By ICC / By Company)
+# =============================================================================
+
+def render_compare_top3(df):
+    top3 = df.head(3)
+    st.markdown("## 🥇 Bảng so sánh Top 3 (Premium Table)")
+    st.markdown("<table class='premium-table gold-theme'><thead><tr>"
+                "<th>Hạng</th><th>Công ty</th><th>Gói</th><th>Chi phí</th>"
+                "<th>Điểm</th><th>Tin cậy</th>"
+                "</tr></thead><tbody>", unsafe_allow_html=True)
+    for _, r in top3.iterrows():
+        st.markdown(
+            f"<tr>"
+            f"<td class='label-col'>#{int(r['rank'])}</td>"
+            f"<td>{r['company']}</td>"
+            f"<td>{r['icc_package']}</td>"
+            f"<td class='highlight-value'>${r['estimated_cost']:,.0f}</td>"
+            f"<td>{r['score']:.3f}</td>"
+            f"<td>{r['confidence']:.2f}</td>"
+            "</tr>", unsafe_allow_html=True)
+    st.markdown("</tbody></table>", unsafe_allow_html=True)
+
+
+def render_compare_top5(df):
+    top5 = df.head(5)
+    st.markdown("## 🏅 Bảng so sánh Top 5 (Premium Table)")
+    st.markdown("<table class='premium-table'><thead><tr>"
+                "<th>Hạng</th><th>Công ty</th><th>Gói</th><th>Chi phí</th>"
+                "<th>Điểm</th><th>Tin cậy</th>"
+                "</tr></thead><tbody>", unsafe_allow_html=True)
+    for _, r in top5.iterrows():
+        st.markdown(
+            f"<tr>"
+            f"<td class='label-col'>#{int(r['rank'])}</td>"
+            f"<td>{r['company']}</td>"
+            f"<td>{r['icc_package']}</td>"
+            f"<td class='highlight-value'>${r['estimated_cost']:,.0f}</td>"
+            f"<td>{r['score']:.3f}</td>"
+            f"<td>{r['confidence']:.2f}</td>"
+            "</tr>", unsafe_allow_html=True)
+    st.markdown("</tbody></table>", unsafe_allow_html=True)
+
+
+def render_compare_by_icc(df):
+    st.markdown("## 📦 So sánh theo từng gói ICC")
+    for icc in ["ICC A", "ICC B", "ICC C"]:
+        sub = df[df["icc_package"] == icc]
+        st.markdown(f"### 🔰 {icc}")
+        st.markdown("<table class='premium-table'><thead><tr>"
+                    "<th>Hạng</th><th>Công ty</th><th>Chi phí</th>"
+                    "<th>Điểm</th><th>Tin cậy</th>"
+                    "</tr></thead><tbody>", unsafe_allow_html=True)
+        for _, r in sub.iterrows():
+            st.markdown(
+                f"<tr>"
+                f"<td class='label-col'>#{int(r['rank'])}</td>"
+                f"<td>{r['company']}</td>"
+                f"<td class='highlight-value'>${r['estimated_cost']:,.0f}</td>"
+                f"<td>{r['score']:.3f}</td>"
+                f"<td>{r['confidence']:.2f}</td>"
+                "</tr>", unsafe_allow_html=True)
+        st.markdown("</tbody></table><br>", unsafe_allow_html=True)
+
+
+def render_compare_by_company(df):
+    st.markdown("## 🏢 So sánh theo từng công ty bảo hiểm")
+    for comp in df["company"].unique():
+        sub = df[df["company"] == comp]
+        st.markdown(f"### 🏛 {comp}")
+        st.markdown("<table class='premium-table'><thead><tr>"
+                    "<th>Gói</th><th>Chi phí</th><th>Điểm</th><th>Tin cậy</th>"
+                    "</tr></thead><tbody>", unsafe_allow_html=True)
+        for _, r in sub.iterrows():
+            st.markdown(
+                f"<tr>"
+                f"<td class='label-col'>{r['icc_package']}</td>"
+                f"<td class='highlight-value'>${r['estimated_cost']:,.0f}</td>"
+                f"<td>{r['score']:.3f}</td>"
+                f"<td>{r['confidence']:.2f}</td>"
+                "</tr>", unsafe_allow_html=True)
+        st.markdown("</tbody></table><br>", unsafe_allow_html=True)
+
+
+# =============================================================================
 # STREAMLIT UI
 # =============================================================================
 
@@ -1968,6 +2052,19 @@ và xa phương án tệ nhất (ideal worst). Điểm càng cao càng tốt.">i
 
         st.dataframe(df_display, use_container_width=True)
 
+        # PREMIUM TABLES - INSERTED HERE
+        st.markdown("---")
+        render_compare_top3(result.results)
+
+        st.markdown("---")
+        render_compare_top5(result.results)
+
+        st.markdown("---")
+        render_compare_by_icc(result.results)
+
+        st.markdown("---")
+        render_compare_by_company(result.results)
+
         st.markdown(
             """
             <div class="explanation-box">
@@ -2003,9 +2100,9 @@ CVaR 95%: tổn thất trung bình trong 5% trường hợp xấu nhất.">i</sp
                 unsafe_allow_html=True
             )
 
-                # Charts section
+        # Charts section
         st.markdown("---")
-        st.subheader("Biểu đồ phân tích")
+        st.subheader("📊 Biểu đồ phân tích")
 
         # Biểu đồ 1: Chi phí – Chất lượng (Cost–Benefit)
         st.markdown("""
@@ -2066,9 +2163,7 @@ mô hình dự báo giá trị tháng kế tiếp (ARIMA hoặc xu hướng tuy�
             result.historical, result.forecast, params.route, params.month
         )
         st.plotly_chart(fig_forecast, use_container_width=True)
-        
-        
-        
+
         # Fuzzy AHP
         if params.use_fuzzy:
             st.markdown("---")
