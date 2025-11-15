@@ -44,414 +44,372 @@ def app_config():
 
 
 def apply_enterprise_css():
-    """Luxury Black · Green Neon · Enterprise."""
+    """AI-LogiCore · Quantum Green · Future Logistics v6.0"""
     st.markdown("""
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
     * {
         text-rendering: optimizeLegibility !important;
         -webkit-font-smoothing: antialiased !important;
+        box-sizing: border-box;
     }
 
+    /* === BACKGROUND AI QUANTUM === */
     .stApp {
-        background: #020509 !important; /* Nền đen sâu */
-        color: #e9fff4 !important;
-        font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif !important;
-        font-size: 1rem !important;
+        background: #0a0f0d !important;
+        color: #e0fff5 !important;
+        font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif !important;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* AI Particle Background */
+    .stApp::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 80%, rgba(0,255,153,0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(0,191,165,0.08) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(0,230,118,0.05) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+        animation: quantum-pulse 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes quantum-pulse {
+        0% { opacity: 0.6; transform: scale(1); }
+        100% { opacity: 1; transform: scale(1.05); }
+    }
+
+    /* AI Scanning Line */
+    .stApp::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #00ff99, transparent);
+        animation: scan-line 4s linear infinite;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    @keyframes scan-line {
+        0% { transform: translateY(-100%); }
+        100% { transform: translateY(200vh); }
     }
 
     .block-container {
-        padding-top: 1.2rem !important;
-        padding-bottom: 3rem !important;
-        max-width: 1500px !important;
+        padding-top: 1.5rem !important;
+        padding-bottom: 4rem !important;
+        max-width: 1600px !important;
+        position: relative;
+        z-index: 2;
     }
 
-    /* ================= HEADER LUXURY ================= */
-    .rc-header {
-        padding: 1.2rem 1.6rem;
-        border-radius: 22px;
-        background: radial-gradient(circle at top left, #072017, #020908 55%, #000000 100%);
-        border: 1px solid rgba(0,255,153,0.32);
-        box-shadow:
-            0 0 0 1px rgba(0,255,153,0.28),
-            0 18px 40px rgba(0,0,0,0.95),
-            0 0 30px rgba(0,255,153,0.4);
-        margin-bottom: 1.8rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1.4rem;
-    }
-
-    .rc-header-left {
-        display: flex;
-        align-items: center;
-        gap: 1.2rem;
-    }
-
-    /* LOGO SHIELD – LUXURY NEON */
+    /* === LOGO AI SHIELD === */
     .rc-logo {
-        width: 82px;
-        height: 82px;
+        width: 88px; height: 88px;
         border-radius: 22px;
-        background:
-            radial-gradient(circle at 35% 25%, #ffffff 0%, #d7fff4 12%, #7affd4 30%, #00e6a7 55%, #003826 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        background: conic-gradient(from 0deg at 50% 50%, 
+            #00ff99, #00bfa5, #00e676, #00ff99);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 900; font-size: 2rem; color: #001a12;
+        border: 3px solid #00ff99;
+        box-shadow: 
+            0 0 30px rgba(0,255,153,0.7),
+            0 0 60px rgba(0,255,153,0.4),
+            inset 0 0 20px rgba(255,255,255,0.2);
+        position: relative;
+        overflow: hidden;
+        animation: ai-core 3s ease-in-out infinite;
+    }
+
+    .rc-logo::before {
+        content: 'AI';
+        font-family: 'JetBrains Mono', monospace;
         font-weight: 900;
-        font-size: 1.9rem;
-        color: #001c12;
-        border: 3px solid #c4ffea;
-        box-shadow:
-            0 0 26px rgba(0,255,153,0.85),
-            0 0 60px rgba(0,255,153,0.55);
-        text-shadow: 0 0 10px rgba(255,255,255,0.9);
+        font-size: 1.4rem;
+        color: #001a12;
+        text-shadow: 0 0 10px #00ff99;
+    }
+
+    @keyframes ai-core {
+        0%, 100% { box-shadow: 0 0 30px rgba(0,255,153,0.7), 0 0 60px rgba(0,255,153,0.4); }
+        50% { box-shadow: 0 0 40px rgba(0,255,153,0.9), 0 0 80px rgba(0,255,153,0.6), 0 0 100px rgba(0,255,153,0.3); }
+    }
+
+    /* === HEADER AI-LOGICORE === */
+    .rc-header {
+        padding: 1.4rem 1.8rem;
+        border-radius: 24px;
+        background: linear-gradient(135deg, rgba(10,30,25,0.95), rgba(5,18,15,0.98));
+        border: 1px solid rgba(0,255,153,0.3);
+        box-shadow: 
+            0 12px 32px rgba(0,0,0,0.6),
+            0 0 30px rgba(0,255,153,0.25),
+            inset 0 1px 0 rgba(255,255,255,0.1);
+        margin-bottom: 2rem;
+        display: flex; justify-content: space-between; align-items: center;
+        gap: 1.6rem;
+        position: relative;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
     }
 
     .rc-title {
-        font-size: 1.6rem;
+        font-size: 1.7rem;
         font-weight: 900;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        background: linear-gradient(90deg, #eafff8, #8cffc8, #c2ffe7);
+        letter-spacing: 0.04em;
+        background: linear-gradient(90deg, #e0fff5, #a0ffda, #70ffcc, #00ff99);
         -webkit-background-clip: text;
         color: transparent;
+        text-transform: uppercase;
+        text-shadow: 0 0 20px rgba(0,255,153,0.4);
     }
 
     .rc-subtitle {
         margin-top: 4px;
-        font-size: 0.95rem;
-        opacity: 0.95;
-        color: #b9ffe6;
-        font-weight: 500;
+        font-size: 0.98rem;
+        opacity: 0.94;
+        color: #b0ffe1;
+        font-weight: 600;
+        letter-spacing: 0.05em;
     }
 
     .rc-badge {
-        background: radial-gradient(circle at top, #00ff99, #00bfa5);
-        padding: 0.6rem 1.4rem;
+        background: linear-gradient(135deg, #00ff99, #00bfa5, #00e676);
+        padding: 0.6rem 1.3rem;
         border-radius: 999px;
         color: #00140c;
         font-weight: 800;
-        font-size: 0.9rem;
-        letter-spacing: 0.06em;
-        box-shadow:
-            0 0 22px rgba(0,255,153,0.75),
-            0 12px 26px rgba(0,0,0,0.9);
+        font-size: 0.92rem;
+        letter-spacing: 0.03em;
+        box-shadow: 
+            0 0 20px rgba(0,255,153,0.6),
+            0 8px 20px rgba(0,0,0,0.5);
         white-space: nowrap;
-        text-transform: uppercase;
+        position: relative;
+        overflow: hidden;
     }
 
-    /* ================= SIDEBAR ================= */
+    .rc-badge::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%;
+        width: 50%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        animation: badge-shine 2s infinite;
+    }
+
+    @keyframes badge-shine {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+
+    /* === SIDEBAR AI === */
     section[data-testid="stSidebar"] {
-        background: radial-gradient(circle at top, #041610, #020705 55%, #000000 100%) !important;
-        border-right: 1px solid rgba(0,255,153,0.24);
-        box-shadow: 8px 0 24px rgba(0,0,0,0.9);
+        background: linear-gradient(180deg, #0a1a15, #081310) !important;
+        border-right: 1px solid rgba(0,255,153,0.3);
+        box-shadow: 10px 0 30px rgba(0,0,0,0.8);
+        backdrop-filter: blur(10px);
     }
 
     section[data-testid="stSidebar"] h1,
-    section[data-testid="stSidebar"] h2,
-    section[data-testid="stSidebar"] h3 {
-        color: #b0ffe1 !important;
-        font-weight: 800 !important;
+    section[data-testid="stSidebar"] h2 {
+        color: #00ff99 !important;
+        font-weight: 900 !important;
+        text-shadow: 0 0 10px rgba(0,255,153,0.4);
     }
 
-    section[data-testid="stSidebar"] label {
-        color: #d4fff1 !important;
-        font-weight: 600 !important;
-    }
-
+    /* === BUTTON AI === */
     .stButton > button {
-        background: linear-gradient(120deg, #00ff99, #00e676, #00bfa5) !important;
+        background: linear-gradient(135deg, #00ff99, #00e676, #00bfa5) !important;
         color: #00140d !important;
         font-weight: 800 !important;
         border-radius: 999px !important;
-        border: none !important;
-        padding: 0.7rem 1.8rem !important;
-        box-shadow:
-            0 10px 24px rgba(0,0,0,0.9),
-            0 0 18px rgba(0,255,153,0.75) !important;
-        transition: all 0.12s ease-out !important;
-        font-size: 0.98rem !important;
+        border: 2px solid rgba(0,255,153,0.5) !important;
+        padding: 0.7rem 2rem !important;
+        box-shadow: 
+            0 8px 25px rgba(0,0,0,0.7),
+            0 0 20px rgba(0,255,153,0.5),
+            inset 0 1px 0 rgba(255,255,255,0.2) !important;
+        transition: all 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        font-size: 1rem !important;
+        position: relative;
+        overflow: hidden;
     }
 
     .stButton > button:hover {
-        transform: translateY(-1px) scale(1.03);
-        box-shadow:
-            0 14px 30px rgba(0,0,0,1),
-            0 0 26px rgba(0,255,153,0.95) !important;
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 
+            0 15px 35px rgba(0,0,0,0.85),
+            0 0 30px rgba(0,255,153,0.9),
+            0 0 50px rgba(0,255,153,0.4) !important;
+        border-color: #00ff99 !important;
     }
 
-    /* ================= CARD CHUNG ================= */
+    .stButton > button:active {
+        transform: translateY(0) scale(0.98);
+    }
+
+    /* === CARD GLASSMORPHISM === */
     .rc-card {
-        background: radial-gradient(circle at top left, rgba(0,255,153,0.08), rgba(1,7,6,0.96));
-        padding: 1.3rem 1.5rem;
-        border-radius: 18px;
-        border: 1px solid rgba(0,255,153,0.22);
-        box-shadow:
-            0 0 0 1px rgba(0,40,25,0.9),
-            0 12px 26px rgba(0,0,0,0.85);
-        margin-bottom: 1.3rem;
+        background: rgba(10, 28, 24, 0.75);
+        padding: 1.4rem 1.6rem;
+        border-radius: 20px;
+        border: 1px solid rgba(0,255,153,0.25);
+        box-shadow: 
+            0 8px 32px rgba(0,0,0,0.5),
+            0 0 20px rgba(0,255,153,0.15);
+        margin-bottom: 1.5rem;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        position: relative;
+        transition: all 0.3s ease;
     }
 
-    /* ================= RESULT BOX (TOP RECOMMENDATION) ================= */
+    .rc-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 30px rgba(0,255,153,0.3);
+        border-color: rgba(0,255,153,0.5);
+    }
+
+    /* === RESULT BOX AI === */
     .result-box {
-        background: radial-gradient(circle at top left,#00ffcc,#00e676,#00bfa5);
+        background: linear-gradient(135deg, #00ff99, #00bfa5, #00e676);
         color: #00130d !important;
         padding: 1.8rem 2.2rem;
-        border-radius: 20px;
-        font-weight: 800;
-        box-shadow:
-            0 0 26px rgba(0,255,153,0.9),
-            0 20px 44px rgba(0,0,0,1);
-        border: 2px solid #b9f6ca;
+        border-radius: 24px;
+        font-weight: 900;
+        font-size: 1.15rem;
+        box-shadow: 
+            0 0 40px rgba(0,255,153,0.8),
+            0 20px 50px rgba(0,0,0,0.9),
+            inset 0 1px 0 rgba(255,255,255,0.3);
+        border: 2px solid #c8ffec;
         margin-top: 0.8rem;
-    }
-
-    /* ================= EXPLANATION BOX ================= */
-    .explanation-box {
-        background: linear-gradient(135deg, rgba(0,15,11,0.98), rgba(0,40,28,0.96));
-        border-left: 4px solid #00e676;
-        padding: 1.1rem 1.4rem;
-        border-radius: 14px;
-        margin-top: 0.7rem;
-        box-shadow:
-            0 0 16px rgba(0,0,0,0.9),
-            0 0 18px rgba(0,255,153,0.24);
-    }
-
-    .explanation-box h4 {
-        color: #a5ffdc !important;
-        font-weight: 800;
-        margin-bottom: 0.4rem;
-    }
-
-    .explanation-box li {
-        color: #e0f2f1 !important;
-        font-weight: 500;
-        margin: 0.22rem 0;
-    }
-
-    /* ================= TOOLTIP TEXT CŨ ================= */
-    .rc-tooltip {
-        text-decoration: underline dotted #00e676;
-        cursor: pointer;
         position: relative;
-        font-weight: 600;
-        color: #aaffdd;
+        overflow: hidden;
     }
 
-    .rc-tooltip:hover::after {
-        content: attr(data-tip);
+    .result-box::before {
+        content: '';
         position: absolute;
-        left: 0;
-        bottom: -2.8rem;
-        background: rgba(0,0,0,0.98);
-        padding: 9px 11px;
-        border-radius: 8px;
-        border: 1px solid rgba(0,255,153,0.5);
-        font-size: 0.85rem;
-        color: #d8fff0;
-        width: max-content;
-        max-width: 320px;
-        z-index: 999;
-        box-shadow: 0 0 18px rgba(0,255,153,0.45);
+        top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 10px,
+            rgba(255,255,255,0.05) 10px,
+            rgba(255,255,255,0.05) 20px
+        );
+        animation: ai-grid 15s linear infinite;
     }
 
-    /* ================= ICON TOOLTIP NEON ================= */
+    @keyframes ai-grid {
+        0% { transform: translate(0, 0) rotate(0deg); }
+        100% { transform: translate(50px, 50px) rotate(45deg); }
+    }
+
+    /* === TOOLTIP AI VOICE === */
     .tooltip-icon {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        margin-left: 6px;
-        background: rgba(0,255,153,0.15);
-        color: #a5ffdc;
+        margin-left: 8px;
+        background: rgba(0,255,153,0.2);
+        color: #00ff99;
         border-radius: 50%;
-        width: 18px;
-        height: 18px;
-        text-align: center;
-        font-size: 12px;
+        width: 22px; height: 22px;
+        font-size: 13px;
         cursor: help;
-        border: 1px solid rgba(0,255,153,0.65);
+        border: 1.5px solid rgba(0,255,153,0.5);
         font-weight: 700;
-        box-shadow: 0 0 10px rgba(0,255,153,0.45);
+        box-shadow: 0 0 12px rgba(0,255,153,0.3);
         position: relative;
+        transition: all 0.2s ease;
     }
 
     .tooltip-icon:hover {
-        background: rgba(0,255,153,0.32);
+        background: rgba(0,255,153,0.4);
         border-color: #00ff99;
+        transform: scale(1.15);
+        box-shadow: 0 0 20px rgba(0,255,153,0.6);
     }
 
     .tooltip-icon:hover::after {
         content: attr(data-tip);
         position: absolute;
-        background: rgba(0,12,9,0.99);
-        border: 1px solid rgba(0,255,153,0.6);
-        padding: 10px 14px;
-        border-radius: 10px;
-        color: #d8fff0;
-        width: 260px;
-        left: 22px;
-        bottom: -4px;
-        font-size: 0.82rem;
-        line-height: 1.35rem;
-        z-index: 999;
-        box-shadow: 0 0 22px rgba(0,255,153,0.6);
-    }
-
-    /* ================= DATAFRAME ================= */
-    div[data-testid="stDataFrame"] {
-        border-radius: 14px !important;
-        border: 1px solid rgba(0,255,153,0.3) !important;
-        overflow: hidden !important;
-        box-shadow:
-            0 0 18px rgba(0,0,0,0.9),
-            0 0 18px rgba(0,255,153,0.32) !important;
-    }
-
-    [data-testid="stMetricValue"] {
-        color: #76ff03 !important;
-        font-weight: 900 !important;
-        font-size: 1.05rem !important;
-    }
-
-    [data-testid="stMetricLabel"] {
-        color: #e0f2f1 !important;
-        font-weight: 600 !important;
-    }
-
-    /* ================= TOP 3 CARDS ================= */
-    .top3-card {
-        position: relative;
-        background: radial-gradient(circle at top left, rgba(0,255,153,0.2), rgba(0,0,0,0.95));
-        border: 1px solid rgba(0,255,153,0.55);
-        padding: 18px 18px;
-        border-radius: 20px;
-        box-shadow:
-            0 0 20px rgba(0,255,153,0.35),
-            0 12px 28px rgba(0,0,0,0.95);
-        margin-bottom: 18px;
-        text-align: center;
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out;
-    }
-
-    .top1-card {
-        background: radial-gradient(circle at top left, rgba(255,215,0,0.22), rgba(0,0,0,0.96));
-        border: 1px solid rgba(255,215,0,0.85);
-        box-shadow:
-            0 0 30px rgba(255,215,0,0.75),
-            0 14px 32px rgba(0,0,0,0.98);
-        animation: gold-pulse 2.4s ease-in-out infinite alternate;
-    }
-
-    @keyframes gold-pulse {
-        0% { box-shadow: 0 0 12px rgba(255,215,0,0.55); border-color: rgba(255,215,0,0.7); }
-        100% { box-shadow: 0 0 30px rgba(255,215,0,0.95); border-color: rgba(255,255,255,0.98); }
-    }
-
-    .top3-card:hover {
-        transform: translateY(-3px) scale(1.03);
-        box-shadow:
-            0 0 28px rgba(0,255,153,0.65),
-            0 16px 36px rgba(0,0,0,1);
-        border-color: rgba(0,255,200,0.95);
-    }
-
-    .top3-title {
-        font-size: 1.1rem;
-        font-weight: 800;
-        color: #a5ffdc;
-    }
-
-    .top1-title {
-        font-size: 1.18rem;
-        font-weight: 900;
-        color: #ffe680;
-        text-shadow: 0 0 12px rgba(255,210,0,0.9);
-    }
-
-    .top3-sub {
-        font-size: 0.92rem;
-        margin-top: 6px;
-        color: #e0f2f1;
-    }
-
-    .badge-icc {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 999px;
-        background: linear-gradient(120deg, #00e676, #00bfa5);
-        color: #00130d;
-        font-weight: 700;
+        background: rgba(0,20,15,0.98);
+        border: 1.5px solid rgba(0,255,153,0.5);
+        padding: 12px 16px;
+        border-radius: 14px;
+        color: #e0fff5;
+        width: 280px;
+        left: 28px;
+        bottom: -10px;
         font-size: 0.88rem;
+        line-height: 1.4rem;
+        z-index: 999;
+        box-shadow: 0 0 25px rgba(0,255,153,0.4);
+        font-family: 'JetBrains Mono', monospace;
     }
 
-    .pill-badge {
-        display: inline-block;
-        padding: 3px 10px;
-        border-radius: 999px;
-        border: 1px solid rgba(0,255,153,0.7);
-        font-size: 0.82rem;
-        margin-top: 4px;
-        color: #c8ffec;
+    /* === TOP1 CARD 3D FLIP === */
+    .top1-card {
+        perspective: 1000px;
+        position: relative;
     }
 
-    /* ================= CARD RISK METRICS ================= */
-    .rc-risk-card h4 {
-        margin-top: 0;
-        margin-bottom: 0.8rem;
-        color: #a5ffdc;
-        font-weight: 800;
+    .top1-card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transform-style: preserve-3d;
     }
 
-    .rc-risk-metrics {
+    .top1-card:hover .top1-card-inner {
+        transform: rotateY(180deg);
+    }
+
+    .top1-face, .top1-back {
+        position: absolute;
+        width: 100%; height: 100%;
+        backface-visibility: hidden;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 0 30px rgba(255,215,0,0.5);
+    }
+
+    .top1-face {
+        background: radial-gradient(circle at top left, rgba(255,215,0,0.25), rgba(0,0,0,0.9));
+        border: 2px solid rgba(255,215,0,0.8);
+    }
+
+    .top1-back {
+        background: linear-gradient(135deg, #001a12, #002018);
+        border: 2px solid #00ff99;
+        transform: rotateY(180deg);
         display: flex;
-        flex-wrap: wrap;
-        gap: 1.4rem;
-    }
-
-    .rc-risk-item {
-        min-width: 150px;
-    }
-
-    .rc-risk-label {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: #e0fff5;
         font-size: 0.9rem;
-        color: #e0f2f1;
     }
 
-    .rc-risk-value {
-        font-size: 1.1rem;
-        font-weight: 900;
-        color: #76ff03;
-    }
-
-    /* ================= CHART WRAPPER – KHUNG NEON ================= */
-    div[data-testid="stPlotlyChart"] {
-        background: radial-gradient(circle at top, #020f0b, #000000);
-        padding: 16px 18px 12px 18px;
-        border-radius: 18px;
-        border: 1.6px solid rgba(0,255,153,0.75);
-        box-shadow:
-            0 0 24px rgba(0,255,153,0.65),
-            0 16px 34px rgba(0,0,0,0.98);
-        margin-bottom: 1.5rem;
-    }
-
-    /* ================= MOBILE ================= */
+    /* === MOBILE === */
     @media (max-width: 900px) {
-        .rc-header { flex-direction: column; align-items: flex-start; }
-        .block-container {
-            padding-left: 0.6rem !important;
-            padding-right: 0.6rem !important;
-        }
-        .rc-risk-metrics { flex-direction: column; }
+        .rc-header { flex-direction: column; align-items: center; text-align: center; }
+        .rc-title { font-size: 1.5rem; }
+        .stButton > button { padding: 0.6rem 1.6rem; font-size: 0.95rem; }
     }
-
     </style>
     """, unsafe_allow_html=True)
-
 
 # =============================================================================
 # DOMAIN MODELS & CONSTANTS
