@@ -42,585 +42,645 @@ def app_config():
         layout="wide"
     )
 def apply_enterprise_css():
-    """Ultra Premium Deluxe · Luxury Black + Green Neon."""
-    st.markdown("""
-    <style>
-    /* ================== GLOBAL RESET + TYPO ================== */
-    * {
-        text-rendering: optimizeLegibility !important;
-        -webkit-font-smoothing: antialiased !important;
-        box-sizing: border-box;
-    }
-
-    html, body {
-        margin: 0;
-        padding: 0;
-        background: radial-gradient(circle at top, #051814 0, #020706 40%, #000000 100%);
-    }
-
-    .stApp {
-        background: radial-gradient(circle at top, #051814 0, #020706 40%, #000000 100%) !important;
-        color: #e6fff7 !important;
-        font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif !important;
-        font-size: 1rem !important;
-    }
-
-    .block-container {
-        padding-top: 1.2rem !important;
-        padding-bottom: 3rem !important;
-        max-width: 1500px !important;
-    }
-
-    h1, h2, h3, h4, h5 {
-        font-weight: 800 !important;
-        letter-spacing: 0.03em;
-    }
-
-    h2, h3, h4 {
-        color: #f1fff9 !important;
-    }
-
-    /* ================== OUTER GLOW FRAME ================== */
-    .stApp::before {
-        content: '';
-        position: fixed;
-        inset: 12px;
-        border-radius: 26px;
-        pointer-events: none;
-        background:
-            radial-gradient(circle at top left, rgba(0,255,160,0.2), transparent 55%),
-            radial-gradient(circle at top right, rgba(0,180,255,0.16), transparent 55%),
-            radial-gradient(circle at bottom, rgba(0,255,160,0.16), transparent 60%);
-        box-shadow:
-            0 0 0 1px rgba(0,255,160,0.22),
-            0 0 40px rgba(0,255,160,0.5),
-            0 0 90px rgba(0,255,160,0.35);
-        z-index: -1;
-    }
-
-    /* ================== SCROLLBAR ================== */
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-    ::-webkit-scrollbar-track {
-        background: #020a08;
-    }
-    ::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, #00ff99, #00bfa5);
-        border-radius: 999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(180deg, #7cffc4, #00e676);
-    }
-
-    /* ================== HEADER ================== */
-    .rc-header {
-        padding: 1.3rem 1.7rem;
-        border-radius: 20px;
-        background:
-            linear-gradient(135deg, rgba(5,25,20,0.94), rgba(1,7,6,0.98)),
-            radial-gradient(circle at top left, rgba(0,255,160,0.25), transparent 55%);
-        border: 1px solid rgba(0,255,153,0.28);
-        box-shadow:
-            0 12px 35px rgba(0,0,0,0.85),
-            0 0 28px rgba(0,255,153,0.45);
-        margin-bottom: 1.9rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1.4rem;
-    }
-
-    .rc-header-left {
-        display: flex;
-        align-items: center;
-        gap: 1.3rem;
-    }
-
-    /* Shield logo */
-    .rc-logo {
-        width: 82px;
-        height: 82px;
-        border-radius: 22px;
-        background:
-            radial-gradient(circle at 40% 30%, #ffffff 0, #d7fff4 12%, #7affd4 30%, #00e6a7 58%, #003826 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 900;
-        font-size: 1.8rem;
-        color: #001c12;
-        border: 3px solid #c4ffea;
-        box-shadow:
-            0 0 26px rgba(0,255,153,0.75),
-            0 0 60px rgba(0,255,153,0.55);
-        text-shadow: 0 0 10px rgba(255,255,255,0.95);
-    }
-
-    .rc-title {
-        font-size: 1.55rem;
-        font-weight: 900;
-        letter-spacing: 0.08em;
-        background: linear-gradient(90deg, #f7fff8, #b7ffd8, #e3fff4);
-        -webkit-background-clip: text;
-        color: transparent;
-        text-transform: uppercase;
-    }
-
-    .rc-subtitle {
-        margin-top: 3px;
-        font-size: 0.92rem;
-        opacity: 0.95;
-        color: #c4ffea;
-        font-weight: 500;
-    }
-
-    .rc-badge {
-        background: radial-gradient(circle at top left, #00ffb0, #00c896);
-        padding: 0.6rem 1.25rem;
-        border-radius: 999px;
-        color: #00140c;
-        font-weight: 800;
-        font-size: 0.92rem;
-        letter-spacing: 0.06em;
-        box-shadow:
-            0 0 16px rgba(0,255,153,0.75),
-            0 12px 28px rgba(0,0,0,0.95);
-        white-space: nowrap;
-        text-transform: uppercase;
-    }
-
-    /* ================== SIDEBAR ================== */
-    section[data-testid="stSidebar"] {
-        background: radial-gradient(circle at top, #071511 0, #020806 55%, #000000 100%) !important;
-        border-right: 1px solid rgba(0,255,153,0.18);
-        box-shadow: 8px 0 26px rgba(0,0,0,0.85);
-    }
-
-    section[data-testid="stSidebar"] h1,
-    section[data-testid="stSidebar"] h2,
-    section[data-testid="stSidebar"] h3 {
-        color: #b9ffe4 !important;
-        font-weight: 800 !important;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    section[data-testid="stSidebar"] label {
-        color: #e0fff4 !important;
-        font-weight: 600 !important;
-        font-size: 0.92rem !important;
-    }
-
-    section[data-testid="stSidebar"] .stSlider label {
-        color: #c7fff0 !important;
-    }
-
-    /* Sidebar inputs */
-    section[data-testid="stSidebar"] .stNumberInput input,
-    section[data-testid="stSidebar"] .stTextInput input,
-    section[data-testid="stSidebar"] select {
-        background: rgba(3,16,13,0.96) !important;
-        color: #e6fff7 !important;
-        border-radius: 10px !important;
-        border: 1px solid rgba(0,255,153,0.28) !important;
-        box-shadow: 0 0 0 1px rgba(0,0,0,0.8);
-    }
-
-    /* Sidebar buttons */
-    section[data-testid="stSidebar"] .stButton > button {
-        background: linear-gradient(120deg, #00ffb0, #00e676, #00bfa5) !important;
-        color: #00140d !important;
-        font-weight: 800 !important;
-        border-radius: 999px !important;
-        border: none !important;
-        padding: 0.55rem 1.4rem !important;
-        box-shadow:
-            0 10px 24px rgba(0,0,0,0.9),
-            0 0 18px rgba(0,255,153,0.7) !important;
-        transition: all 0.12s ease-out !important;
-        font-size: 0.95rem !important;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-    }
-
-    section[data-testid="stSidebar"] .stButton > button:hover {
-        transform: translateY(-1px) scale(1.02);
-        box-shadow:
-            0 14px 32px rgba(0,0,0,0.95),
-            0 0 24px rgba(0,255,180,0.9) !important;
-    }
-
-    /* ================== MAIN BUTTON (PHÂN TÍCH) ================== */
-    .stButton > button[kind="primary"] {
-        background: radial-gradient(circle at top left, #00ffbf, #00c676) !important;
-        color: #00130c !important;
-        font-weight: 900 !important;
-        font-size: 1rem !important;
-        border-radius: 999px !important;
-        border: none !important;
-        padding: 0.8rem 1.8rem !important;
-        box-shadow:
-            0 12px 32px rgba(0,0,0,0.9),
-            0 0 28px rgba(0,255,160,0.9) !important;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-    }
-
-    .stButton > button[kind="primary"]:hover {
-        transform: translateY(-1px) scale(1.015);
-        box-shadow:
-            0 18px 40px rgba(0,0,0,0.98),
-            0 0 38px rgba(160,255,220,1) !important;
-    }
-
-    /* ================== GENERIC CARD ================== */
-    .rc-card {
-        background:
-            radial-gradient(circle at top, rgba(0,255,160,0.12), transparent 55%),
-            linear-gradient(145deg, rgba(4,18,15,0.96), rgba(2,8,6,0.98));
-        padding: 1.2rem 1.5rem;
-        border-radius: 18px;
-        border: 1px solid rgba(0,255,153,0.25);
-        box-shadow:
-            0 10px 26px rgba(0,0,0,0.85),
-            0 0 22px rgba(0,255,153,0.25);
-        margin-bottom: 1.35rem;
-    }
-
-    /* ================== RESULT BOX ================== */
-    .result-box {
-        background:
-            radial-gradient(circle at top left, #00ffb0, #00e676),
-            linear-gradient(135deg, #00e676, #00bfa5);
-        color: #00130d !important;
-        padding: 1.6rem 2.1rem;
-        border-radius: 20px;
-        font-weight: 800;
-        box-shadow:
-            0 0 28px rgba(0,255,153,0.9),
-            0 18px 40px rgba(0,0,0,0.95);
-        border: 2px solid #b9f6ca;
-        margin-top: 0.6rem;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .result-box::after {
-        content: '';
-        position: absolute;
-        inset: 2px;
-        border-radius: 18px;
-        border: 1px solid rgba(0,90,70,0.45);
-        box-shadow: inset 0 0 18px rgba(0,120,80,0.6);
-        pointer-events: none;
-    }
-
-    /* ================== EXPLANATION BOX ================== */
-    .explanation-box {
-        background: linear-gradient(135deg, rgba(5,25,20,0.96), rgba(1,10,7,0.98));
-        border-radius: 15px;
-        border: 1px solid rgba(0,255,153,0.4);
-        padding: 1.1rem 1.5rem;
-        margin-top: 0.7rem;
-        box-shadow:
-            0 10px 24px rgba(0,0,0,0.9),
-            0 0 20px rgba(0,255,153,0.28);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .explanation-box::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
-        background: radial-gradient(circle at top left, rgba(0,255,160,0.22), transparent 55%);
-        opacity: 0.7;
-        pointer-events: none;
-    }
-
-    .explanation-box h4 {
-        color: #d2ffef !important;
-        font-weight: 800;
-        margin-bottom: 0.45rem;
-        position: relative;
-        z-index: 1;
-    }
-
-    .explanation-box ul,
-    .explanation-box p {
-        position: relative;
-        z-index: 1;
-    }
-
-    .explanation-box li {
-        color: #e0f2f1 !important;
-        font-weight: 500;
-        margin: 0.22rem 0;
-        line-height: 1.5;
-    }
-
-    /* ================== TOOLTIP TEXT ================== */
-    .rc-tooltip {
-        text-decoration: underline dotted #00e676;
-        cursor: pointer;
-        position: relative;
-        font-weight: 600;
-        color: #aaffdd;
-    }
-
-    .rc-tooltip:hover::after {
-        content: attr(data-tip);
-        position: absolute;
-        left: 0;
-        bottom: -2.9rem;
-        background: rgba(0,10,7,0.98);
-        padding: 9px 12px;
-        border-radius: 10px;
-        border: 1px solid rgba(0,255,153,0.45);
-        font-size: 0.85rem;
-        color: #e6fff7;
-        width: max-content;
-        max-width: 340px;
-        z-index: 999;
-        box-shadow:
-            0 0 18px rgba(0,255,153,0.3),
-            0 14px 26px rgba(0,0,0,0.9);
-    }
-
-    /* ================== ICON TOOLTIP ================== */
-    .tooltip-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        margin-left: 6px;
-        background: rgba(0,255,153,0.15);
-        color: #a5ffdc;
-        border-radius: 50%;
-        width: 18px;
-        height: 18px;
-        font-size: 12px;
-        cursor: help;
-        border: 1px solid rgba(0,255,153,0.4);
-        font-weight: 700;
-        box-shadow: 0 0 10px rgba(0,255,153,0.35);
-        position: relative;
-    }
-
-    .tooltip-icon:hover {
-        background: rgba(0,255,153,0.32);
-        border-color: #00ffb0;
-    }
-
-    .tooltip-icon:hover::after {
-        content: attr(data-tip);
-        position: absolute;
-        background: rgba(0,12,8,0.99);
-        border: 1px solid rgba(0,255,153,0.6);
-        padding: 10px 14px;
-        border-radius: 10px;
-        color: #d8fff0;
-        width: 260px;
-        left: 22px;
-        bottom: -4px;
-        font-size: 0.82rem;
-        line-height: 1.35rem;
-        z-index: 999;
-        box-shadow:
-            0 0 22px rgba(0,255,153,0.6),
-            0 14px 30px rgba(0,0,0,0.95);
-    }
-
-    /* ================== DATAFRAME ================== */
-    div[data-testid="stDataFrame"] {
-        border-radius: 14px !important;
-        border: 1px solid rgba(0,255,153,0.25) !important;
-        overflow: hidden !important;
-        box-shadow:
-            0 10px 24px rgba(0,0,0,0.9),
-            0 0 20px rgba(0,255,153,0.3) !important;
-        background: radial-gradient(circle at top, rgba(0,255,153,0.16), rgba(2,12,9,0.96));
-    }
-
-    /* ================== METRICS ================== */
-    [data-testid="stMetricValue"] {
-        color: #7CFF03 !important;
-        font-weight: 900 !important;
-        font-size: 1.05rem !important;
-    }
-
-    [data-testid="stMetricLabel"] {
-        color: #e0f2f1 !important;
-        font-weight: 600 !important;
-    }
-
-    /* ================== TOP 3 CARDS ================== */
-    .top3-card {
-        position: relative;
-        background:
-            radial-gradient(circle at top, rgba(0,255,153,0.18), transparent 70%),
-            linear-gradient(145deg, rgba(3,18,14,0.96), rgba(1,9,7,0.98));
-        border: 1px solid rgba(0,255,153,0.45);
-        padding: 18px 18px 16px 18px;
-        border-radius: 20px;
-        box-shadow:
-            0 10px 26px rgba(0,0,0,0.9),
-            0 0 22px rgba(0,255,153,0.32);
-        margin-bottom: 18px;
-        text-align: center;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out;
-    }
-
-    .top1-card {
-        background:
-            radial-gradient(circle at top, rgba(255,215,0,0.28), transparent 72%),
-            linear-gradient(145deg, rgba(5,14,10,0.98), rgba(2,7,5,0.99));
-        border: 1px solid rgba(255,230,120,0.85);
-        box-shadow:
-            0 12px 34px rgba(0,0,0,0.95),
-            0 0 32px rgba(255,215,0,0.6);
-        animation: gold-pulse-deluxe 2.4s ease-in-out infinite alternate;
-    }
-
-    @keyframes gold-pulse-deluxe {
-        0% {
-            box-shadow:
-                0 10px 26px rgba(0,0,0,0.95),
-                0 0 18px rgba(255,215,0,0.45);
+    """RISKCAST Ultra Luxury v3 – Max Glow (Black + Neon Green)."""
+    st.markdown(
+        """
+        <style>
+        /* =========================================================
+           GLOBAL RESET + TYPO
+        ========================================================= */
+        * {
+            text-rendering: optimizeLegibility !important;
+            -webkit-font-smoothing: antialiased !important;
+            scroll-behavior: smooth;
         }
-        100% {
-            box-shadow:
-                0 16px 40px rgba(0,0,0,1),
-                0 0 36px rgba(255,255,200,0.95);
+
+        html, body {
+            background: #020608 !important;
         }
-    }
 
-    .top3-card:hover {
-        transform: translateY(-3px) scale(1.02);
-        box-shadow:
-            0 16px 34px rgba(0,0,0,0.98),
-            0 0 30px rgba(0,255,190,0.65);
-        border-color: rgba(0,255,200,0.95);
-    }
-
-    .top3-title {
-        font-size: 1.1rem;
-        font-weight: 800;
-        color: #a5ffdc;
-    }
-
-    .top1-title {
-        font-size: 1.15rem;
-        font-weight: 900;
-        color: #ffe680;
-        text-shadow: 0 0 10px rgba(255,210,0,0.7);
-    }
-
-    .top3-sub {
-        font-size: 0.93rem;
-        margin-top: 6px;
-        color: #e0f2f1;
-    }
-
-    .badge-icc {
-        display: inline-block;
-        padding: 4px 11px;
-        border-radius: 999px;
-        background: linear-gradient(120deg, #00e676, #00bfa5);
-        color: #00130d;
-        font-weight: 700;
-        font-size: 0.88rem;
-    }
-
-    .pill-badge {
-        display: inline-block;
-        padding: 3px 10px;
-        border-radius: 999px;
-        border: 1px solid rgba(0,255,153,0.6);
-        font-size: 0.82rem;
-        margin-top: 4px;
-        color: #c8ffec;
-    }
-
-    /* ================== RISK METRICS BOX ================== */
-    .rc-risk-card h4 {
-        margin-top: 0;
-        margin-bottom: 0.8rem;
-        color: #a5ffdc;
-        font-weight: 800;
-    }
-
-    .rc-risk-metrics {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1.4rem;
-    }
-
-    .rc-risk-item {
-        min-width: 150px;
-    }
-
-    .rc-risk-label {
-        font-size: 0.9rem;
-        color: #e0f2f1;
-    }
-
-    .rc-risk-value {
-        font-size: 1.1rem;
-        font-weight: 900;
-        color: #76ff03;
-    }
-
-    /* ================== PLOTLY CHART WRAPPER ================== */
-    div[data-testid="stPlotlyChart"] {
-        background: radial-gradient(circle at top, rgba(0,255,153,0.1), rgba(0,10,8,0.98));
-        padding: 14px 14px 10px 14px;
-        border-radius: 18px;
-        border: 1px solid rgba(0,255,153,0.4);
-        box-shadow:
-            0 12px 30px rgba(0,0,0,0.94),
-            0 0 26px rgba(0,255,153,0.32);
-        margin-bottom: 1.4rem;
-    }
-
-    /* Không ép kích thước – để Plotly + use_container_width tự căn chỉnh */
-    div[data-testid="stPlotlyChart"] > div {
-        border-radius: 12px;
-    }
-
-    /* ================== FUZZY INFO HIGHLIGHT BOX ================== */
-    .fuzzy-highlight-box {
-        background: #00331F;
-        padding: 15px;
-        border-radius: 12px;
-        border: 2px solid #00FFAA;
-        color: #CCFFE6;
-        box-shadow:
-            0 0 20px rgba(0,255,153,0.46),
-            0 10px 26px rgba(0,0,0,0.9);
-    }
-
-    /* ================== MOBILE ================== */
-    @media (max-width: 900px) {
-        .rc-header {
-            flex-direction: column;
-            align-items: flex-start;
+        .stApp {
+            background: radial-gradient(circle at top,
+                        #041619 0%,
+                        #020608 40%,
+                        #000000 100%) !important;
+            color: #e9fff4 !important;
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif !important;
+            font-size: 16px !important;
         }
+
         .block-container {
-            padding-left: 0.6rem !important;
-            padding-right: 0.6rem !important;
+            padding-top: 1.4rem !important;
+            padding-bottom: 3.4rem !important;
+            max-width: 1500px !important;
         }
-        .rc-risk-metrics {
-            flex-direction: column;
-        }
-    }
 
-    </style>
-    """, unsafe_allow_html=True)
+        h1, h2, h3, h4, h5 {
+            font-weight: 800 !important;
+            letter-spacing: 0.02em;
+            color: #eafff8 !important;
+        }
+
+        /* =========================================================
+           LUXURY GLOW UTILITIES
+        ========================================================= */
+        .neon-text {
+            background: linear-gradient(90deg, #eafff8, #9dffd0, #e0fff7);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .neon-soft {
+            text-shadow: 0 0 14px rgba(0,255,153,0.45);
+        }
+
+        .neon-hard {
+            text-shadow:
+                0 0 4px rgba(0,255,153,0.9),
+                0 0 10px rgba(0,255,153,0.8),
+                0 0 25px rgba(0,255,153,0.7);
+        }
+
+        .glow-ring {
+            box-shadow:
+                0 0 0 1px rgba(0,255,153,0.25),
+                0 0 20px rgba(0,255,153,0.25),
+                0 0 40px rgba(0,255,153,0.30);
+        }
+
+        .glass {
+            background: linear-gradient(135deg,
+                rgba(6, 24, 20, 0.94),
+                rgba(0, 0, 0, 0.98)) !important;
+            border-radius: 18px;
+            border: 1px solid rgba(0,255,153,0.22);
+            box-shadow:
+                0 16px 40px rgba(0,0,0,0.85),
+                0 0 30px rgba(0,255,153,0.22);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        /* =========================================================
+           HEADER – ULTRA LUXURY
+        ========================================================= */
+        .rc-header {
+            position: relative;
+            padding: 1.3rem 1.7rem;
+            margin-bottom: 2.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.6rem;
+            overflow: hidden;
+        }
+
+        .rc-header::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: 22px;
+            background: radial-gradient(circle at 10% 0%,
+                        rgba(0,255,153,0.16) 0%,
+                        transparent 45%),
+                        radial-gradient(circle at 90% 100%,
+                        rgba(0,255,204,0.18) 0%,
+                        transparent 55%);
+            opacity: 0.85;
+            pointer-events: none;
+        }
+
+        .rc-header::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 22px;
+            border: 1px solid rgba(0,255,153,0.45);
+            box-shadow:
+                0 0 0 1px rgba(0,255,153,0.25),
+                0 0 18px rgba(0,255,153,0.55),
+                0 18px 45px rgba(0,0,0,0.95);
+            pointer-events: none;
+        }
+
+        .rc-header-left {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 1.3rem;
+        }
+
+        .rc-logo {
+            width: 82px;
+            height: 82px;
+            border-radius: 22px;
+            background:
+                radial-gradient(circle at 30% 20%,
+                    #ffffff 0%, #d7fff4 14%, #9affdf 34%, transparent 60%),
+                radial-gradient(circle at 70% 80%,
+                    #00ffcc 0%, #00e6aa 35%, #00664a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.8rem;
+            color: #00140d;
+            border: 3px solid #c4ffea;
+            box-shadow:
+                0 0 12px rgba(0,255,153,0.75),
+                0 0 38px rgba(0,255,153,0.85);
+            text-shadow:
+                0 0 4px rgba(0,0,0,0.55),
+                0 0 16px rgba(0,255,153,0.95);
+        }
+
+        .rc-title {
+            font-size: 1.55rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: linear-gradient(90deg,
+                        #f4fff9,
+                        #c2ffe0,
+                        #e2fff7);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .rc-subtitle {
+            margin-top: 4px;
+            font-size: 0.95rem;
+            color: #c4ffea;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+
+        .rc-badge {
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(135deg, #00ff99, #00e676, #00bfa5);
+            padding: 0.7rem 1.5rem;
+            border-radius: 999px;
+            color: #00140c;
+            font-weight: 800;
+            font-size: 0.92rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            box-shadow:
+                0 0 18px rgba(0,255,153,0.7),
+                0 14px 36px rgba(0,0,0,0.9);
+            white-space: nowrap;
+        }
+
+        /* =========================================================
+           SIDEBAR – LUXURY PANEL
+        ========================================================= */
+        section[data-testid="stSidebar"] {
+            background: radial-gradient(circle at top,
+                        #031914 0%,
+                        #020806 45%,
+                        #000000 100%) !important;
+            border-right: 1px solid rgba(0,255,153,0.26);
+            box-shadow: 10px 0 30px rgba(0,0,0,0.85);
+        }
+
+        section[data-testid="stSidebar"] > div {
+            padding-top: 0.5rem;
+        }
+
+        section[data-testid="stSidebar"] h1,
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3 {
+            color: #c8ffec !important;
+            font-weight: 800 !important;
+        }
+
+        section[data-testid="stSidebar"] label {
+            color: #e0fff4 !important;
+            font-weight: 600 !important;
+        }
+
+        section[data-testid="stSidebar"] .stSlider label {
+            font-size: 0.9rem !important;
+        }
+
+        /* Sidebar inputs */
+        section[data-testid="stSidebar"] 
+        .stTextInput > div > div > input,
+        section[data-testid="stSidebar"]
+        .stNumberInput input,
+        section[data-testid="stSidebar"]
+        .stSelectbox > div > div {
+            background: rgba(0,0,0,0.6) !important;
+            border-radius: 10px !important;
+            border: 1px solid rgba(0,255,153,0.4) !important;
+            color: #e9fff4 !important;
+            box-shadow: 0 0 0 1px rgba(0,255,153,0.24);
+        }
+
+        /* Sidebar button */
+        section[data-testid="stSidebar"] .stButton > button {
+            background: linear-gradient(135deg, #00ff99, #00e676, #00c853) !important;
+            color: #00140d !important;
+            font-weight: 900 !important;
+            border-radius: 999px !important;
+            border: none !important;
+            padding: 0.7rem 1.8rem !important;
+            box-shadow:
+                0 0 18px rgba(0,255,153,0.65),
+                0 12px 30px rgba(0,0,0,0.9) !important;
+            transition: all 0.15s ease-out !important;
+            font-size: 0.98rem !important;
+        }
+
+        section[data-testid="stSidebar"] .stButton > button:hover {
+            transform: translateY(-1px) scale(1.02);
+            box-shadow:
+                0 0 26px rgba(0,255,153,0.9),
+                0 16px 40px rgba(0,0,0,0.95) !important;
+        }
+
+        /* =========================================================
+           CORE CARDS / SECTIONS
+        ========================================================= */
+        .rc-card {
+            margin-bottom: 1.5rem;
+        }
+
+        .rc-card,
+        .result-box,
+        .explanation-box,
+        .top3-card,
+        .rc-risk-card {
+            position: relative;
+        }
+
+        .rc-card::before,
+        .result-box::before,
+        .explanation-box::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 18px;
+            border: 1px solid rgba(0,255,153,0.25);
+            box-shadow:
+                0 0 14px rgba(0,255,153,0.25),
+                0 12px 26px rgba(0,0,0,0.9);
+            opacity: 0.9;
+            pointer-events: none;
+        }
+
+        .rc-card > *:not(.rc-card::before),
+        .result-box > *:not(.result-box::before),
+        .explanation-box > *:not(.explanation-box::before) {
+            position: relative;
+            z-index: 2;
+        }
+
+        .rc-card {
+            padding: 1.25rem 1.5rem;
+            background: radial-gradient(circle at top left,
+                        rgba(0,255,153,0.16),
+                        transparent 55%),
+                        radial-gradient(circle at bottom right,
+                        rgba(0,128,96,0.35),
+                        rgba(0,0,0,0.98));
+            border-radius: 18px;
+        }
+
+        .result-box {
+            padding: 1.7rem 2.1rem;
+            border-radius: 20px;
+            background:
+                radial-gradient(circle at top left,
+                    rgba(0,255,153,0.35),
+                    rgba(0,0,0,0.98)),
+                radial-gradient(circle at bottom right,
+                    rgba(0,255,204,0.22),
+                    rgba(0,0,0,1));
+            color: #00130d !important;
+        }
+
+        .result-box b {
+            color: #00130d !important;
+        }
+
+        .explanation-box {
+            margin-top: 0.8rem;
+            padding: 1.2rem 1.5rem;
+            border-radius: 18px;
+            background: linear-gradient(135deg,
+                        rgba(1, 20, 14, 0.98),
+                        rgba(0, 0, 0, 0.98));
+            border-left: 4px solid #00e676;
+        }
+
+        .explanation-box h4 {
+            margin-bottom: 0.5rem;
+            color: #a5ffdc !important;
+        }
+
+        .explanation-box p,
+        .explanation-box li {
+            color: #e0f2f1 !important;
+            font-weight: 500;
+        }
+
+        /* =========================================================
+           TOOLTIP (TEXT + ICON)
+        ========================================================= */
+        .rc-tooltip {
+            text-decoration: underline dotted #00e676;
+            cursor: pointer;
+            position: relative;
+            font-weight: 600;
+            color: #aaffdd;
+        }
+
+        .rc-tooltip:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            left: 0;
+            bottom: -2.9rem;
+            background: rgba(0, 5, 4, 0.98);
+            padding: 9px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(0,255,153,0.55);
+            font-size: 0.84rem;
+            color: #d8fff0;
+            width: max-content;
+            max-width: 320px;
+            z-index: 999;
+            box-shadow:
+                0 0 14px rgba(0,255,153,0.45),
+                0 18px 30px rgba(0,0,0,0.9);
+        }
+
+        .tooltip-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 6px;
+            background: radial-gradient(circle,
+                        rgba(0,255,153,0.18),
+                        rgba(0, 36, 26, 0.95));
+            color: #a5ffdc;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 12px;
+            cursor: help;
+            border: 1px solid rgba(0,255,153,0.6);
+            box-shadow:
+                0 0 8px rgba(0,255,153,0.35),
+                0 0 16px rgba(0,255,153,0.4);
+            position: relative;
+            font-weight: 700;
+        }
+
+        .tooltip-icon:hover {
+            background: radial-gradient(circle,
+                        rgba(0,255,160,0.35),
+                        rgba(0, 40, 28, 0.95));
+        }
+
+        .tooltip-icon:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            background: rgba(0, 8, 6, 0.98);
+            border: 1px solid rgba(0,255,153,0.6);
+            padding: 10px 14px;
+            border-radius: 10px;
+            color: #e0fff5;
+            width: 260px;
+            left: 22px;
+            bottom: -4px;
+            font-size: 0.82rem;
+            line-height: 1.35rem;
+            z-index: 999;
+            box-shadow:
+                0 0 20px rgba(0,255,153,0.6),
+                0 18px 36px rgba(0,0,0,0.95);
+        }
+
+        /* =========================================================
+           TOP 3 CARDS – MEDAL GLOW
+        ========================================================= */
+        .top3-card {
+            position: relative;
+            padding: 1.1rem 1.1rem 1.0rem 1.1rem;
+            border-radius: 18px;
+            background: radial-gradient(circle at top left,
+                        rgba(0,255,153,0.16),
+                        rgba(0,0,0,0.96));
+            border: 1px solid rgba(0,255,153,0.45);
+            box-shadow:
+                0 0 18px rgba(0,255,153,0.18),
+                0 16px 40px rgba(0,0,0,0.9);
+            text-align: center;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            transition: transform 0.18s ease-out,
+                        box-shadow 0.18s ease-out,
+                        border-color 0.18s ease-out;
+            margin-bottom: 1.2rem;
+        }
+
+        .top1-card {
+            background: radial-gradient(circle at top left,
+                        rgba(255,215,0,0.22),
+                        rgba(0,0,0,0.96));
+            border-color: rgba(255,215,0,0.8);
+            box-shadow:
+                0 0 24px rgba(255,215,0,0.65),
+                0 20px 46px rgba(0,0,0,0.95);
+            animation: gold-pulse 2.6s ease-in-out infinite alternate;
+        }
+
+        @keyframes gold-pulse {
+            0% {
+                box-shadow:
+                    0 0 10px rgba(255,215,0,0.35),
+                    0 18px 40px rgba(0,0,0,0.9);
+            }
+            100% {
+                box-shadow:
+                    0 0 28px rgba(255,215,0,0.9),
+                    0 24px 54px rgba(0,0,0,0.98);
+            }
+        }
+
+        .top3-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            border-color: rgba(0,255,200,0.9);
+            box-shadow:
+                0 0 24px rgba(0,255,180,0.9),
+                0 22px 52px rgba(0,0,0,0.98);
+        }
+
+        .top3-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #a5ffdc;
+        }
+
+        .top1-title {
+            font-size: 1.12rem;
+            font-weight: 900;
+            color: #ffe680;
+            text-shadow:
+                0 0 10px rgba(255,210,0,0.7),
+                0 0 20px rgba(255,210,0,0.9);
+        }
+
+        .top3-sub {
+            font-size: 0.92rem;
+            margin-top: 5px;
+            color: #e0f2f1;
+        }
+
+        .badge-icc {
+            display: inline-block;
+            padding: 4px 11px;
+            border-radius: 999px;
+            background: linear-gradient(120deg, #00e676, #00bfa5);
+            color: #00130d;
+            font-weight: 700;
+            font-size: 0.86rem;
+        }
+
+        .pill-badge {
+            display: inline-block;
+            padding: 3px 11px;
+            border-radius: 999px;
+            border: 1px solid rgba(0,255,153,0.65);
+            font-size: 0.82rem;
+            margin-top: 4px;
+            color: #c8ffec;
+        }
+
+        /* =========================================================
+           DATAFRAME / TABLE
+        ========================================================= */
+        div[data-testid="stDataFrame"] {
+            border-radius: 14px !important;
+            border: 1px solid rgba(0,255,153,0.32) !important;
+            overflow: hidden !important;
+            box-shadow:
+                0 0 18px rgba(0,255,153,0.22),
+                0 18px 38px rgba(0,0,0,0.9) !important;
+            background: radial-gradient(circle at top,
+                        rgba(0,255,153,0.16),
+                        rgba(0,0,0,0.96)) !important;
+        }
+
+        /* Metric */
+        [data-testid="stMetricValue"] {
+            color: #76ff03 !important;
+            font-weight: 900 !important;
+            font-size: 1.08rem !important;
+        }
+
+        [data-testid="stMetricLabel"] {
+            color: #e0f2f1 !important;
+            font-weight: 600 !important;
+        }
+
+        /* =========================================================
+           CHART FRAME (FIX PHÓNG TO + NEON BORDER)
+        ========================================================= */
+        div[data-testid="stPlotlyChart"] {
+            padding: 0.8rem 0.9rem 0.6rem 0.9rem;
+            margin: 0.9rem 0 1.5rem 0;
+            background: radial-gradient(circle at top,
+                        rgba(0,255,153,0.12),
+                        rgba(0,0,0,0.98));
+            border-radius: 18px;
+            border: 1px solid rgba(0,255,153,0.38);
+            box-shadow:
+                0 0 20px rgba(0,255,153,0.35),
+                0 18px 40px rgba(0,0,0,0.95);
+        }
+
+        div[data-testid="stPlotlyChart"] > div {
+            max-width: 100% !important;
+        }
+
+        /* =========================================================
+           MAIN ACTION BUTTON
+        ========================================================= */
+        button[kind="primary"],
+        .stButton > button[kind="primary"] {
+            background: radial-gradient(circle at 0% 0%,
+                        #ffffff 0%, #d7fff4 24%, #00ffbf 55%, #00bfa5 100%) !important;
+            color: #00140d !important;
+            font-weight: 900 !important;
+            border-radius: 999px !important;
+            border: none !important;
+            padding: 0.9rem 1.9rem !important;
+            box-shadow:
+                0 0 20px rgba(0,255,153,0.75),
+                0 20px 46px rgba(0,0,0,0.95) !important;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            transition: all 0.16s ease-out !important;
+            font-size: 1.02rem !important;
+        }
+
+        button[kind="primary"]:hover,
+        .stButton > button[kind="primary"]:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow:
+                0 0 30px rgba(0,255,170,0.95),
+                0 26px 60px rgba(0,0,0,0.98) !important;
+        }
+
+        /* =========================================================
+           DOWNLOAD BUTTONS
+        ========================================================= */
+        .stDownloadButton > button {
+            border-radius: 999px !important;
+            border: 1px solid rgba(0,255,153,0.7) !important;
+            background: radial-gradient(circle,
+                        rgba(0,255,153,0.18),
+                        rgba(0,0,0,0.96)) !important;
+            color: #e9fff4 !important;
+            font-weight: 700 !important;
+            box-shadow:
+                0 0 14px rgba(0,255,153,0.35),
+                0 14px 30px rgba(0,0,0,0.9) !important;
+        }
+
+        .stDownloadButton > button:hover {
+            background: radial-gradient(circle,
+                        rgba(0,255,153,0.35),
+                        rgba(0,10,8,0.98)) !important;
+        }
+
+        /* =========================================================
+           MOBILE RESPONSIVE
+        ========================================================= */
+        @media (max-width: 900px) {
+            .rc-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .block-container {
+                padding-left: 0.7rem !important;
+                padding-right: 0.7rem !important;
+            }
+            .rc-badge {
+                margin-top: 0.4rem;
+            }
+            div[data-testid="stPlotlyChart"] {
+                padding: 0.6rem 0.5rem 0.6rem 0.5rem;
+            }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 # =============================================================================
