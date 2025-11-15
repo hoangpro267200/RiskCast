@@ -362,8 +362,21 @@ def apply_enterprise_css():
             color: #001a10 !important;
         }
 
-        .result-box b {
+        .result-box b,
+        .result-box strong {
+            color: #000f08 !important;
+            font-weight: 900 !important;
+        }
+
+        .result-box p,
+        .result-box div,
+        .result-box span,
+        .result-box h1,
+        .result-box h2,
+        .result-box h3,
+        .result-box h4 {
             color: #001a10 !important;
+            font-weight: 700 !important;
         }
 
         .explanation-box {
@@ -537,7 +550,22 @@ def apply_enterprise_css():
         .top3-sub {
             font-size: 0.92rem;
             margin-top: 5px;
-            color: #e0f2f1;
+            color: #f0fff8;
+            font-weight: 600;
+        }
+
+        /* Làm sáng text trong top3 cards */
+        .top3-card p,
+        .top3-card div,
+        .top3-card span {
+            color: #f0fff8 !important;
+            font-weight: 600 !important;
+        }
+
+        .top3-card strong,
+        .top3-card b {
+            color: #ffffff !important;
+            font-weight: 800 !important;
         }
 
         .badge-icc {
@@ -687,7 +715,6 @@ def apply_enterprise_css():
         """,
         unsafe_allow_html=True,
     )
-
 
 # =============================================================================
 # DOMAIN MODELS & CONSTANTS
