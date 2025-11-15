@@ -1,5 +1,5 @@
 # =============================================================================
-# RISKCAST v5.5 — ENTERPRISE EDITION (Layout FIX + Shield Logo + Chart Gap)
+# RISKCAST v5.5 — ENTERPRISE ULTRA TOOLTIP EDITION
 # ESG Logistics Risk Assessment Dashboard
 #
 # Author: Bùi Xuân Hoàng (original idea)
@@ -37,7 +37,7 @@ except ImportError:
 
 def app_config():
     st.set_page_config(
-        page_title="RISKCAST v5.5 — Multi-Package Analysis",
+        page_title="RISKCAST v5.5 — Enterprise Tooltip Edition",
         page_icon="🛡️",
         layout="wide"
     )
@@ -213,7 +213,7 @@ def apply_enterprise_css():
         margin: 0.22rem 0;
     }
 
-    /* TOOLTIP */
+    /* TEXT TOOLTIP (old style – vẫn giữ để reuse) */
     .rc-tooltip {
         text-decoration: underline dotted #00e676;
         cursor: pointer;
@@ -237,6 +237,48 @@ def apply_enterprise_css():
         max-width: 320px;
         z-index: 999;
         box-shadow: 0 0 14px rgba(0,255,153,0.25);
+    }
+
+    /* ENTERPRISE ICON TOOLTIP v5.5 */
+    .tooltip-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 6px;
+        background: rgba(0,255,153,0.15);
+        color: #a5ffdc;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        text-align: center;
+        font-size: 12px;
+        cursor: help;
+        border: 1px solid rgba(0,255,153,0.4);
+        font-weight: 700;
+        box-shadow: 0 0 8px rgba(0,255,153,0.25);
+        position: relative;
+    }
+
+    .tooltip-icon:hover {
+        background: rgba(0,255,153,0.3);
+        border-color: #00ff99;
+    }
+
+    .tooltip-icon:hover::after {
+        content: attr(data-tip);
+        position: absolute;
+        background: rgba(0,20,15,0.98);
+        border: 1px solid rgba(0,255,153,0.45);
+        padding: 10px 14px;
+        border-radius: 10px;
+        color: #d8fff0;
+        width: 260px;
+        left: 22px;
+        bottom: -4px;
+        font-size: 0.82rem;
+        line-height: 1.35rem;
+        z-index: 999;
+        box-shadow: 0 0 18px rgba(0,255,153,0.35);
     }
 
     /* DATAFRAME */
@@ -330,7 +372,7 @@ def apply_enterprise_css():
         color: #c8ffec;
     }
 
-    /* RISK METRICS CARD */
+    /* RISK METRICS CARD (VaR / CVaR / Risk Ratio) */
     .rc-risk-card h4 {
         margin-top: 0;
         margin-bottom: 0.8rem;
@@ -986,7 +1028,7 @@ class ChartFactory:
         fig.update_yaxes(title="<b>Điểm TOPSIS</b>", range=[0, 1])
 
         fig = ChartFactory._apply_theme(fig, "💰 Chi phí vs Chất lượng (Cost-Benefit Analysis)")
-        fig.update_layout(height=480)  # đồng bộ chiều cao hàng 1
+        fig.update_layout(height=480, autosize=False)
         return fig
 
     @staticmethod
@@ -1068,7 +1110,7 @@ class ChartFactory:
             tickformat=".0%"
         )
 
-        fig.update_layout(height=480)  # đồng bộ chiều cao hàng 2
+        fig.update_layout(height=450, autosize=False)
         return fig
 
     @staticmethod
@@ -1133,10 +1175,11 @@ class ChartFactory:
                 bordercolor="#00e676",
                 borderwidth=1
             ),
-            margin=dict(l=60, r=60, t=80, b=60)
+            margin=dict(l=60, r=60, t=80, b=60),
+            height=480,
+            autosize=False
         )
 
-        fig.update_layout(height=480)  # đồng bộ chiều cao hàng 1
         return fig
 
 
@@ -1313,7 +1356,8 @@ class StreamlitUI:
                 </ul>
                 <p>
                     <b>💡 Gợi ý dùng trong báo cáo NCKH:</b><br>
-                    Trình bày rằng hệ thống áp dụng <span class="rc-tooltip" 
+                    Trình bày rằng hệ thống áp dụng 
+                    <span class="rc-tooltip" 
                     data-tip="Trọng số được xác định trước theo hành vi ra quyết định điển hình của nhà xuất nhập khẩu">
                     hồ sơ ưu tiên (priority profile)</span> để phản ánh mục tiêu thực tế của doanh nghiệp.
                 </p>
@@ -1333,10 +1377,9 @@ class StreamlitUI:
                 🏆 <b>GỢI Ý TỐT NHẤT CHO MỤC TIÊU: {params.priority}</b><br><br>
                 <span style="font-size:1.6rem;">{top['company']} - {top['icc_package']}</span><br><br>
                 💰 Chi phí: <b>${top['estimated_cost']:,.0f}</b> ({top['premium_rate']:.2%} giá trị hàng)<br>
-                📊 Điểm TOPSIS 
-                    <span class="rc-tooltip" data-tip="TOPSIS đo mức độ gần với phương án lý tưởng (ideal best) và xa phương án tệ nhất (ideal worst). Điểm càng cao càng tốt.">
-                        (giải thích)
-                    </span>: <b>{top['score']:.3f}</b> | 
+                📊 Điểm TOPSIS: <b>{top['score']:.3f}</b>
+                <span class="tooltip-icon" data-tip="TOPSIS đo mức độ gần với phương án lý tưởng (ideal best) 
+và xa phương án tệ nhất (ideal worst). Điểm càng cao càng tốt.">i</span> |
                 🎯 Độ tin cậy: <b>{top['confidence']:.2f}</b><br>
                 📦 Loại gợi ý: <b>{top['category']}</b><br>
                 📜 Gói ICC: <b>{ICC_PACKAGES[top['icc_package']]['description']}</b>
@@ -1448,10 +1491,10 @@ class StreamlitUI:
             st.markdown(
                 f"""
                 <div class="explanation-box">
-                    <h4>⚠️ Đánh giá rủi ro tài chính 
-                        <span class="rc-tooltip" data-tip="VaR: tổn thất tối đa với mức tin cậy 95%. CVaR: tổn thất trung bình trong 5% trường hợp xấu nhất.">
-                            (VaR / CVaR)
-                        </span>
+                    <h4>
+                        ⚠️ Đánh giá rủi ro tài chính (VaR / CVaR)
+                        <span class="tooltip-icon" data-tip="VaR 95%: tổn thất tối đa có thể xảy ra với mức tin cậy 95%.
+CVaR 95%: tổn thất trung bình trong 5% trường hợp xấu nhất.">i</span>
                     </h4>
                     <ul>
                         <li><b>VaR 95%:</b> ${result.var:,.0f} ({risk_pct:.1f}% giá trị hàng).</li>
@@ -1467,16 +1510,27 @@ class StreamlitUI:
         st.markdown("---")
         st.subheader("📊 Biểu đồ phân tích")
 
-        # 🔧 FIX: tách 2 biểu đồ hàng 1 bằng gap="medium"
-        col_scatter, col_cat = st.columns(2, gap="medium")
-
+        col_scatter, col_cat = st.columns(2)
         with col_scatter:
-            st.markdown("#### 📉 Chi phí – Chất lượng (Cost–Benefit)")
+            st.markdown("""
+            <h4 style='display:flex;align-items:center;gap:6px;'>
+            📉 Chi phí – Chất lượng (Cost–Benefit)
+            <span class="tooltip-icon" data-tip="Mỗi điểm là một phương án bảo hiểm (công ty × gói ICC).
+Trục X: chi phí ước tính; Trục Y: điểm TOPSIS. 
+Điểm càng cao và chi phí càng thấp → phương án càng hấp dẫn.">i</span>
+            </h4>
+            """, unsafe_allow_html=True)
             fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
             st.plotly_chart(fig_scatter, use_container_width=True)
 
         with col_cat:
-            st.markdown("#### 📊 So sánh 3 loại phương án")
+            st.markdown("""
+            <h4 style='display:flex;align-items:center;gap:6px;'>
+            📊 So sánh 3 loại phương án
+            <span class="tooltip-icon" data-tip="So sánh trung bình điểm TOPSIS và trung bình chi phí 
+của 3 nhóm: Tiết kiệm (ICC C), Cân bằng (ICC B), An toàn (ICC A).">i</span>
+            </h4>
+            """, unsafe_allow_html=True)
             fig_category = self.chart_factory.create_category_comparison(result.results)
             st.plotly_chart(fig_category, use_container_width=True)
 
@@ -1486,11 +1540,16 @@ class StreamlitUI:
 
         # Weights + Forecast + Risk metrics
         st.markdown("---")
-
-        # 🔧 FIX: tách 2 biểu đồ hàng 2 bằng gap="medium"
-        col_w1, col_w2 = st.columns(2, gap="medium")
+        col_w1, col_w2 = st.columns(2)
 
         with col_w1:
+            st.markdown("""
+            <h4 style='display:flex;align-items:center;gap:6px;'>
+            📘 Trọng số tiêu chí
+            <span class="tooltip-icon" data-tip="Trọng số được xác định theo hồ sơ ưu tiên (Tiết kiệm / Cân bằng / An toàn).
+Nếu bật Fuzzy AHP, mỗi trọng số được mở rộng thành tam giác mờ (Low–Mid–High).">i</span>
+            </h4>
+            """, unsafe_allow_html=True)
             fig_weights = self.chart_factory.create_weights_pie(
                 result.weights,
                 "Trọng số tiêu chí (sau khi áp dụng Fuzzy AHP)" if params.use_fuzzy else "Trọng số tiêu chí"
@@ -1498,7 +1557,13 @@ class StreamlitUI:
             st.plotly_chart(fig_weights, use_container_width=True)
 
         with col_w2:
-            st.markdown("#### 📉 Dự báo rủi ro khí hậu theo tháng")
+            st.markdown("""
+            <h4 style='display:flex;align-items:center;gap:6px;'>
+            📉 Dự báo rủi ro khí hậu theo tháng
+            <span class="tooltip-icon" data-tip="Từ dữ liệu lịch sử rủi ro khí hậu theo tuyến, 
+mô hình dự báo giá trị tháng kế tiếp (ARIMA hoặc xu hướng tuyến tính).">i</span>
+            </h4>
+            """, unsafe_allow_html=True)
             fig_forecast = self.chart_factory.create_forecast_chart(
                 result.historical, result.forecast, params.route, params.month
             )
