@@ -1644,47 +1644,30 @@ if params.use_fuzzy:
         </ul>
     </div>
     """, unsafe_allow_html=True)
-        # ===================== FUZZY AHP MODULE =====================
-        if params.use_fuzzy:
-            st.markdown("---")
-            st.subheader("🌿 Fuzzy AHP — Phân tích bất định trọng số (Enterprise Module)")
 
-            st.markdown("""
-            <div class="explanation-box">
-                <h4>📚 Giải thích về Fuzzy AHP:</h4>
-                <ul>
-                    <li><b>Mục đích:</b> Xử lý bất định trong đánh giá chuyên gia</li>
-                    <li><b>Phương pháp:</b> Chuyển trọng số crisp thành tam giác mờ (Low-Mid-High)</li>
-                    <li><b>Defuzzification:</b> Dùng phương pháp Centroid</li>
-                    <li><b>Ứng dụng:</b> Tăng độ tin cậy khi chuyên gia không chắc chắn</li>
-                </ul>
-            </div>
-            """, unsafe_allow_html=True)
+    # Biểu đồ Fuzzy
+    fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
+    st.plotly_chart(fig_fuzzy, use_container_width=True)
 
-            # Biểu đồ Fuzzy
-            fig_fuzzy = fuzzy_chart_premium(result.weights, params.fuzzy_uncertainty)
-            st.plotly_chart(fig_fuzzy, use_container_width=True)
+    # Bảng Low – Mid – High – Centroid
+    st.subheader("📋 Bảng Low – Mid – High – Centroid (cho NCKH)")
+    fuzzy_table = build_fuzzy_table(result.weights, params.fuzzy_uncertainty)
+    st.dataframe(fuzzy_table, use_container_width=True)
 
-            # Bảng Low – Mid – High – Centroid
-            st.subheader("📋 Bảng Low – Mid – High – Centroid (cho NCKH)")
-            fuzzy_table = build_fuzzy_table(result.weights, params.fuzzy_uncertainty)
-            st.dataframe(fuzzy_table, use_container_width=True)
+    # Highlight tiêu chí dao động mạnh nhất
+    most_unc, diff_map = most_uncertain_criterion(result.weights, params.fuzzy_uncertainty)
 
-            # Highlight tiêu chí dao động mạnh nhất
-            most_unc, diff_map = most_uncertain_criterion(result.weights, params.fuzzy_uncertainty)
-
-            st.markdown(
-                f"""
-                <div style="background:#00331F; padding:15px; border-radius:10px;
-                border:2px solid #00FFAA; color:#CCFFE6; font-size:16px;">
-                    <b>🔍 Tiêu chí dao động mạnh nhất:</b> {most_unc}<br>
-                    <small>Độ chênh lệch (Low → High): {diff_map[most_unc]:.4f}</small>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-            
+    st.markdown(
+        f"""
+        <div style="background:#00331F; padding:15px; border-radius:10px;
+        border:2px solid #00FFAA; color:#CCFFE6; font-size:16px;">
+            <b>🔍 Tiêu chí dao động mạnh nhất:</b> {most_unc}<br>
+            <small>Độ chênh lệch (Low → High): {diff_map[most_unc]:.4f}</small>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    
             # Heatmap Premium
             st.subheader("🔥 Heatmap mức dao động Fuzzy (Premium Green)")
             fig_heat = fuzzy_heatmap_premium(diff_map)
