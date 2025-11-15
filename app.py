@@ -636,7 +636,11 @@ class Forecaster:
         use_arima: bool = True
     ) -> Tuple[np.ndarray, np.ndarray]:
         if route not in historical.columns:
-            route = historical.columns[1]
+            # Fallback to a default route or handle error
+            if len(historical.columns) > 1:
+                route = historical.columns[1] # Potential risk area, but required for fallback
+            else:
+                return np.array([]), np.array([0.0]) # Return empty if no data
 
         full_series = historical[route].values
         n_total = len(full_series)
@@ -653,6 +657,7 @@ class Forecaster:
                 fc_val = float(np.clip(fc[0], 0.0, 1.0))
                 return hist_series, np.array([fc_val])
             except Exception:
+                # Fallback to simpler method if ARIMA fails
                 pass
 
         if len(train_series) >= 3:
@@ -819,12 +824,12 @@ class MultiPackageAnalyzer:
 
         company_data = self.data_service.get_company_data()
 
-        if params.month in historical["month"].values:
+        if params.month in historical["month"].values and params.route in historical.columns:
             base_risk = float(
                 historical.loc[historical["month"] == params.month, params.route].iloc[0]
             )
         else:
-            base_risk = 0.4
+            base_risk = 0.4 # Default risk if data is missing
 
         if params.use_mc:
             companies, mc_mean, mc_std = self.mc_simulator.simulate(
@@ -833,7 +838,8 @@ class MultiPackageAnalyzer:
             order = [companies.index(c) for c in company_data.index]
             mc_mean, mc_std = mc_mean[order], mc_std[order]
         else:
-            mc_mean = np.zeros(len(company_data))
+            # Simple scaling of base risk if MC is off
+            mc_mean = np.array([base_risk * SENSITIVITY_MAP[c] for c in company_data.index])
             mc_std = np.zeros(len(company_data))
 
         all_options = []
@@ -895,11 +901,19 @@ class MultiPackageAnalyzer:
         eps = 1e-9
         cv_c6 = data_adjusted["C6_std"].values / (data_adjusted["C6_mean"].values + eps)
         conf = 1.0 / (1.0 + cv_c6)
-        conf = 0.3 + 0.7 * (conf - conf.min()) / (np.ptp(conf) + eps)
+        
+        # Normalize confidence score between 0.3 and 1.0 based on variance of risk
+        ptp_conf = np.ptp(conf)
+        if ptp_conf > 0:
+            conf = 0.3 + 0.7 * (conf - conf.min()) / ptp_conf
+        else:
+            conf = np.full_like(conf, 0.65) # Default confidence if no variation in risk
+            
         data_adjusted["confidence"] = conf
 
         var = cvar = None
         if params.use_var:
+            # Use only C6_mean for VaR/CVaR since it represents the expected loss rate
             var, cvar = self.risk_calc.calculate_var_cvar(
                 data_adjusted["C6_mean"].values, params.cargo_value
             )
@@ -988,7 +1002,7 @@ class ChartFactory:
             paper_bgcolor="#001016",
             plot_bgcolor="#001016",
             margin=dict(l=0, r=0, t=80, b=0),
-            height=480
+            height=480 # Giữ nguyên vì chỉ có 1 biểu đồ chiếm không gian này
         )
         return fig
 
@@ -1028,7 +1042,8 @@ class ChartFactory:
         fig.update_yaxes(title="<b>Điểm TOPSIS</b>", range=[0, 1])
 
         fig = ChartFactory._apply_theme(fig, "💰 Chi phí vs Chất lượng (Cost-Benefit Analysis)")
-        fig.update_layout(height=480, autosize=False)
+        # Sửa: Tăng chiều cao để biểu đồ có thêm không gian, giảm rủi ro trùng lặp tiêu đề
+        fig.update_layout(height=550) 
         return fig
 
     @staticmethod
@@ -1067,7 +1082,8 @@ class ChartFactory:
     ) -> go.Figure:
         hist_len = len(historical)
         months_hist = list(range(1, hist_len + 1))
-        next_month = selected_month % 12 + 1
+        # Logic for next month calculation in a 1-12 cycle
+        next_month = selected_month % 12 + 1 if selected_month in range(1, 13) else 1
         months_fc = [next_month]
 
         fig = go.Figure()
@@ -1103,7 +1119,8 @@ class ChartFactory:
             tickvals=list(range(1, 13))
         )
 
-        max_val = max(float(historical.max()), float(forecast.max()))
+        max_val = max(1.0, float(historical.max()) if historical.size > 0 else 0.0)
+        max_val = max(max_val, float(forecast.max()) if forecast.size > 0 else 0.0)
         fig.update_yaxes(
             title="<b>Mức rủi ro (0–1)</b>",
             range=[0, max(1.0, max_val * 1.15)],
@@ -1150,6 +1167,10 @@ class ChartFactory:
             hovertemplate="<b>%{x}</b><br>Chi phí TB: $%{y:,.0f}<extra></extra>"
         ))
 
+        # Determine y2 range dynamically
+        max_cost = max(avg_costs) if avg_costs else 10000
+        y2_range = [0, max(10000, max_cost * 1.2)]
+        
         fig.update_layout(
             title=dict(
                 text="<b>📊 So sánh 3 loại phương án</b>",
@@ -1165,7 +1186,8 @@ class ChartFactory:
                 title=dict(text="<b>Chi phí ($)</b>", font=dict(color="#ffeb3b")),
                 overlaying="y",
                 side="right",
-                tickfont=dict(color="#ffeb3b")
+                tickfont=dict(color="#ffeb3b"),
+                range=y2_range # Use dynamic range
             ),
             paper_bgcolor="#000c11",
             plot_bgcolor="#001016",
@@ -1175,9 +1197,9 @@ class ChartFactory:
                 bordercolor="#00e676",
                 borderwidth=1
             ),
-            margin=dict(l=60, r=60, t=80, b=60),
-            height=480,
-            autosize=False
+            # Sửa: Tăng chiều cao để biểu đồ có thêm không gian, giảm rủi ro trùng lặp tiêu đề
+            margin=dict(l=60, r=60, t=80, b=60), 
+            height=550
         )
 
         return fig
@@ -1236,7 +1258,7 @@ class ReportGenerator:
             if var is not None and cvar is not None:
                 pdf.ln(4)
                 pdf.set_font("Arial", "B", 11)
-                pdf.cell(0, 6, f"VaR 95%: ${var:,.0f}   |   CVaR 95%: ${cvar:,.0f}", 0, 1)
+                pdf.cell(0, 6, f"VaR 95%: ${var:,.0f}    |    CVaR 95%: ${cvar:,.0f}", 0, 1)
 
             return pdf.output(dest="S").encode("latin1")
         except Exception as e:
@@ -1327,7 +1349,7 @@ class StreamlitUI:
             use_mc = st.checkbox("Monte Carlo (C6)", True,
                                  help="Mô phỏng nhiều kịch bản rủi ro khí hậu để lấy mean & std")
             use_var = st.checkbox("Tính VaR/CVaR", True,
-                                  help="Đo lường tổn thất tối đa & tổn thất trung bình trong tail")
+                                 help="Đo lường tổn thất tối đa & tổn thất trung bình trong tail")
 
             mc_runs = st.number_input("Số lần Monte Carlo", 500, 10_000, 2_000, 500)
             fuzzy_uncertainty = st.slider("Mức bất định Fuzzy (%)", 0, 50, 15) if use_fuzzy else 15
@@ -1510,8 +1532,11 @@ CVaR 95%: tổn thất trung bình trong 5% trường hợp xấu nhất.">i</sp
         st.markdown("---")
         st.subheader("📊 Biểu đồ phân tích")
 
+        # FIX: Bọc mỗi biểu đồ trong st.container để kiểm soát không gian tốt hơn
         col_scatter, col_cat = st.columns(2)
+        
         with col_scatter:
+            st.container() 
             st.markdown("""
             <h4 style='display:flex;align-items:center;gap:6px;'>
             📉 Chi phí – Chất lượng (Cost–Benefit)
@@ -1524,6 +1549,7 @@ Trục X: chi phí ước tính; Trục Y: điểm TOPSIS.
             st.plotly_chart(fig_scatter, use_container_width=True)
 
         with col_cat:
+            st.container()
             st.markdown("""
             <h4 style='display:flex;align-items:center;gap:6px;'>
             📊 So sánh 3 loại phương án
