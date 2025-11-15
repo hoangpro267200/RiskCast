@@ -4,6 +4,7 @@
 #
 # Author: Bùi Xuân Hoàng (original idea)
 # Refactor + Multi-Package + Full Explanations + Enterprise UX: Kai assistant
+# FIX 2-COLUMN PLOTLY OVERLAP: Kai assistant
 #
 # Theme: Premium Green · Mixed Enterprise (Salesforce + Oracle Fusion)
 # =============================================================================
@@ -835,7 +836,7 @@ class MultiPackageAnalyzer:
             companies, mc_mean, mc_std = self.mc_simulator.simulate(
                 base_risk, SENSITIVITY_MAP, params.mc_runs
             )
-            order = [companies.index(c) for c in company_data.index]
+            order = [list(SENSITIVITY_MAP.keys()).index(c) for c in company_data.index]
             mc_mean, mc_std = mc_mean[order], mc_std[order]
         else:
             # Simple scaling of base risk if MC is off
@@ -902,18 +903,16 @@ class MultiPackageAnalyzer:
         cv_c6 = data_adjusted["C6_std"].values / (data_adjusted["C6_mean"].values + eps)
         conf = 1.0 / (1.0 + cv_c6)
         
-        # Normalize confidence score between 0.3 and 1.0 based on variance of risk
         ptp_conf = np.ptp(conf)
         if ptp_conf > 0:
             conf = 0.3 + 0.7 * (conf - conf.min()) / ptp_conf
         else:
-            conf = np.full_like(conf, 0.65) # Default confidence if no variation in risk
+            conf = np.full_like(conf, 0.65)
             
         data_adjusted["confidence"] = conf
 
         var = cvar = None
         if params.use_var:
-            # Use only C6_mean for VaR/CVaR since it represents the expected loss rate
             var, cvar = self.risk_calc.calculate_var_cvar(
                 data_adjusted["C6_mean"].values, params.cargo_value
             )
@@ -945,12 +944,13 @@ class ChartFactory:
             title=dict(
                 text=f"<b>{title}</b>",
                 font=dict(size=22, color="#e6fff7"),
-                x=0.5
+                x=0.5,
+                y=0.95 # FIX: Điều chỉnh vị trí tiêu đề
             ),
             font=dict(size=15, color="#e6fff7"),
             plot_bgcolor="#001016",
             paper_bgcolor="#000c11",
-            margin=dict(l=70, r=40, t=80, b=70),
+            margin=dict(l=60, r=40, t=60, b=60), # FIX: Điều chỉnh margin
             legend=dict(
                 bgcolor="rgba(0,0,0,0.3)",
                 bordercolor="#00e676",
@@ -990,19 +990,19 @@ class ChartFactory:
         fig.update_layout(
             title=dict(
                 text=f"<b>{title}</b>",
-                font=dict(size=20, color="#a5ffdc"),
+                font=dict(size=22, color="#a5ffdc"),
                 x=0.5,
-                y=0.98
+                y=0.95 # FIX: Điều chỉnh vị trí tiêu đề
             ),
             showlegend=True,
             legend=dict(
                 title="<b>Các tiêu chí</b>",
                 font=dict(size=13, color="#e6fff7")
             ),
-            paper_bgcolor="#001016",
-            plot_bgcolor="#001016",
-            margin=dict(l=0, r=0, t=80, b=0),
-            height=480 # Giữ nguyên vì chỉ có 1 biểu đồ chiếm không gian này
+            paper_bgcolor="#000c11",
+            plot_bgcolor="#000c11",
+            margin=dict(l=0, r=0, t=60, b=0), # FIX: Điều chỉnh margin
+            height=480
         )
         return fig
 
@@ -1013,9 +1013,19 @@ class ChartFactory:
             "ICC B": "#ffd93d",
             "ICC C": "#6bcf7f"
         }
-
+        
+        # Tiêu đề biểu đồ mới
+        chart_title = '💰 Chi phí vs Chất lượng (Cost-Benefit Analysis)'
+        # Thêm icon giải thích vào tiêu đề chính
+        tooltip_html = """
+        <span class="tooltip-icon" data-tip="Mỗi điểm là một phương án bảo hiểm (công ty × gói ICC). 
+        Trục X: chi phí ước tính; Trục Y: điểm TOPSIS. 
+        Điểm càng cao và chi phí càng thấp → phương án càng hấp dẫn.">i</span>
+        """
+        
+        # FIX: Tạo go.Figure ngay tại đây để có thể tùy chỉnh Layout
         fig = go.Figure()
-
+        
         for icc in ["ICC C", "ICC B", "ICC A"]:
             df_icc = results[results["icc_package"] == icc]
             fig.add_trace(go.Scatter(
@@ -1041,10 +1051,12 @@ class ChartFactory:
         fig.update_xaxes(title="<b>Chi phí ước tính ($)</b>")
         fig.update_yaxes(title="<b>Điểm TOPSIS</b>", range=[0, 1])
 
-        fig = ChartFactory._apply_theme(fig, "💰 Chi phí vs Chất lượng (Cost-Benefit Analysis)")
-        # Sửa: Tăng chiều cao để biểu đồ có thêm không gian, giảm rủi ro trùng lặp tiêu đề
+        # FIX: Áp dụng theme và tiêu đề vào Plotly Layout
+        fig = ChartFactory._apply_theme(fig, chart_title)
         fig.update_layout(height=550) 
-        return fig
+        
+        # FIX: Trả về tiêu đề và tooltip riêng để hiển thị bằng st.markdown (tách khỏi Plotly)
+        return fig, chart_title, tooltip_html 
 
     @staticmethod
     def create_top_recommendations_bar(results: pd.DataFrame) -> go.Figure:
@@ -1082,7 +1094,6 @@ class ChartFactory:
     ) -> go.Figure:
         hist_len = len(historical)
         months_hist = list(range(1, hist_len + 1))
-        # Logic for next month calculation in a 1-12 cycle
         next_month = selected_month % 12 + 1 if selected_month in range(1, 13) else 1
         months_fc = [next_month]
 
@@ -1108,7 +1119,7 @@ class ChartFactory:
             hovertemplate="Tháng %{x}<br>Dự báo: %{y:.1%}<extra></extra>"
         ))
 
-        fig = ChartFactory._apply_theme(fig, f"Dự báo rủi ro khí hậu — {route}")
+        fig = ChartFactory._apply_theme(fig, f"📉 Dự báo rủi ro khí hậu — {route}")
 
         fig.update_xaxes(
             title="<b>Tháng</b>",
@@ -1145,6 +1156,13 @@ class ChartFactory:
                 avg_scores.append(0)
                 avg_costs.append(0)
 
+        chart_title = '📊 So sánh 3 loại phương án'
+        tooltip_html = """
+        <span class="tooltip-icon" data-tip="So sánh trung bình điểm TOPSIS và trung bình chi phí 
+        của 3 nhóm: Tiết kiệm (ICC C), Cân bằng (ICC B), An toàn (ICC A).">i</span>
+        """
+        
+        # FIX: Tạo go.Figure ngay tại đây để có thể tùy chỉnh Layout
         fig = go.Figure()
 
         fig.add_trace(go.Bar(
@@ -1167,16 +1185,13 @@ class ChartFactory:
             hovertemplate="<b>%{x}</b><br>Chi phí TB: $%{y:,.0f}<extra></extra>"
         ))
 
-        # Determine y2 range dynamically
         max_cost = max(avg_costs) if avg_costs else 10000
         y2_range = [0, max(10000, max_cost * 1.2)]
         
+        # Áp dụng Theme
+        fig = ChartFactory._apply_theme(fig, chart_title)
+
         fig.update_layout(
-            title=dict(
-                text="<b>📊 So sánh 3 loại phương án</b>",
-                font=dict(size=22, color="#e6fff7"),
-                x=0.5
-            ),
             yaxis=dict(
                 title=dict(text="<b>Điểm TOPSIS</b>", font=dict(color="#00e676")),
                 range=[0, 1],
@@ -1187,22 +1202,14 @@ class ChartFactory:
                 overlaying="y",
                 side="right",
                 tickfont=dict(color="#ffeb3b"),
-                range=y2_range # Use dynamic range
+                range=y2_range
             ),
-            paper_bgcolor="#000c11",
-            plot_bgcolor="#001016",
-            font=dict(color="#e6fff7"),
-            legend=dict(
-                bgcolor="rgba(0,0,0,0.3)",
-                bordercolor="#00e676",
-                borderwidth=1
-            ),
-            # Sửa: Tăng chiều cao để biểu đồ có thêm không gian, giảm rủi ro trùng lặp tiêu đề
-            margin=dict(l=60, r=60, t=80, b=60), 
+            margin=dict(l=60, r=60, t=60, b=60), # FIX: Điều chỉnh margin
             height=550
         )
-
-        return fig
+        
+        # FIX: Trả về tiêu đề và tooltip riêng để hiển thị bằng st.markdown (tách khỏi Plotly)
+        return fig, chart_title, tooltip_html
 
 
 # =============================================================================
@@ -1532,33 +1539,33 @@ CVaR 95%: tổn thất trung bình trong 5% trường hợp xấu nhất.">i</sp
         st.markdown("---")
         st.subheader("📊 Biểu đồ phân tích")
 
-        # FIX: Bọc mỗi biểu đồ trong st.container để kiểm soát không gian tốt hơn
+        # FIX: Sửa cách hiển thị 2 biểu đồ bị dính vào nhau
         col_scatter, col_cat = st.columns(2)
         
+        # Biểu đồ 1: Cost-Benefit
+        fig_scatter, title_scatter, tooltip_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
         with col_scatter:
-            st.container() 
-            st.markdown("""
-            <h4 style='display:flex;align-items:center;gap:6px;'>
-            📉 Chi phí – Chất lượng (Cost–Benefit)
-            <span class="tooltip-icon" data-tip="Mỗi điểm là một phương án bảo hiểm (công ty × gói ICC).
-Trục X: chi phí ước tính; Trục Y: điểm TOPSIS. 
-Điểm càng cao và chi phí càng thấp → phương án càng hấp dẫn.">i</span>
-            </h4>
-            """, unsafe_allow_html=True)
-            fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
+            st.markdown(
+                f"""
+                <h4 style='display:flex;align-items:center;gap:6px;'>
+                📉 {title_scatter}
+                {tooltip_scatter}
+                </h4>
+                """, unsafe_allow_html=True)
             st.plotly_chart(fig_scatter, use_container_width=True)
 
+        # Biểu đồ 2: Category Comparison
+        fig_category, title_category, tooltip_category = self.chart_factory.create_category_comparison(result.results)
         with col_cat:
-            st.container()
-            st.markdown("""
-            <h4 style='display:flex;align-items:center;gap:6px;'>
-            📊 So sánh 3 loại phương án
-            <span class="tooltip-icon" data-tip="So sánh trung bình điểm TOPSIS và trung bình chi phí 
-của 3 nhóm: Tiết kiệm (ICC C), Cân bằng (ICC B), An toàn (ICC A).">i</span>
-            </h4>
-            """, unsafe_allow_html=True)
-            fig_category = self.chart_factory.create_category_comparison(result.results)
+            st.markdown(
+                f"""
+                <h4 style='display:flex;align-items:center;gap:6px;'>
+                {title_category}
+                {tooltip_category}
+                </h4>
+                """, unsafe_allow_html=True)
             st.plotly_chart(fig_category, use_container_width=True)
+
 
         st.markdown("#### 🏆 Top 5 phương án tốt nhất")
         fig_top5 = self.chart_factory.create_top_recommendations_bar(result.results)
