@@ -1467,16 +1467,23 @@ class StreamlitUI:
         st.markdown("---")
         st.subheader("📊 Biểu đồ phân tích")
 
-        col_scatter, col_cat = st.columns(2)
-        with col_scatter:
-            st.markdown("#### 📉 Chi phí – Chất lượng (Cost–Benefit)")
-            fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
-            st.plotly_chart(fig_scatter, use_container_width=True)
+  # === FIX LAYOUT HÀNG 1 (TÁCH 2 BIỂU ĐỒ + CĂN ĐỀU CHIỀU CAO) ===
+col_scatter, col_cat = st.columns([1, 1], gap="large")
 
-        with col_cat:
-            st.markdown("#### 📊 So sánh 3 loại phương án")
-            fig_category = self.chart_factory.create_category_comparison(result.results)
-            st.plotly_chart(fig_category, use_container_width=True)
+with col_scatter:
+    st.markdown("<div style='padding-right:12px;'>", unsafe_allow_html=True)
+    st.markdown("#### 📉 Chi phí – Chất lượng (Cost–Benefit)")
+    fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
+    st.plotly_chart(fig_scatter, use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+with col_cat:
+    st.markdown("<div style='padding-left:12px;'>", unsafe_allow_html=True)
+    st.markdown("#### 📊 So sánh 3 loại phương án")
+    fig_category = self.chart_factory.create_category_comparison(result.results)
+    st.plotly_chart(fig_category, use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
 
         st.markdown("#### 🏆 Top 5 phương án tốt nhất")
         fig_top5 = self.chart_factory.create_top_recommendations_bar(result.results)
