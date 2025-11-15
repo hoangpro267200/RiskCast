@@ -1683,21 +1683,24 @@ if "result" in st.session_state and st.session_state.result is not None:
 else:
     st.info("⚠️ Vui lòng chạy mô phỏng trước để xem Top 3 phương án.")
 
-        # Weights & Metrics
-        col1, col2 = st.columns(2)
-        with col1:
-            fig_weights = self.chart_factory.create_weights_pie(
-                result.weights,
-                f"Trọng số áp dụng ({params.priority})"
-            )
-            st.plotly_chart(fig_weights, use_container_width=True)
-        
-        with col2:
-            if result.var is not None and result.cvar is not None:
-                st.metric("💰 VaR 95%", f"${result.var:,.0f}")
-                st.metric("🛡️ CVaR 95%", f"${result.cvar:,.0f}")
-                risk_pct = (result.var / params.cargo_value) * 100
-                st.metric("📊 Rủi ro / Giá trị", f"{risk_pct:.1f}%")
+# Weights & Metrics
+col1, col2 = st.columns(2)
+
+with col1:
+    fig_weights = self.chart_factory.create_weights_pie(
+        result.weight,
+        f"Trọng số áp dụng ({params.priority})"
+    )
+    st.plotly_chart(fig_weights, use_container_width=True)
+
+with col2:
+    if result.var is not None and result.cvar is not None:
+        st.metric("🔥 VaR 95%", f"${result.var:,.0f}")
+        st.metric("⚡ CVaR 95%", f"${result.cvar:,.0f}")
+
+        risk_pct = (result.var / params.cargo_value) * 100
+        st.metric("📊 Rủi ro / Giá trị", f"{risk_pct:.1f}%")
+
         
         # Forecast
         st.markdown("---")
