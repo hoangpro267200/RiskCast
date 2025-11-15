@@ -1609,95 +1609,88 @@ class StreamlitUI:
         </style>
         """, unsafe_allow_html=True)
 
-        st.markdown("## 🏅 Top 3 phương án (Premium View)")
+    st.markdown("## 🏅 Top 3 phương án (Premium View)")
 
-        cols = st.columns(3)
-        top3 = result.results.head(3)
-        medals = ["🥇", "🥈", "🥉"]
+cols = st.columns(3)
+top3 = result.results.head(3)
+medals = ["🥇", "🥈", "🥉"]
 
-        for i, col in enumerate(cols):
-            r = top3.iloc[i]
+for i, col in enumerate(cols):
+    r = top3.iloc[i]
 
-            card_class = "top3-card"
-            title_class = "top3-title"
-            if i == 0:
-                card_class += " top1-card"
-                title_class = "top1-title"
+    card_class = "top3-card"
+    title_class = "top3-title"
+    if i == 0:
+        card_class += " top1-card"
+        title_class = "top1-title"
 
-            with col:
-                st.markdown(f"""
-                <div class="{card_class}">
-                    <div class="{title_class}">{medals[i]} #{i+1}: {r['company']}</div>
+    with col:
+        st.markdown(f"""
+        <div class="{card_class}">
+            <div class="{title_class}">{medals[i]} #{i+1}: {r['company']}</div>
 
-                    <!-- Loại ICC + tooltip -->
-                    <div class="top3-sub info-tt">
-                        <b class="badge-icc">{r['icc_package']}</b>
-                        <span class="info-text">
-                            <b>Loại điều khoản ICC</b><br><br>
-                            • <b>ICC A</b>: Bảo hiểm rộng nhất, gần như mọi rủi ro (All Risks).<br>
-                            • <b>ICC B</b>: Mức trung bình – bảo hiểm các rủi ro chính, loại trừ nhiều hơn A.<br>
-                            • <b>ICC C</b>: Cơ bản, chi phí thấp nhưng bảo vệ ít nhất.<br><br>
-                            Gói càng cao → phạm vi bảo vệ càng rộng, chi phí càng tăng.
-                        </span>
-                    </div>
+            <div class="top3-sub info-tt">
+                <b class="badge-icc">{r['icc_package']}</b>
+                <span class="info-text">
+                    <b>Loại điều khoản ICC</b><br><br>
+                    • <b>ICC A</b>: Bảo hiểm rộng nhất, gần như mọi rủi ro (All Risks).<br>
+                    • <b>ICC B</b>: Mức trung bình – bảo hiểm các rủi ro chính, loại trừ nhiều hơn A.<br>
+                    • <b>ICC C</b>: Cơ bản, chi phí thấp nhưng bảo vệ ít nhất.<br><br>
+                    Gói càng cao → phạm vi bảo vệ càng rộng, chi phí càng tăng.
+                </span>
+            </div>
 
-                    <!-- Hạng mục Tiết kiệm / Chi phí -->
-                    <div class="top3-sub info-tt" style="color:#7CFFA1; font-size:1.1rem;">
-                        💰 Chi phí kỳ vọng: <b>${r['estimated_cost']:,.0f}</b>
-                        <span class="info-text">
-                            <b>Ý nghĩa chi phí</b><br><br>
-                            Đây là mức chi phí bảo hiểm ước tính sau khi mô phỏng Monte Carlo.<br>
-                            Giúp doanh nghiệp so sánh:<br>
-                            • Gói nào <b>tiết kiệm</b> hơn về chi phí.<br>
-                            • Gói nào xứng đáng trả thêm để đổi lấy mức bảo vệ cao hơn.
-                        </span>
-                    </div>
+            <div class="top3-sub info-tt" style="color:#7CFFA1; font-size:1.1rem;">
+                💰 Chi phí kỳ vọng: <b>${r['estimated_cost']:,.0f}</b>
+                <span class="info-text">
+                    <b>Ý nghĩa chi phí</b><br><br>
+                    Đây là mức chi phí bảo hiểm ước tính sau khi mô phỏng Monte Carlo.<br>
+                    Giúp doanh nghiệp so sánh:<br>
+                    • Gói nào <b>tiết kiệm</b> hơn về chi phí.<br>
+                    • Gói nào xứng đáng trả thêm để đổi lấy mức bảo vệ cao hơn.
+                </span>
+            </div>
 
-                    <!-- Điểm tổng hợp -->
-                    <div class="top3-sub info-tt">
-                        📊 Điểm: <b>{r['score']:.3f}</b> · <span class="pill-badge">{r['category']}</span>
-                        <span class="info-text">
-                            <b>Điểm tổng hợp TOPSIS</b><br><br>
-                            Điểm này tổng hợp từ:<br>
-                            • Tỷ lệ phí (C1)<br>
-                            • Thời gian xử lý (C2)<br>
-                            • Tỷ lệ tổn thất (C3)<br>
-                            • Chất lượng hỗ trợ ICC (C4)<br>
-                            • Chăm sóc khách hàng (C5)<br>
-                            • Rủi ro khí hậu tuyến đường (C6)<br><br>
-                            Điểm càng cao → phương án càng gần “phương án lý tưởng”.
-                        </span>
-                    </div>
+            <div class="top3-sub info-tt">
+                📊 Điểm: <b>{r['score']:.3f}</b> · <span class="pill-badge">{r['category']}</span>
+                <span class="info-text">
+                    <b>Điểm tổng hợp TOPSIS</b><br><br>
+                    Điểm này tổng hợp từ:<br>
+                    • Tỷ lệ phí (C1)<br>
+                    • Thời gian xử lý (C2)<br>
+                    • Tỷ lệ tổn thất (C3)<br>
+                    • Chất lượng hỗ trợ ICC (C4)<br>
+                    • Chăm sóc khách hàng (C5)<br>
+                    • Rủi ro khí hậu tuyến đường (C6)<br><br>
+                    Điểm càng cao → phương án càng gần “phương án lý tưởng”.
+                </span>
+            </div>
 
-                    <!-- Tin cậy -->
-                    <div class="top3-sub info-tt">
-                        🎯 Tin cậy: <b>{r['confidence']:.2f}</b>
-                        <span class="info-text">
-                            <b>Tin cậy của phương án</b><br><br>
-                            Được tính từ độ ổn định kết quả sau hàng nghìn lần mô phỏng Monte Carlo.<br>
-                            • 0.70 – 1.00: Rất ổn định, ít bị ảnh hưởng khi điều kiện rủi ro thay đổi.<br>
-                            • 0.40 – 0.69: Ổn định trung bình.<br>
-                            • &lt; 0.40: Nhạy cảm, dễ biến động, cần xem xét kỹ.<br>
-                        </span>
-                    </div>
+            <div class="top3-sub info-tt">
+                🎯 Tin cậy: <b>{r['confidence']:.2f}</b>
+                <span class="info-text">
+                    <b>Tin cậy của phương án</b><br><br>
+                    Được tính từ độ ổn định kết quả sau hàng nghìn lần mô phỏng Monte Carlo.<br>
+                    • 0.70 – 1.00: Rất ổn định, ít bị ảnh hưởng khi điều kiện rủi ro thay đổi.<br>
+                    • 0.40 – 0.69: Ổn định trung bình.<br>
+                    • &lt; 0.40: Nhạy cảm, dễ biến động, cần xem xét kỹ.<br>
+                </span>
+            </div>
 
-                    <!-- Độ biến động rủi ro (dùng C6_std) -->
-                    <div class="top3-sub info-tt">
-                        🌪 Biến động rủi ro: <b>{r['C6_std']:.2f}</b>
-                        <span class="info-text">
-                            <b>Độ biến động rủi ro khí hậu (C6_std)</b><br><br>
-                            • Phản ánh mức dao động của rủi ro khí hậu trên tuyến đường vận chuyển.<br>
-                            • Giá trị càng cao → rủi ro khó dự đoán, biến động mạnh.<br>
-                            • Giá trị thấp → rủi ro ổn định, dễ kiểm soát hơn.<br><br>
-                            Chỉ số này giúp doanh nghiệp cân nhắc giữa <b>chi phí</b> và <b>mức độ an toàn</b>.
-                        </span>
-                    </div>
+            <div class="top3-sub info-tt">
+                🌪 Biến động rủi ro: <b>{r['C6_std']:.2f}</b>
+                <span class="info-text">
+                    <b>Độ biến động rủi ro khí hậu (C6_std)</b><br><br>
+                    • Phản ánh mức dao động của rủi ro khí hậu.<br>
+                    • Giá trị cao → rủi ro khó dự đoán, biến động mạnh.<br>
+                    • Giá trị thấp → rủi ro ổn định.<br><br>
+                    Chỉ số này giúp doanh nghiệp cân nhắc giữa <b>chi phí</b> và <b>mức độ an toàn</b>.
+                </span>
+            </div>
 
-                    <!-- Nút xem chi tiết (để bạn giải thích trong bảo vệ là có thể mở panel phân tích sâu) -->
-                    <button class="top3-btn">📘 Xem phân tích chi tiết</button>
-                </div>
-                """, unsafe_allow_html=True)
-
+            <button class="top3-btn">📘 Xem phân tích chi tiết</button>
+        </div>
+        """, unsafe_allow_html=True)
 
         # Weights & Metrics
         col1, col2 = st.columns(2)
