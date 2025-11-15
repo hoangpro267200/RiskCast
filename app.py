@@ -4,6 +4,7 @@
 #
 # Author: Bùi Xuân Hoàng (original idea)
 # Refactor + Multi-Package + Full Explanations + Enterprise UX: Kai assistant
+# FINAL FIX v4: Restoring tooltips + Fixing 2-column overlap bug.
 #
 # Theme: Premium Green · Mixed Enterprise (Salesforce + Oracle Fusion)
 # =============================================================================
@@ -279,6 +280,17 @@ def apply_enterprise_css():
         line-height: 1.35rem;
         z-index: 999;
         box-shadow: 0 0 18px rgba(0,255,153,0.35);
+    }
+    
+    /* FIX v4: Thêm class mới cho tiêu đề biểu đồ */
+    .rc-chart-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #a5ffdc;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 0.5rem;
     }
 
     /* DATAFRAME */
@@ -636,7 +648,11 @@ class Forecaster:
         use_arima: bool = True
     ) -> Tuple[np.ndarray, np.ndarray]:
         if route not in historical.columns:
-            route = historical.columns[1]
+            # Fallback to a default route or handle error
+            if len(historical.columns) > 1:
+                route = historical.columns[1] # Potential risk area, but required for fallback
+            else:
+                return np.array([]), np.array([0.0]) # Return empty if no data
 
         full_series = historical[route].values
         n_total = len(full_series)
@@ -653,6 +669,7 @@ class Forecaster:
                 fc_val = float(np.clip(fc[0], 0.0, 1.0))
                 return hist_series, np.array([fc_val])
             except Exception:
+                # Fallback to simpler method if ARIMA fails
                 pass
 
         if len(train_series) >= 3:
@@ -819,21 +836,22 @@ class MultiPackageAnalyzer:
 
         company_data = self.data_service.get_company_data()
 
-        if params.month in historical["month"].values:
+        if params.month in historical["month"].values and params.route in historical.columns:
             base_risk = float(
                 historical.loc[historical["month"] == params.month, params.route].iloc[0]
             )
         else:
-            base_risk = 0.4
+            base_risk = 0.4 # Default risk if data is missing
 
         if params.use_mc:
             companies, mc_mean, mc_std = self.mc_simulator.simulate(
                 base_risk, SENSITIVITY_MAP, params.mc_runs
             )
-            order = [companies.index(c) for c in company_data.index]
+            order = [list(SENSITIVITY_MAP.keys()).index(c) for c in company_data.index]
             mc_mean, mc_std = mc_mean[order], mc_std[order]
         else:
-            mc_mean = np.zeros(len(company_data))
+            # Simple scaling of base risk if MC is off
+            mc_mean = np.array([base_risk * SENSITIVITY_MAP[c] for c in company_data.index])
             mc_std = np.zeros(len(company_data))
 
         all_options = []
@@ -895,7 +913,13 @@ class MultiPackageAnalyzer:
         eps = 1e-9
         cv_c6 = data_adjusted["C6_std"].values / (data_adjusted["C6_mean"].values + eps)
         conf = 1.0 / (1.0 + cv_c6)
-        conf = 0.3 + 0.7 * (conf - conf.min()) / (np.ptp(conf) + eps)
+        
+        ptp_conf = np.ptp(conf)
+        if ptp_conf > 0:
+            conf = 0.3 + 0.7 * (conf - conf.min()) / ptp_conf
+        else:
+            conf = np.full_like(conf, 0.65)
+            
         data_adjusted["confidence"] = conf
 
         var = cvar = None
@@ -930,13 +954,14 @@ class ChartFactory:
             template="plotly_dark",
             title=dict(
                 text=f"<b>{title}</b>",
-                font=dict(size=22, color="#e6fff7"),
-                x=0.5
+                font=dict(size=20, color="#e6fff7"),
+                x=0.5,
+                y=0.95 
             ),
             font=dict(size=15, color="#e6fff7"),
             plot_bgcolor="#001016",
             paper_bgcolor="#000c11",
-            margin=dict(l=70, r=40, t=80, b=70),
+            margin=dict(l=60, r=40, t=60, b=60), 
             legend=dict(
                 bgcolor="rgba(0,0,0,0.3)",
                 bordercolor="#00e676",
@@ -972,22 +997,17 @@ class ChartFactory:
             pull=[0.04] * len(weights),
             hovertemplate="<b>%{label}</b><br>Tỉ trọng: %{percent}<extra></extra>"
         )])
-
+        
+        # FIX v4: Bỏ tiêu đề khỏi hàm này, để StreamlitUI xử lý
         fig.update_layout(
-            title=dict(
-                text=f"<b>{title}</b>",
-                font=dict(size=20, color="#a5ffdc"),
-                x=0.5,
-                y=0.98
-            ),
             showlegend=True,
             legend=dict(
                 title="<b>Các tiêu chí</b>",
                 font=dict(size=13, color="#e6fff7")
             ),
-            paper_bgcolor="#001016",
-            plot_bgcolor="#001016",
-            margin=dict(l=0, r=0, t=80, b=0),
+            paper_bgcolor="#000c11", 
+            plot_bgcolor="#000c11",
+            margin=dict(l=0, r=0, t=0, b=0), # FIX v4: Xóa margin
             height=480
         )
         return fig
@@ -999,9 +1019,9 @@ class ChartFactory:
             "ICC B": "#ffd93d",
             "ICC C": "#6bcf7f"
         }
-
+        
         fig = go.Figure()
-
+        
         for icc in ["ICC C", "ICC B", "ICC A"]:
             df_icc = results[results["icc_package"] == icc]
             fig.add_trace(go.Scatter(
@@ -1027,9 +1047,24 @@ class ChartFactory:
         fig.update_xaxes(title="<b>Chi phí ước tính ($)</b>")
         fig.update_yaxes(title="<b>Điểm TOPSIS</b>", range=[0, 1])
 
-        fig = ChartFactory._apply_theme(fig, "💰 Chi phí vs Chất lượng (Cost-Benefit Analysis)")
-        fig.update_layout(height=480, autosize=False)
-        return fig
+        # FIX v4: Bỏ tiêu đề khỏi hàm này
+        fig.update_layout(
+            template="plotly_dark",
+            font=dict(size=15, color="#e6fff7"),
+            plot_bgcolor="#001016",
+            paper_bgcolor="#000c11",
+            margin=dict(l=60, r=40, t=20, b=60), # FIX v4: Xóa margin top
+            legend=dict(
+                bgcolor="rgba(0,0,0,0.3)",
+                bordercolor="#00e676",
+                borderwidth=1
+            ),
+            height=550
+        )
+        fig.update_xaxes(showgrid=True, gridcolor="#00332b", tickfont=dict(size=14, color="#e6fff7"))
+        fig.update_yaxes(showgrid=True, gridcolor="#00332b", tickfont=dict(size=14, color="#e6fff7"))
+        
+        return fig 
 
     @staticmethod
     def create_top_recommendations_bar(results: pd.DataFrame) -> go.Figure:
@@ -1067,7 +1102,7 @@ class ChartFactory:
     ) -> go.Figure:
         hist_len = len(historical)
         months_hist = list(range(1, hist_len + 1))
-        next_month = selected_month % 12 + 1
+        next_month = selected_month % 12 + 1 if selected_month in range(1, 13) else 1
         months_fc = [next_month]
 
         fig = go.Figure()
@@ -1092,7 +1127,20 @@ class ChartFactory:
             hovertemplate="Tháng %{x}<br>Dự báo: %{y:.1%}<extra></extra>"
         ))
 
-        fig = ChartFactory._apply_theme(fig, f"Dự báo rủi ro khí hậu — {route}")
+        # FIX v4: Bỏ tiêu đề khỏi hàm này
+        fig.update_layout(
+            template="plotly_dark",
+            font=dict(size=15, color="#e6fff7"),
+            plot_bgcolor="#001016",
+            paper_bgcolor="#000c11",
+            margin=dict(l=60, r=40, t=20, b=60), # FIX v4: Xóa margin top
+            legend=dict(
+                bgcolor="rgba(0,0,0,0.3)",
+                bordercolor="#00e676",
+                borderwidth=1
+            ),
+            height=450
+        )
 
         fig.update_xaxes(
             title="<b>Tháng</b>",
@@ -1100,17 +1148,19 @@ class ChartFactory:
             tick0=1,
             dtick=1,
             range=[1, 12],
-            tickvals=list(range(1, 13))
+            tickvals=list(range(1, 13)),
+            showgrid=True, gridcolor="#00332b", tickfont=dict(size=14, color="#e6fff7")
         )
 
-        max_val = max(float(historical.max()), float(forecast.max()))
+        max_val = max(1.0, float(historical.max()) if historical.size > 0 else 0.0)
+        max_val = max(max_val, float(forecast.max()) if forecast.size > 0 else 0.0)
         fig.update_yaxes(
             title="<b>Mức rủi ro (0–1)</b>",
             range=[0, max(1.0, max_val * 1.15)],
-            tickformat=".0%"
+            tickformat=".0%",
+            showgrid=True, gridcolor="#00332b", tickfont=dict(size=14, color="#e6fff7")
         )
 
-        fig.update_layout(height=450, autosize=False)
         return fig
 
     @staticmethod
@@ -1150,12 +1200,25 @@ class ChartFactory:
             hovertemplate="<b>%{x}</b><br>Chi phí TB: $%{y:,.0f}<extra></extra>"
         ))
 
+        max_cost = max(avg_costs) if avg_costs else 10000
+        y2_range = [0, max(10000, max_cost * 1.2)]
+        
+        # FIX v4: Bỏ tiêu đề khỏi hàm này
         fig.update_layout(
-            title=dict(
-                text="<b>📊 So sánh 3 loại phương án</b>",
-                font=dict(size=22, color="#e6fff7"),
-                x=0.5
+            template="plotly_dark",
+            font=dict(size=15, color="#e6fff7"),
+            plot_bgcolor="#001016",
+            paper_bgcolor="#000c11",
+            margin=dict(l=60, r=60, t=20, b=60), # FIX v4: Xóa margin top
+            legend=dict(
+                bgcolor="rgba(0,0,0,0.3)",
+                bordercolor="#00e676",
+                borderwidth=1
             ),
+            height=550
+        )
+        
+        fig.update_layout(
             yaxis=dict(
                 title=dict(text="<b>Điểm TOPSIS</b>", font=dict(color="#00e676")),
                 range=[0, 1],
@@ -1165,21 +1228,13 @@ class ChartFactory:
                 title=dict(text="<b>Chi phí ($)</b>", font=dict(color="#ffeb3b")),
                 overlaying="y",
                 side="right",
-                tickfont=dict(color="#ffeb3b")
-            ),
-            paper_bgcolor="#000c11",
-            plot_bgcolor="#001016",
-            font=dict(color="#e6fff7"),
-            legend=dict(
-                bgcolor="rgba(0,0,0,0.3)",
-                bordercolor="#00e676",
-                borderwidth=1
-            ),
-            margin=dict(l=60, r=60, t=80, b=60),
-            height=480,
-            autosize=False
+                tickfont=dict(color="#ffeb3b"),
+                range=y2_range
+            )
         )
-
+        fig.update_xaxes(showgrid=True, gridcolor="#00332b", tickfont=dict(size=14, color="#e6fff7"))
+        fig.update_yaxes(showgrid=True, gridcolor="#00332b", tickfont=dict(size=14, color="#e6fff7"))
+        
         return fig
 
 
@@ -1236,7 +1291,7 @@ class ReportGenerator:
             if var is not None and cvar is not None:
                 pdf.ln(4)
                 pdf.set_font("Arial", "B", 11)
-                pdf.cell(0, 6, f"VaR 95%: ${var:,.0f}   |   CVaR 95%: ${cvar:,.0f}", 0, 1)
+                pdf.cell(0, 6, f"VaR 95%: ${var:,.0f}    |    CVaR 95%: ${cvar:,.0f}", 0, 1)
 
             return pdf.output(dest="S").encode("latin1")
         except Exception as e:
@@ -1327,7 +1382,7 @@ class StreamlitUI:
             use_mc = st.checkbox("Monte Carlo (C6)", True,
                                  help="Mô phỏng nhiều kịch bản rủi ro khí hậu để lấy mean & std")
             use_var = st.checkbox("Tính VaR/CVaR", True,
-                                  help="Đo lường tổn thất tối đa & tổn thất trung bình trong tail")
+                                 help="Đo lường tổn thất tối đa & tổn thất trung bình trong tail")
 
             mc_runs = st.number_input("Số lần Monte Carlo", 500, 10_000, 2_000, 500)
             fuzzy_uncertainty = st.slider("Mức bất định Fuzzy (%)", 0, 50, 15) if use_fuzzy else 15
@@ -1510,29 +1565,36 @@ CVaR 95%: tổn thất trung bình trong 5% trường hợp xấu nhất.">i</sp
         st.markdown("---")
         st.subheader("📊 Biểu đồ phân tích")
 
+        # FIX v4: Khôi phục tiêu đề (dùng class CSS) và tooltip
         col_scatter, col_cat = st.columns(2)
+        
         with col_scatter:
-            st.markdown("""
-            <h4 style='display:flex;align-items:center;gap:6px;'>
-            📉 Chi phí – Chất lượng (Cost–Benefit)
-            <span class="tooltip-icon" data-tip="Mỗi điểm là một phương án bảo hiểm (công ty × gói ICC).
+            st.markdown(
+                """
+                <div class="rc-chart-title">
+                    📉 Chi phí – Chất lượng (Cost-Benefit)
+                    <span class="tooltip-icon" data-tip="Mỗi điểm là một phương án bảo hiểm (công ty × gói ICC).
 Trục X: chi phí ước tính; Trục Y: điểm TOPSIS. 
 Điểm càng cao và chi phí càng thấp → phương án càng hấp dẫn.">i</span>
-            </h4>
-            """, unsafe_allow_html=True)
+                </div>
+                """, unsafe_allow_html=True
+            )
             fig_scatter = self.chart_factory.create_cost_benefit_scatter(result.results)
             st.plotly_chart(fig_scatter, use_container_width=True)
 
         with col_cat:
-            st.markdown("""
-            <h4 style='display:flex;align-items:center;gap:6px;'>
-            📊 So sánh 3 loại phương án
-            <span class="tooltip-icon" data-tip="So sánh trung bình điểm TOPSIS và trung bình chi phí 
+            st.markdown(
+                """
+                <div class="rc-chart-title">
+                    📊 So sánh 3 loại phương án
+                    <span class="tooltip-icon" data-tip="So sánh trung bình điểm TOPSIS và trung bình chi phí 
 của 3 nhóm: Tiết kiệm (ICC C), Cân bằng (ICC B), An toàn (ICC A).">i</span>
-            </h4>
-            """, unsafe_allow_html=True)
+                </div>
+                """, unsafe_allow_html=True
+            )
             fig_category = self.chart_factory.create_category_comparison(result.results)
             st.plotly_chart(fig_category, use_container_width=True)
+
 
         st.markdown("#### 🏆 Top 5 phương án tốt nhất")
         fig_top5 = self.chart_factory.create_top_recommendations_bar(result.results)
@@ -1540,30 +1602,40 @@ của 3 nhóm: Tiết kiệm (ICC C), Cân bằng (ICC B), An toàn (ICC A).">i<
 
         # Weights + Forecast + Risk metrics
         st.markdown("---")
+        
+        # FIX v4: Khôi phục tiêu đề và tooltip cho 2 biểu đồ này
         col_w1, col_w2 = st.columns(2)
 
         with col_w1:
-            st.markdown("""
-            <h4 style='display:flex;align-items:center;gap:6px;'>
-            📘 Trọng số tiêu chí
-            <span class="tooltip-icon" data-tip="Trọng số được xác định theo hồ sơ ưu tiên (Tiết kiệm / Cân bằng / An toàn).
+            title_pie = "📘 Trọng số tiêu chí"
+            if params.use_fuzzy:
+                title_pie = "📘 Trọng số (sau Fuzzy AHP)"
+            
+            st.markdown(
+                f"""
+                <div class="rc-chart-title">
+                    {title_pie}
+                    <span class="tooltip-icon" data-tip="Trọng số được xác định theo hồ sơ ưu tiên (Tiết kiệm / Cân bằng / An toàn).
 Nếu bật Fuzzy AHP, mỗi trọng số được mở rộng thành tam giác mờ (Low–Mid–High).">i</span>
-            </h4>
-            """, unsafe_allow_html=True)
+                </div>
+                """, unsafe_allow_html=True
+            )
             fig_weights = self.chart_factory.create_weights_pie(
                 result.weights,
-                "Trọng số tiêu chí (sau khi áp dụng Fuzzy AHP)" if params.use_fuzzy else "Trọng số tiêu chí"
+                "" # Tiêu đề đã được chuyển ra st.markdown
             )
             st.plotly_chart(fig_weights, use_container_width=True)
 
         with col_w2:
-            st.markdown("""
-            <h4 style='display:flex;align-items:center;gap:6px;'>
-            📉 Dự báo rủi ro khí hậu theo tháng
-            <span class="tooltip-icon" data-tip="Từ dữ liệu lịch sử rủi ro khí hậu theo tuyến, 
+            st.markdown(
+                f"""
+                <div class="rc-chart-title">
+                    📉 Dự báo rủi ro khí hậu
+                    <span class="tooltip-icon" data-tip="Từ dữ liệu lịch sử rủi ro khí hậu theo tuyến, 
 mô hình dự báo giá trị tháng kế tiếp (ARIMA hoặc xu hướng tuyến tính).">i</span>
-            </h4>
-            """, unsafe_allow_html=True)
+                </div>
+                """, unsafe_allow_html=True
+            )
             fig_forecast = self.chart_factory.create_forecast_chart(
                 result.historical, result.forecast, params.route, params.month
             )
