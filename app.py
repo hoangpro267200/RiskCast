@@ -711,6 +711,138 @@ def apply_enterprise_css():
                 padding: 0 !important;
             }
         }
+
+        /* =========================================================
+           PREMIUM TABLE LAYOUT - TOP 1 & RESULT BOX
+        ========================================================= */
+        .premium-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: radial-gradient(circle at top left,
+                        rgba(0,255,153,0.22),
+                        rgba(10,35,28,0.92));
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid rgba(0,255,153,0.35);
+            box-shadow:
+                0 0 20px rgba(0,255,153,0.25),
+                0 16px 40px rgba(0,0,0,0.92);
+        }
+
+        .premium-table thead {
+            background: linear-gradient(135deg,
+                        rgba(0,255,153,0.28),
+                        rgba(0,200,120,0.32));
+        }
+
+        .premium-table thead th {
+            padding: 1.2rem 1.5rem;
+            text-align: left;
+            font-weight: 900;
+            font-size: 1.05rem;
+            color: #001a10;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border-bottom: 2px solid rgba(0,255,153,0.5);
+        }
+
+        .premium-table tbody tr {
+            border-bottom: 1px solid rgba(0,255,153,0.15);
+            transition: all 0.2s ease;
+        }
+
+        .premium-table tbody tr:hover {
+            background: rgba(0,255,153,0.12);
+        }
+
+        .premium-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .premium-table td {
+            padding: 1rem 1.5rem;
+            color: #e9fff4;
+            font-weight: 600;
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+
+        .premium-table td.label-col {
+            color: #c8ffec;
+            font-weight: 700;
+            width: 35%;
+            white-space: nowrap;
+        }
+
+        .premium-table td.value-col {
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 1.02rem;
+        }
+
+        .premium-table .highlight-value {
+            color: #00ff99;
+            font-weight: 900;
+            font-size: 1.15rem;
+            text-shadow: 0 0 8px rgba(0,255,153,0.6);
+        }
+
+        .premium-table .table-title-row td {
+            padding: 1.5rem 1.5rem 1.2rem 1.5rem;
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #ffffff;
+            text-align: center;
+            background: linear-gradient(135deg,
+                        rgba(0,255,153,0.25),
+                        rgba(0,200,120,0.28));
+            border-bottom: 2px solid rgba(0,255,153,0.45);
+        }
+
+        .premium-table .badge-cell {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 999px;
+            background: linear-gradient(120deg, #00ff99, #00e676);
+            color: #001a10;
+            font-weight: 800;
+            font-size: 0.88rem;
+            margin-right: 0.6rem;
+            box-shadow: 0 0 12px rgba(0,255,153,0.5);
+        }
+
+        .premium-table .icon-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Top 1 Gold Theme Override */
+        .premium-table.gold-theme {
+            background: radial-gradient(circle at top left,
+                        rgba(255,215,0,0.22),
+                        rgba(40,35,10,0.92));
+            border-color: rgba(255,215,0,0.5);
+            box-shadow:
+                0 0 24px rgba(255,215,0,0.45),
+                0 18px 42px rgba(0,0,0,0.94);
+        }
+
+        .premium-table.gold-theme .table-title-row td {
+            background: linear-gradient(135deg,
+                        rgba(255,215,0,0.35),
+                        rgba(255,180,0,0.38));
+            color: #fff8dc;
+            text-shadow: 0 0 12px rgba(255,215,0,0.7);
+        }
+
+        .premium-table.gold-theme thead th {
+            background: linear-gradient(135deg,
+                        rgba(255,215,0,0.28),
+                        rgba(255,200,0,0.32));
+            color: #3a2f00;
+        }
         </style>
         """,
         unsafe_allow_html=True,
